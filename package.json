@@ -1,0 +1,8 @@
+{
+  "name": "chip-city-greybox-spike",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "node --test verification.test.js"
+  }
+}
