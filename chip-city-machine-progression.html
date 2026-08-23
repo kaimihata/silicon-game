@@ -1,0 +1,713 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Interactive visualization of Chip City's proposed machine and vertical-integration progression.">
+  <title>Chip City - Machine Progression</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #061019;
+      --panel: #0d1d27;
+      --panel-2: #122a36;
+      --line: #284957;
+      --ink: #eef8f7;
+      --muted: #9eb5bb;
+      --cyan: #55d6c8;
+      --blue: #69b8ff;
+      --violet: #b69aff;
+      --amber: #f2b65c;
+      --red: #ff817a;
+      --green: #81e39a;
+      --thermal: #ff9577;
+      --shadow: 0 24px 70px rgb(0 0 0 / 30%);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 10% 0%, rgb(41 155 153 / 18%), transparent 32rem),
+        radial-gradient(circle at 90% 25%, rgb(90 75 157 / 18%), transparent 34rem),
+        var(--bg);
+      color: var(--ink);
+      font: 16px/1.55 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    a { color: var(--cyan); }
+    button { font: inherit; }
+    .shell { width: min(1240px, calc(100% - 36px)); margin: 0 auto; }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: 72px 0 50px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .hero::after {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      content: "";
+      opacity: .14;
+      background-image:
+        linear-gradient(var(--line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--line) 1px, transparent 1px);
+      background-size: 34px 34px;
+      mask-image: linear-gradient(to right, transparent, #000 45%, transparent);
+    }
+
+    .hero .shell { position: relative; z-index: 1; }
+    .eyebrow { margin: 0 0 10px; color: var(--cyan); font-size: .76rem; font-weight: 850; letter-spacing: .15em; text-transform: uppercase; }
+    h1 { max-width: 960px; margin: 0; font-size: clamp(2.7rem, 7vw, 6rem); line-height: .94; letter-spacing: -.055em; }
+    .lede { max-width: 800px; margin: 24px 0 0; color: #c7d8dc; font-size: clamp(1.05rem, 2vw, 1.3rem); }
+
+    .principles {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      margin-top: 28px;
+    }
+
+    .principles span,
+    .pill {
+      padding: 6px 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--muted);
+      background: rgb(8 26 35 / 78%);
+      font-size: .8rem;
+      font-weight: 750;
+    }
+
+    .principles span:first-child { color: var(--green); }
+
+    nav {
+      position: sticky;
+      z-index: 20;
+      top: 0;
+      overflow-x: auto;
+      border-bottom: 1px solid var(--line);
+      background: rgb(6 16 25 / 91%);
+      backdrop-filter: blur(15px);
+    }
+
+    nav .shell { display: flex; gap: 5px; padding: 10px 0; }
+    nav a { flex: 0 0 auto; padding: 8px 11px; border-radius: 8px; color: var(--muted); font-size: .86rem; font-weight: 750; text-decoration: none; }
+    nav a:hover { color: var(--ink); background: var(--panel-2); }
+    main { padding-bottom: 80px; }
+    section { padding-top: 64px; scroll-margin-top: 70px; }
+
+    .heading {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 490px);
+      gap: 30px;
+      align-items: end;
+      margin-bottom: 24px;
+    }
+
+    h2 { margin: 0; font-size: clamp(2rem, 4vw, 3.3rem); line-height: 1; letter-spacing: -.04em; }
+    h3 { margin: 0; line-height: 1.2; }
+    p { margin: 9px 0; }
+    .heading > p { margin: 0; color: var(--muted); }
+
+    .unlock-loop {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .loop-card {
+      position: relative;
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: linear-gradient(145deg, var(--panel-2), var(--panel));
+      box-shadow: var(--shadow);
+    }
+
+    .loop-card:not(:last-child)::after {
+      position: absolute;
+      z-index: 2;
+      top: 50%;
+      right: -23px;
+      display: grid;
+      width: 32px;
+      height: 32px;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: 50%;
+      color: var(--cyan);
+      background: var(--bg);
+      content: "\2192";
+      transform: translateY(-50%);
+    }
+
+    .step { display: grid; width: 34px; height: 34px; margin-bottom: 13px; place-items: center; border-radius: 9px; color: var(--bg); background: var(--cyan); font-weight: 900; }
+    .loop-card p { color: var(--muted); font-size: .92rem; }
+
+    .map-frame {
+      overflow-x: auto;
+      padding: 26px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background:
+        linear-gradient(rgb(30 68 81 / 22%) 1px, transparent 1px),
+        linear-gradient(90deg, rgb(30 68 81 / 22%) 1px, transparent 1px),
+        rgb(5 17 24 / 72%);
+      background-size: 26px 26px;
+      box-shadow: var(--shadow);
+    }
+
+    .tree {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(5, 190px);
+      grid-template-rows: repeat(6, minmax(96px, auto));
+      gap: 20px 44px;
+      min-width: 1120px;
+    }
+
+    .tree::before {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      content: "";
+      opacity: .28;
+      background:
+        linear-gradient(90deg, transparent 9%, var(--cyan) 9% 91%, transparent 91%) 0 63px / 100% 2px no-repeat,
+        linear-gradient(90deg, transparent 29%, var(--cyan) 29% 71%, transparent 71%) 0 179px / 100% 2px no-repeat;
+    }
+
+    .node {
+      --accent: var(--cyan);
+      position: relative;
+      z-index: 2;
+      min-height: 96px;
+      padding: 15px;
+      border: 1px solid color-mix(in srgb, var(--accent) 58%, var(--line));
+      border-left: 4px solid var(--accent);
+      border-radius: 13px;
+      color: var(--ink);
+      background: linear-gradient(145deg, color-mix(in srgb, var(--accent) 10%, var(--panel-2)), var(--panel));
+      text-align: left;
+      cursor: pointer;
+      transition: opacity .2s, transform .2s, box-shadow .2s;
+    }
+
+    .node:hover,
+    .node:focus-visible,
+    .node.active {
+      outline: none;
+      transform: translateY(-3px);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent), 0 15px 35px rgb(0 0 0 / 28%);
+    }
+
+    .node small { display: block; margin-bottom: 5px; color: var(--accent); font-size: .67rem; font-weight: 850; letter-spacing: .1em; text-transform: uppercase; }
+    .node strong { display: block; font-size: 1rem; }
+    .node span { display: block; margin-top: 5px; color: var(--muted); font-size: .72rem; }
+    .node.foundation { --accent: var(--cyan); }
+    .node.memory { --accent: var(--violet); }
+    .node.substrate { --accent: var(--green); }
+    .node.thermal { --accent: var(--thermal); }
+    .node.io { --accent: var(--blue); }
+    .node.power { --accent: var(--amber); }
+    .node.packaging { --accent: #65d8ff; }
+    .node.compute { --accent: var(--red); }
+    .node.network { --accent: #b7e86b; }
+    .node.upstream { --accent: #c7aa7c; }
+
+    .tree.filtered .node:not(.related) { opacity: .16; }
+    .detail {
+      display: grid;
+      grid-template-columns: 1.05fr 1fr;
+      gap: 20px;
+      margin-top: 18px;
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--panel);
+    }
+
+    .detail h3 { font-size: 1.45rem; }
+    .detail p,
+    .detail li { color: var(--muted); }
+    .detail ul { margin: 10px 0 0; padding-left: 1.1rem; }
+    .detail li + li { margin-top: 5px; }
+    .detail-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+    .meta { padding: 11px; border: 1px solid var(--line); border-radius: 10px; background: rgb(5 18 25 / 55%); }
+    .meta span { display: block; color: var(--muted); font-size: .7rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+    .meta strong { display: block; margin-top: 3px; font-size: .9rem; }
+
+    .branch-controls { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .branch-controls button {
+      padding: 8px 11px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--muted);
+      background: var(--panel);
+      cursor: pointer;
+    }
+    .branch-controls button:hover,
+    .branch-controls button.active { border-color: var(--cyan); color: var(--ink); background: #143d43; }
+
+    .branch-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .branch-card {
+      --accent: var(--cyan);
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--panel);
+    }
+
+    .branch-card header { padding: 18px; border-bottom: 3px solid var(--accent); background: color-mix(in srgb, var(--accent) 10%, var(--panel-2)); }
+    .branch-card header span { color: var(--accent); font-size: .7rem; font-weight: 850; letter-spacing: .1em; text-transform: uppercase; }
+    .branch-card .body { padding: 18px; }
+    .branch-card p { color: var(--muted); font-size: .88rem; }
+    .branch-card ul { margin: 12px 0 0; padding: 0; list-style: none; }
+    .branch-card li { display: grid; grid-template-columns: 70px 1fr; gap: 8px; padding: 7px 0; border-top: 1px solid var(--line); font-size: .78rem; }
+    .branch-card code { color: var(--accent); font: inherit; font-weight: 800; }
+    .branch-card.memory { --accent: var(--violet); }
+    .branch-card.substrate { --accent: var(--green); }
+    .branch-card.thermal { --accent: var(--thermal); }
+    .branch-card.io { --accent: var(--blue); }
+    .branch-card.power { --accent: var(--amber); }
+    .branch-card.compute { --accent: var(--red); }
+
+    .timeline {
+      display: grid;
+      grid-template-columns: repeat(9, minmax(170px, 1fr));
+      gap: 12px;
+      overflow-x: auto;
+      padding: 5px 3px 20px;
+    }
+
+    .stage {
+      position: relative;
+      min-height: 220px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      background: linear-gradient(155deg, var(--panel-2), var(--panel));
+    }
+
+    .stage:not(:last-child)::after {
+      position: absolute;
+      top: 29px;
+      right: -18px;
+      z-index: 2;
+      color: var(--cyan);
+      content: "\2192";
+      font-size: 1.35rem;
+    }
+
+    .stage b { display: grid; width: 30px; height: 30px; place-items: center; border-radius: 8px; color: var(--bg); background: var(--cyan); }
+    .stage h3 { margin-top: 14px; font-size: 1rem; }
+    .stage p { color: var(--muted); font-size: .8rem; }
+    .stage .lesson { margin-top: 13px; padding-top: 10px; border-top: 1px solid var(--line); color: var(--green); }
+
+    .generation-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .generation {
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--panel);
+    }
+
+    .generation strong { display: block; color: var(--cyan); font-size: 2rem; }
+    .generation p { color: var(--muted); }
+    .generation ul { padding-left: 1.1rem; color: var(--muted); }
+    .generation li + li { margin-top: 5px; }
+
+    .rule {
+      margin-top: 18px;
+      padding: 18px 20px;
+      border: 1px solid #63502e;
+      border-left: 5px solid var(--amber);
+      border-radius: 12px;
+      color: #f3dfbf;
+      background: rgb(75 57 30 / 55%);
+    }
+
+    footer { margin-top: 70px; padding: 28px 0 48px; border-top: 1px solid var(--line); color: var(--muted); font-size: .87rem; }
+    footer .shell { display: flex; justify-content: space-between; gap: 20px; }
+
+    @media (max-width: 920px) {
+      .heading,
+      .detail { grid-template-columns: 1fr; }
+      .branch-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 650px) {
+      .unlock-loop,
+      .branch-grid,
+      .generation-grid { grid-template-columns: 1fr; }
+      .loop-card::after { display: none !important; }
+      footer .shell { display: block; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      * { transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="shell">
+      <p class="eyebrow">Proposed full-game capability map</p>
+      <h1>Start by buying. Grow by choosing what to make.</h1>
+      <p class="lede">Chip City begins as an assembly company. Research, capital investment, and qualification gradually open internal production branches without ever making suppliers obsolete.</p>
+      <div class="principles">
+        <span>Buy, make, or combine</span>
+        <span>One expandable campus</span>
+        <span>Capability is not free machinery</span>
+        <span>Every branch changes factory play</span>
+        <span>Values and ordering are provisional</span>
+      </div>
+    </div>
+  </header>
+
+  <nav>
+    <div class="shell">
+      <a href="#unlock-loop">How unlocks work</a>
+      <a href="#scope">First-release scope</a>
+      <a href="#map">Capability map</a>
+      <a href="#branches">Production branches</a>
+      <a href="#campaign">Teaching order</a>
+      <a href="#generations">Machine generations</a>
+    </div>
+  </nav>
+
+  <main class="shell">
+    <section id="unlock-loop">
+      <div class="heading">
+        <div><p class="eyebrow">Research becomes gameplay</p><h2>Three steps from idea to production</h2></div>
+        <p>An engineering project grants knowledge. The player must still fund a line and prove that it can produce qualified components.</p>
+      </div>
+      <div class="unlock-loop">
+        <article class="loop-card"><span class="step">1</span><h3>Develop capability</h3><p>Spend cash and engineering capacity after the company has demonstrated demand, shortages, quality problems, or supplier exposure.</p></article>
+        <article class="loop-card"><span class="step">2</span><h3>Purchase and build</h3><p>Unlocked machines enter the catalog. The player commits capital, floor space, logistics, and supporting inspection or test capacity.</p></article>
+        <article class="loop-card"><span class="step">3</span><h3>Qualify output</h3><p>Run pilot batches and produce enough accepted samples at the required quality before internal output can feed normal production.</p></article>
+      </div>
+      <div class="rule"><strong>Suppliers stay relevant.</strong> Unlocking internal production never removes purchased equivalents. Supplier backup, partial integration, and external purchasing remain valid strategies.</div>
+    </section>
+
+    <section id="scope">
+      <div class="heading">
+        <div><p class="eyebrow">Deliberate first-release boundary</p><h2>One campus. Three internal verticals.</h2></div>
+        <p>The first game should prove deep factory decisions in one expandable site before adding every component family or inter-factory freight.</p>
+      </div>
+      <div class="generation-grid">
+        <article class="generation"><strong style="color:var(--thermal)">TH</strong><h3>Thermal components</h3><p>The accessible first integration branch.</p><ul><li>Continuous forming and finishing</li><li>Bulky material logistics</li><li>Capacity grades</li><li>Recyclable offcuts</li></ul></article>
+        <article class="generation"><strong style="color:var(--violet)">MEM</strong><h3>Memory</h3><p>The first wafer-production branch.</p><ul><li>Wafer batches</li><li>Spatial yield variation</li><li>Parallel die output</li><li>Speed and quality bins</li></ul></article>
+        <article class="generation"><strong style="color:var(--green)">SUB</strong><h3>Substrates and links</h3><p>The package-material planning branch.</p><ul><li>Panel nesting</li><li>Product-size allocation</li><li>Valuable offcuts</li><li>Shared X-ray inspection</li></ul></article>
+      </div>
+      <div class="rule"><strong>Deferred, not deleted:</strong> I/O, power, and compute remain purchasable; internal production for those families, multiple sites, freight networks, and upstream materials are expansion directions. Advanced packaging remains in scope because it deepens final assembly without requiring another die-fabrication vertical.</div>
+    </section>
+
+    <section id="map">
+      <div class="heading">
+        <div><p class="eyebrow">Interactive overview</p><h2>Capability map</h2></div>
+        <p>Select a node for prerequisites, unlocked machinery, and the new factory decision it introduces. The map separates shared infrastructure from optional specialization.</p>
+      </div>
+
+      <div class="branch-controls" aria-label="Highlight progression branch">
+        <button type="button" class="active" data-filter="all">Show all</button>
+        <button type="button" data-filter="foundation">Infrastructure</button>
+        <button type="button" data-filter="memory">Memory</button>
+        <button type="button" data-filter="substrate">Substrate &amp; links</button>
+        <button type="button" data-filter="thermal">Thermal</button>
+        <button type="button" data-filter="io">I/O</button>
+        <button type="button" data-filter="power">Power</button>
+        <button type="button" data-filter="packaging">Packaging</button>
+        <button type="button" data-filter="compute">Compute</button>
+      </div>
+
+      <div class="map-frame">
+        <div class="tree" id="tree">
+          <button class="node foundation active" style="grid-column:1;grid-row:1" data-id="assembly" data-branches="foundation memory substrate thermal io power packaging compute network upstream">
+            <small>Starting capability</small><strong>Assembly Company</strong><span>Purchased components</span>
+          </button>
+          <button class="node foundation" style="grid-column:2;grid-row:1" data-id="operations" data-branches="foundation memory substrate thermal io power packaging compute network upstream">
+            <small>Shared spine 1</small><strong>Factory Operations</strong><span>Routing, buffers, monitoring</span>
+          </button>
+          <button class="node foundation" style="grid-column:3;grid-row:1" data-id="process" data-branches="foundation memory substrate io power packaging compute network upstream">
+            <small>Shared spine 2</small><strong>Process Engineering</strong><span>Wafers, dicing, test, rework</span>
+          </button>
+          <button class="node thermal" style="grid-column:2;grid-row:2" data-id="thermal" data-branches="thermal network upstream">
+            <small>Early optional branch</small><strong>Thermal Integration</strong><span>Bulky mechanical flow</span>
+          </button>
+          <button class="node memory" style="grid-column:3;grid-row:2" data-id="memory" data-branches="memory compute network upstream">
+            <small>Recommended first wafer branch</small><strong>Memory Integration</strong><span>Batch yield and volume</span>
+          </button>
+          <button class="node substrate" style="grid-column:3;grid-row:3" data-id="substrate" data-branches="substrate network upstream">
+            <small>Optional branch</small><strong>Substrate &amp; Links</strong><span>Panels, offcuts, inspection</span>
+          </button>
+          <button class="node io" style="grid-column:3;grid-row:4" data-id="io" data-branches="io compute network upstream">
+            <small>Optional wafer branch</small><strong>I/O Integration</strong><span>Changeovers and test fixtures</span>
+          </button>
+          <button class="node power" style="grid-column:3;grid-row:5" data-id="power" data-branches="power compute network upstream">
+            <small>Optional wafer branch</small><strong>Power Integration</strong><span>Reliability and analog test</span>
+          </button>
+          <button class="node packaging" style="grid-column:4;grid-row:2" data-id="packaging" data-branches="packaging">
+            <small>Source-independent branch</small><strong>Advanced Packaging</strong><span>New product design space</span>
+          </button>
+          <button class="node compute" style="grid-column:4;grid-row:4" data-id="compute" data-branches="compute upstream">
+            <small>Late qualified branch</small><strong>Compute Integration</strong><span>Binning and expensive yield</span>
+          </button>
+          <button class="node network" style="grid-column:4;grid-row:6" data-id="network" data-branches="network">
+            <small>First-release scale capability</small><strong>Integrated Campus</strong><span>Shared departments and allocation</span>
+          </button>
+          <button class="node upstream" style="grid-column:5;grid-row:3" data-id="upstream" data-branches="upstream">
+            <small>Late optional depth</small><strong>Upstream Materials</strong><span>Wafers, chemicals, metals</span>
+          </button>
+        </div>
+      </div>
+
+      <article class="detail" id="detail" aria-live="polite"></article>
+    </section>
+
+    <section id="branches">
+      <div class="heading">
+        <div><p class="eyebrow">Vertical integration choices</p><h2>Each branch creates a different factory</h2></div>
+        <p>Internal production should not repeat one generic chain with renamed outputs. Each family emphasizes a distinct logistical or process problem.</p>
+      </div>
+
+      <div class="branch-grid">
+        <article class="branch-card thermal">
+          <header><span>Accessible integration</span><h3>Thermal</h3></header>
+          <div class="body"><p>Low technical risk, bulky inputs, and high transport volume make heat spreaders a gentle introduction to make-versus-buy.</p><ul><li><code>THM-100</code><span>Metal Former</span></li><li><code>THF-100</code><span>Surface Finisher</span></li><li><code>THT-100</code><span>Thermal Tester</span></li></ul></div>
+        </article>
+        <article class="branch-card memory">
+          <header><span>Recommended first wafer branch</span><h3>Memory</h3></header>
+          <div class="body"><p>High-volume batch output, wafer yield, quality binning, and reuse across many products create visible economic leverage.</p><ul><li><code>MEM-100</code><span>Memory Fabrication Cell</span></li><li><code>WIS-100</code><span>Wafer Scanner</span></li><li><code>DIC-100</code><span>Dicing Station</span></li><li><code>MTS-100</code><span>Memory Tester</span></li></ul></div>
+        </article>
+        <article class="branch-card substrate">
+          <header><span>Package integration</span><h3>Substrates &amp; Links</h3></header>
+          <div class="body"><p>Panel batches must be patterned and cut efficiently. Dense links introduce expensive X-ray inspection contention.</p><ul><li><code>SUB-100</code><span>Lamination Press</span></li><li><code>TRC-100</code><span>Trace Patterning</span></li><li><code>LNK-100</code><span>Conductor Former</span></li><li><code>LNT-100</code><span>Continuity Tester</span></li></ul></div>
+        </article>
+        <article class="branch-card io">
+          <header><span>Future expansion branch</span><h3>I/O</h3></header>
+          <div class="body"><p>Many low-volume interface types share fabrication capacity. Changeovers and specialized test fixtures reward planning.</p><ul><li><code>LOGC-100</code><span>Logic Fabrication Cell</span></li><li><code>MSK-100</code><span>Mask &amp; Recipe Loader</span></li><li><code>IFT-100</code><span>Interface Tester</span></li></ul></div>
+        </article>
+        <article class="branch-card power">
+          <header><span>Future expansion branch</span><h3>Power Management</h3></header>
+          <div class="body"><p>Long analog batches favor efficiency while customer-specific qualification and burn-in require flexible test capacity.</p><ul><li><code>PWR-100</code><span>Analog Fabrication Cell</span></li><li><code>PAT-100</code><span>Analog Tester</span></li><li><code>PDP-100</code><span>Power Die Packager</span></li></ul></div>
+        </article>
+        <article class="branch-card compute">
+          <header><span>Future expansion branch</span><h3>Compute</h3></header>
+          <div class="body"><p>Expensive wafers, strict metrology, and performance binning create high-value output where imperfect dies may still be useful.</p><ul><li><code>CPU-100</code><span>Precision Logic Fabricator</span></li><li><code>MET-200</code><span>Advanced Metrology</span></li><li><code>CPT-100</code><span>Characterization Tester</span></li><li><code>BRN-100</code><span>Stress Tester</span></li></ul></div>
+        </article>
+      </div>
+    </section>
+
+    <section id="campaign">
+      <div class="heading">
+        <div><p class="eyebrow">Candidate teaching sequence</p><h2>How complexity arrives</h2></div>
+        <p>The campaign suggests problems in an understandable order while leaving later specialization open to the player.</p>
+      </div>
+      <div class="timeline">
+        <article class="stage"><b>1</b><h3>Purchased assembly</h3><p>Buy every component and ship a basic package.</p><p class="lesson">Learn: chip design creates factory demand.</p></article>
+        <article class="stage"><b>2</b><h3>Flow improvement</h3><p>Supplier deliveries and queues begin limiting output.</p><p class="lesson">Learn: routing and buffers matter.</p></article>
+        <article class="stage"><b>3</b><h3>Quality pressure</h3><p>Reject loss becomes expensive enough to address.</p><p class="lesson">Learn: inspect before adding more value.</p></article>
+        <article class="stage"><b>4</b><h3>Thermal pilot</h3><p>Heat-spreader cost and freight justify simple integration.</p><p class="lesson">Learn: production changes space and logistics.</p></article>
+        <article class="stage"><b>5</b><h3>Memory pilot</h3><p>Memory spending justifies the first wafer line.</p><p class="lesson">Learn: batch yield trades simplicity for margin.</p></article>
+        <article class="stage"><b>6</b><h3>Hybrid supply</h3><p>Internal memory cannot satisfy every product.</p><p class="lesson">Learn: buy and make can coexist.</p></article>
+        <article class="stage"><b>7</b><h3>Package materials</h3><p>Several products require different substrates and links.</p><p class="lesson">Learn: panel waste and product mix interact.</p></article>
+        <article class="stage"><b>8</b><h3>Advanced product</h3><p>A contract needs dense links or higher reliability.</p><p class="lesson">Learn: capability unlocks design space.</p></article>
+        <article class="stage"><b>9</b><h3>Integrated campus</h3><p>Several departments feed multiple final products.</p><p class="lesson">Learn: shared capacity creates leverage and contention.</p></article>
+      </div>
+    </section>
+
+    <section id="generations">
+      <div class="heading">
+        <div><p class="eyebrow">Equipment progression</p><h2>Later does not always mean better</h2></div>
+        <p>Machine generations add capabilities and tradeoffs. Older equipment remains useful for prototypes, small batches, and low-utilization lines.</p>
+      </div>
+      <div class="generation-grid">
+        <article class="generation"><strong>100</strong><h3>Foundation series</h3><p>Affordable and compact.</p><ul><li>Modest throughput</li><li>Limited recipe set</li><li>Small local buffers</li><li>Good for prototypes and dedicated lines</li></ul></article>
+        <article class="generation"><strong>200</strong><h3>Automation series</h3><p>Efficient when kept busy.</p><ul><li>Larger footprint</li><li>Higher capital and power</li><li>Advanced recipes</li><li>Stronger shared-factory economics</li></ul></article>
+        <article class="generation"><strong>300</strong><h3>Frontier series</h3><p>Specialized capability, not a universal upgrade.</p><ul><li>Enables new products</li><li>Demanding infrastructure</li><li>Difficult maintenance</li><li>Wasteful for basic production</li></ul></article>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="shell"><span>First-pass progression framework for iteration.</span><span><a href="chip-city-parts-and-machines-guide.html">Parts and machines guide</a></span></div>
+  </footer>
+
+  <script>
+    const details = {
+      assembly: {
+        title: "Assembly Company",
+        summary: "The starting company buys finished component modules and focuses on final-chip design, assembly flow, quality, and contract economics.",
+        prerequisite: "Available at start",
+        unlock: "Delivery, conveyors, storage, assembly, bonding, inspection, testing, packaging, scrap, shipping",
+        decision: "Which products justify their purchased bill of materials?",
+        qualification: "Ship the first accepted contract",
+        suppliers: "All component families required"
+      },
+      operations: {
+        title: "Factory Operations",
+        summary: "Shared logistics tools make larger factories readable and allow several machines or products to share flow.",
+        prerequisite: "Successful purchased-component assembly",
+        unlock: "Splitters, mergers, filters, priority routers, warehouses, production monitor",
+        decision: "Use dedicated simple routes or compact shared infrastructure?",
+        qualification: "Resolve a real bottleneck or supplier interruption",
+        suppliers: "Unchanged"
+      },
+      process: {
+        title: "Process Engineering",
+        summary: "Common wafer and quality capabilities prepare the company for internal semiconductor production.",
+        prerequisite: "Factory Operations plus experienced reject loss",
+        unlock: "Wafer scanner, dicing, die testing, rework, recovery, recipe control",
+        decision: "Spend early to detect failures before adding more value?",
+        qualification: "Demonstrate controlled pilot processing",
+        suppliers: "Unchanged"
+      },
+      thermal: {
+        title: "Thermal Integration",
+        summary: "A low-risk first integration branch with bulky metal inputs, forming, finishing, and thermal qualification.",
+        prerequisite: "Factory Operations",
+        unlock: "Metal Former, Surface Finisher, Thermal Tester",
+        decision: "Trade simple purchasing for floor space and high-volume logistics?",
+        qualification: "Produce qualified TH-110 heat spreaders",
+        suppliers: "Purchased TH-110 remains compatible"
+      },
+      memory: {
+        title: "Memory Integration",
+        summary: "The first wafer-production branch creates reusable high-volume output with visible batch yield and quality bins.",
+        prerequisite: "Process Engineering plus demonstrated memory demand",
+        unlock: "MEM-100, wafer scanning, dicing, MTS-100",
+        decision: "How much demand should internal batches cover versus supplier backup?",
+        qualification: "Produce 200 qualified MD-110 dies",
+        suppliers: "Purchased MD-110 can merge with internal output"
+      },
+      substrate: {
+        title: "Substrate and Link Integration",
+        summary: "Panel nesting, offcuts, trace patterning, and dense-link inspection make package materials a distinct production problem.",
+        prerequisite: "Process Engineering",
+        unlock: "Lamination, trace patterning, substrate inspection, link forming and continuity testing",
+        decision: "Allocate panels among product sizes and advanced inspection demand?",
+        qualification: "Qualify a substrate and compatible link kit",
+        suppliers: "Purchased substrates and links remain available"
+      },
+      io: {
+        title: "I/O Integration",
+        summary: "A future expansion branch where many lower-volume interface types share fabrication equipment, creating batch-size and recipe-changeover pressure.",
+        prerequisite: "Process Engineering",
+        unlock: "LOGC-100, MSK-100, interface-specific test fixtures",
+        decision: "Build inventory in long batches or pay changeover cost for responsiveness?",
+        qualification: "Qualify an IO-110 display-controller batch",
+        suppliers: "Purchased IO-110 remains compatible"
+      },
+      power: {
+        title: "Power-management Integration",
+        summary: "A future expansion branch where analog fabrication emphasizes efficiency classes, reliability, and customer-specific qualification rather than raw throughput.",
+        prerequisite: "Process Engineering",
+        unlock: "PWR-100, PAT-100, PDP-100",
+        decision: "Share long analog batches while maintaining flexible downstream test?",
+        qualification: "Qualify PM-110 efficiency and reliability",
+        suppliers: "Purchased PM-110 remains compatible"
+      },
+      packaging: {
+        title: "Advanced Packaging",
+        summary: "An assembly specialist can unlock dense bonding, hidden-joint inspection, stress qualification, interposers, and 3D stacking without fabricating its own dies.",
+        prerequisite: "Process Engineering; no internal component branch required",
+        unlock: "BND-200, XRY-100, BRN-100, INT-200, STK-300, PKG-200",
+        decision: "Which expensive capabilities justify shared versus dedicated capacity?",
+        qualification: "Qualify an advanced package type",
+        suppliers: "Fully compatible with purchased dies"
+      },
+      compute: {
+        title: "Compute Integration",
+        summary: "A future, high-capital branch where expensive wafers, metrology, binning, and burn-in determine whether imperfect output retains value.",
+        prerequisite: "Process Engineering plus any qualified wafer branch",
+        unlock: "CPU-100, MET-200, DIC-200, CPT-100, BRN-100",
+        decision: "Use strict premium bins or broader bins that protect yield?",
+        qualification: "Qualify licensed CP-110 chiplets",
+        suppliers: "Purchased CP-110 remains available"
+      },
+      network: {
+        title: "Integrated Campus",
+        summary: "Component departments become reusable industrial assets supplying multiple final products within one expanding site.",
+        prerequisite: "A qualified internal line serving multiple products",
+        unlock: "Campus warehouses, capacity reservations, supplier backup rules, central quality lab",
+        decision: "How should scarce internal output be allocated among products and buyers?",
+        qualification: "Sustain a multi-consumer campus network",
+        suppliers: "Become strategic backup and overflow capacity"
+      },
+      upstream: {
+        title: "Upstream Materials",
+        summary: "Optional late-game depth extends into blank wafers, chemicals, substrate materials, and thermal metals.",
+        prerequisite: "Deep demand in one or more internal branches",
+        unlock: "Material-specific production chains",
+        decision: "Does control justify the huge increase in logistics and capital?",
+        qualification: "Material-specific",
+        suppliers: "Always available as an alternative"
+      }
+    };
+
+    const tree = document.querySelector("#tree");
+    const nodes = [...document.querySelectorAll(".node")];
+    const detail = document.querySelector("#detail");
+    const filters = [...document.querySelectorAll("[data-filter]")];
+
+    function renderDetail(id) {
+      const entry = details[id];
+      detail.innerHTML = `
+        <div>
+          <p class="eyebrow">Selected capability</p>
+          <h3>${entry.title}</h3>
+          <p>${entry.summary}</p>
+          <ul>
+            <li><strong>Unlocks:</strong> ${entry.unlock}</li>
+            <li><strong>New decision:</strong> ${entry.decision}</li>
+          </ul>
+        </div>
+        <div class="detail-meta">
+          <div class="meta"><span>Prerequisite</span><strong>${entry.prerequisite}</strong></div>
+          <div class="meta"><span>Qualification</span><strong>${entry.qualification}</strong></div>
+          <div class="meta" style="grid-column:1 / -1"><span>Supplier relationship</span><strong>${entry.suppliers}</strong></div>
+        </div>`;
+    }
+
+    nodes.forEach((node) => {
+      node.addEventListener("click", () => {
+        nodes.forEach((candidate) => candidate.classList.toggle("active", candidate === node));
+        renderDetail(node.dataset.id);
+      });
+    });
+
+    filters.forEach((button) => {
+      button.addEventListener("click", () => {
+        const filter = button.dataset.filter;
+        filters.forEach((candidate) => candidate.classList.toggle("active", candidate === button));
+        tree.classList.toggle("filtered", filter !== "all");
+        nodes.forEach((node) => {
+          const related = filter === "all" || node.dataset.branches.split(" ").includes(filter);
+          node.classList.toggle("related", related);
+        });
+      });
+    });
+
+    renderDetail("assembly");
+  </script>
+</body>
+</html>

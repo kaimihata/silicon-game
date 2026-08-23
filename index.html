@@ -26,6 +26,8 @@
     <button class="tab" data-screen="factory">2. Build factory</button>
     <button class="tab" data-screen="production">3. Run line</button>
     <a href="chip-city-greybox-spike-handoff.html">Build documents</a>
+    <a href="chip-city-parts-and-machines-guide.html">Parts &amp; machines guide</a>
+    <a href="chip-city-machine-progression.html">Machine progression</a>
   </nav>
 
   <main>
@@ -50,13 +52,7 @@
             <select id="memory-type"><option value="standardMemory">Standard memory — $10</option><option value="fastMemory">Fast memory — $20</option></select>
           </label>
           <label class="check"><input id="cooling-enabled" type="checkbox" checked> Include cooling / power — $4</label>
-          <p class="hint">Select a part below, then click the die to move it. Click two placed parts to restore a missing connection.</p>
-          <div id="part-palette" class="button-grid">
-            <button data-part-id="cpu">Move CPU</button>
-            <button data-part-id="memory">Move memory</button>
-            <button data-part-id="io">Move I/O</button>
-            <button data-part-id="cooling">Move cooling</button>
-          </div>
+          <p class="hint">Drag a component from any point on its surface to move it. Click two components to restore a missing connection.</p>
           <label>Routing plan
             <select id="routing"><option value="clear">Clear direct routes</option><option value="crowded">Shared crowded region</option></select>
           </label>
@@ -79,22 +75,33 @@
 
     <section id="factory-screen" class="screen">
       <div class="section-heading">
-        <div><p class="eyebrow">12 × 8 factory shell</p><h2>Build every physical route</h2></div>
+        <div><p class="eyebrow">12 × 8 interactive factory shell</p><h2>Place, route, observe, improve</h2></div>
         <div class="money-strip">
           <span>Cash <strong id="cash">$10,000</strong></span>
           <button id="borrow">Borrow $16,000</button>
-          <button id="auto-build">Build $26,000 starter line</button>
+          <button id="starter-hint">Show starter blueprint</button>
+          <button id="undo-factory" title="Undo factory edit (Ctrl+Z)">Undo</button>
+          <button id="redo-factory" title="Redo factory edit (Ctrl+Y)">Redo</button>
           <button id="clear-factory">Clear floor</button>
         </div>
       </div>
       <div class="workspace factory-workspace">
         <aside class="panel controls">
-          <h3>Place equipment</h3>
+          <h3>Build tools</h3>
+          <article class="component-kit-card">
+            <div class="kit-heading">
+              <span class="eyebrow">Design-fed recipe</span>
+              <strong id="kit-name">Draft component kit</strong>
+            </div>
+            <div id="kit-contents"></div>
+            <div id="kit-sourcing" class="kit-sourcing"></div>
+          </article>
           <div id="factory-palette" class="factory-palette"></div>
-          <p class="hint">Choose equipment, then click a floor cell. Erasing refunds placed equipment so the greybox stays easy to test.</p>
+          <button id="rotate-factory" class="wide-button">Rotate selected tool <span id="rotation-label">0&deg;</span> (R)</button>
+          <p class="hint">Drag machines from the palette or click to select and place. Drag existing machines to move them. Paint tracks and erase by dragging. Pan with the middle mouse button and zoom with the wheel.</p>
           <div id="purchase-message" class="diagnosis"></div>
         </aside>
-        <div id="factory-board" class="factory-board" aria-label="12 by 8 factory floor"></div>
+        <div id="factory-board" class="factory-board" role="application" aria-label="Interactive 12 by 8 factory floor"></div>
         <aside class="panel readiness">
           <h3>Line readiness</h3>
           <div id="factory-validity" class="status"></div>
@@ -116,7 +123,7 @@
       <div id="run-blocker" class="status"></div>
       <div class="kpi-grid">
         <article><span>Accepted / 1,000</span><strong id="accepted">0</strong></article>
-        <article><span>Input kits remaining</span><strong id="input-kits">1,200</strong></article>
+        <article><span>Component kits available</span><strong id="input-kits">1,200</strong></article>
         <article><span>Garbage rejects</span><strong id="rejects">0</strong></article>
         <article><span>Accepted rate</span><strong id="rate">—</strong></article>
         <article><span>Bottleneck</span><strong id="bottleneck">—</strong></article>
@@ -124,7 +131,7 @@
       </div>
 
       <div id="flow-line" class="flow-line">
-        <div>Input kits</div><i></i><div>Process</div><i></i><div>Inspection</div><i></i><div>Test</div><i></i><div>Packaging</div><i></i><div>Shipping</div>
+        <div>Design Kit Dock</div><i></i><div>Process</div><i></i><div>Inspection</div><i></i><div>Test</div><i></i><div>Packaging</div><i></i><div>Shipping</div>
         <span class="reject-flow">Inspection / test rejects → Garbage</span>
       </div>
 
@@ -148,7 +155,7 @@
   </main>
 
   <div id="toast" role="status" aria-live="polite"></div>
-  <script src="engine.js"></script>
-  <script src="app.js"></script>
+  <script type="module" src="engine.js"></script>
+  <script type="module" src="app.js"></script>
 </body>
 </html>

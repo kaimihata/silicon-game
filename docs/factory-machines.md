@@ -2,11 +2,11 @@
 
 **Status:** Core machine roles are established by the greybox; full-game capabilities, recipes, and progression remain under design.
 
-This document defines the machine and logistics roles used to produce component modules and final chips. See [Game design](game-design.md) for the overall progression, [Chip parts](chip-parts.md) and [Component catalog](component-catalog.md) for product inputs, and [Manufacturing metrics](manufacturing-metrics.md) for provisional capacities.
+This document defines the machine and logistics roles used to produce component modules and final chips. See [Game design](game-design.md) for the overall loop, [Machine and capability progression](machine-progression.md) for the proposed unlock structure, [Chip parts](chip-parts.md) and [Component catalog](component-catalog.md) for product inputs, and [Manufacturing metrics](manufacturing-metrics.md) for provisional capacities.
 
 ## Factory purpose
 
-Factories convert purchased or internally produced inputs into component modules and final chips. A factory may:
+Factories convert purchased or internally produced inputs into component modules and final chips. The first complete game should model one expandable campus containing several production departments. That campus may:
 
 - manufacture a component used by other factories;
 - assemble a final chip;
@@ -14,7 +14,7 @@ Factories convert purchased or internally produced inputs into component modules
 - handle rejects or byproducts;
 - share capacity among several production lines.
 
-The same production rules should apply whether the output is a memory module, CPU module, or final chip.
+The same production rules should apply whether the output is a memory module, thermal part, substrate, or final chip. Multiple independent sites and freight between them are deferred until the one-campus game proves sufficiently deep.
 
 ## Machine model
 
@@ -70,7 +70,7 @@ The **Quality Scanner** (`INS-100`) identifies placement, surface, and visible c
 
 Complex routing, advanced parts, and difficult component recipes may increase inspection time or reject probability. Inspection can be shared across lines, making it a reusable capability and a potential network bottleneck.
 
-Later products may require an **Advanced Scanner** (`XRY-100`) for hidden connections or dense multi-chip packages.
+Later products may require an **X-ray Scanner** (`XRY-100`) for hidden connections or dense multi-chip packages.
 
 ### Electrical and thermal test
 
@@ -104,8 +104,9 @@ Inspection and test rejects are physical outputs. The greybox routes them to gar
 
 | Machine | Prototype role | Prototype capital cost |
 | --- | --- | ---: |
-| Input bay | Supplies aggregate component kits | $1,500 |
+| Design Kit Dock | Supplies the submitted design's aggregate component kit | $1,500 |
 | Process | Converts kits into fabricated wafers | $7,000 |
+| Memory Fabricator | Optionally replaces the kit's purchased memory with internal production | $9,000 |
 | Inspection | Produces inspected wafers or rejects | $5,000 |
 | Test | Produces validated wafers or rejects | $4,500 |
 | Packaging | Produces accepted packaged chips | $4,000 |
@@ -116,12 +117,14 @@ Inspection and test rejects are physical outputs. The greybox routes them to gar
 The current required route is:
 
 ```text
-input -> process -> inspection -> test -> packaging -> output
-                       |             |
-                       +-> garbage <-+
+design kit dock -> process -> inspection -> test -> packaging -> output
+                                  |             |
+                                  +-> garbage <-+
+
+optional memory fabricator ---+
 ```
 
-This is a useful acceptance baseline, but it is too linear to represent the intended full-game factory network.
+The submitted chip design determines the dock's kit contents and purchase cost. A Memory Fabricator connected to Process replaces purchased memory with the catalog's internal variable cost. This is a useful bridge toward typed inputs, but it remains too aggregated and linear to represent the intended full-game factory network.
 
 ## Full-game starter machine names
 
@@ -140,7 +143,7 @@ This is a useful acceptance baseline, but it is too linear to represent the inte
 
 These are generation-one machine models. Later machines can add speed, larger buffers, advanced capabilities, quality improvements, or lower operating costs without renaming the production roles.
 
-## Proposed first vertical-integration experiment
+## Current browser vertical-integration experiment
 
 The next greybox should retain a final-chip line while introducing typed purchased inputs:
 
@@ -162,7 +165,7 @@ silicon wafer + memory substrate
     -> final assembly
 ```
 
-Purchased memory remains compatible with final assembly and can merge with internal memory output. This tests partial integration, supplier backup, shared flow, capital cost, and the complexity-versus-margin decision without requiring a complete upstream production tree.
+Purchased memory remains compatible with final assembly and can merge with internal memory output. This browser experiment tests partial integration, supplier backup, shared flow, capital cost, and the complexity-versus-margin decision without requiring a complete upstream production tree. It does not lock memory as the first integration branch in the full campaign.
 
 ## Distinct component-line characteristics
 
@@ -170,18 +173,29 @@ Component factories should create different production problems rather than reus
 
 | Component family | Intended factory character |
 | --- | --- |
-| CPU | Expensive inputs, longer or more precise processing, strict inspection, relatively low volume |
-| Memory | Batch or parallel production, high volume, yield management, reusable across products |
-| I/O | Multiple material types, assembly-oriented flow, interface and packaging tests |
-| Cooling / power | Cheaper but bulkier inputs, higher transport volume, simpler transformation |
-| Interconnect | Conductive materials, precision processing, strong relationship to inspection and yield |
-| Final chip | Converges selected component streams and inherits their quality and workload pressures |
+| Thermal | Continuous forming and finishing, bulky inputs, high transport volume, recyclable offcuts |
+| Memory | Wafer batches, parallel output, spatial yield variation, speed and quality bins |
+| Substrate / interconnect | Panel nesting, offcuts, trace complexity, and shared X-ray inspection |
+| I/O | Many lower-volume recipes, costly changeovers, and interface-specific test fixtures |
+| Power management | Long analog batches, efficiency grades, reliability qualification, and burn-in |
+| CPU | Expensive low-volume wafers, early metrology, performance binning, and valuable lower-grade output |
+| Final chip | Converges selected component streams and inherits their quality, timing, and workload pressures |
 
-These are design directions, not finalized recipes.
+Two branches should not be implemented as the same machine chain with different constants. Each branch must differ on at least three of: flow topology, process cadence, quality model, output grades, setup pressure, physical pressure, and recovery options.
+
+## Proposed first-release campus scope
+
+The first complete game should support internal production for:
+
+1. **Thermal components:** the accessible introduction to vertical integration and bulky logistics.
+2. **Memory:** the first wafer branch, centered on batch yield, parallel output, and binning.
+3. **Substrates and interconnects:** panel allocation, material waste, routing precision, and advanced inspection.
+
+I/O, power-management, and compute components remain purchasable in the first release. Their internal-production branches are documented as later expansion candidates. Advanced packaging can still be part of the first release because it changes final-chip assembly and does not require internal die fabrication.
 
 ## Shared capacity and network design
 
-Nonlinear factories emerge when production lines interact:
+Nonlinear factories emerge when production lines interact within the campus:
 
 - several final products draw from one memory line;
 - component and final-chip products share inspection or packaging;
@@ -191,7 +205,7 @@ Nonlinear factories emerge when production lines interact:
 - excess internal production is stored or sold;
 - reject handling consumes space and transport capacity.
 
-Players should be able to create compact dedicated lines, flexible shared facilities, or hybrids with different costs and risks.
+Players should be able to create compact dedicated departments, flexible shared facilities, or hybrids with different costs and risks. Multi-site freight can extend this model later but is not needed for the first release.
 
 ## Factory-state feedback
 

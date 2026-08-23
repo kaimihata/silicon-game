@@ -118,7 +118,7 @@ test("Functional: board placement, I/O edge, required links, and express limit a
 test("Functional: factory reports exact missing equipment and routes", () => {
   const empty = E.validateFactory([]);
   assert.equal(empty.valid, false);
-  assert.match(empty.errors[0], /Missing Input bay/);
+  assert.match(empty.errors[0], /Missing Design Kit Dock/);
 
   const broken = E.starterFactory().filter((item) => !(item.x === 3 && item.y === 3));
   assert.equal(E.validateFactory(broken).valid, false);
@@ -127,6 +127,48 @@ test("Functional: factory reports exact missing equipment and routes", () => {
   const starter = E.validateFactory(E.starterFactory());
   assert.equal(starter.valid, true);
   assert.equal(starter.cost, 26000);
+});
+
+test("Functional: submitted design produces an explicit component kit", () => {
+  const lean = profile("lean");
+  assert.equal(lean.componentKit.name, "Efficient CPU controller kit");
+  assert.equal(lean.componentKit.supplierCost, lean.materialCost);
+  assert.deepEqual(
+    lean.componentKit.items.map((item) => [item.catalogId, item.quantity]),
+    [
+      ["CP-110", 1],
+      ["MD-110", 1],
+      ["IO-110", 1],
+      ["PM/TH-110", 1],
+      ["DL-110", 3],
+    ]
+  );
+});
+
+test("Functional: connected memory fabrication replaces the purchased memory cost", () => {
+  const lean = profile("lean");
+  const purchased = E.factorySourcing(lean, E.starterFactory());
+  assert.equal(purchased.memorySource, "supplier");
+  assert.equal(purchased.materialCost, 38);
+
+  const integratedFactory = E.starterFactory();
+  integratedFactory.push(
+    { type: "memoryFab", x: 0, y: 1 },
+    { type: "track", x: 1, y: 1 },
+    { type: "track", x: 2, y: 1 },
+    { type: "track", x: 2, y: 2 }
+  );
+  const internal = E.factorySourcing(lean, integratedFactory);
+  assert.equal(internal.memorySource, "internal");
+  assert.equal(internal.supplierCost, 28);
+  assert.equal(internal.internalComponentCost, 6);
+  assert.equal(internal.materialCost, 34);
+  assert.equal(internal.savingsPerAttempt, 4);
+
+  const run = E.advanceProduction(lean, integratedFactory, E.initialProductionState(), 60);
+  assert.ok(run.supplierCost > 0);
+  assert.ok(run.internalComponentCost > 0);
+  assert.ok(run.productionCost < E.advanceProduction(lean, E.starterFactory(), E.initialProductionState(), 60).productionCost);
 });
 
 test("Functional: production counts only accepted packages and reconciles economy", () => {

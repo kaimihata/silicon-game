@@ -45,7 +45,7 @@ Memory provides capacity or bandwidth required by the final product and interact
 | 1 GB LPDDR Memory (`MD-110`) | 1 GB capacity and 12.8 GB/s peak bandwidth | Lower component cost and normal inspection or test load |
 | 2 GB LPDDR Memory (`MD-130`) | 2 GB capacity and 25.6 GB/s peak bandwidth | Higher component cost, power, inspection load, and electrical-test work |
 
-Memory is the proposed first vertical-integration experiment because it can begin as a purchased input and later become the output of a reusable internal production line.
+Memory is the proposed first **wafer-production experiment** in the browser spike because it can begin as a purchased input and later become the output of a reusable internal line. For the full game's teaching order, simpler thermal-component production may introduce make-versus-buy before memory introduces wafer batches, yield, and binning.
 
 ### Interface chiplets
 

@@ -9,6 +9,7 @@ Chip City is a game about designing final chips and building the industrial netw
 - [Chip parts](chip-parts.md) defines the current functional blocks available in final-chip designs and how they create manufacturing pressure.
 - [Component catalog](component-catalog.md) defines scalable model names and provisional physical and economic specifications.
 - [Factory machines](factory-machines.md) defines the production and logistics roles used to manufacture components and final chips.
+- [Machine and capability progression](machine-progression.md) defines the proposed infrastructure spine, vertical-integration branches, unlock model, and candidate teaching order.
 - [Product and manufacturing metrics](manufacturing-metrics.md) defines how component specifications affect eligibility, factory workload, throughput, yield, and cost.
 - [Candidate first user interaction](first-user-interaction.md) describes a testable onboarding story and reference factory for the next spike.
 - [Greybox build brief](../chip-city-greybox-spike-build-brief.html) specifies the current browser prototype.
@@ -19,6 +20,8 @@ Chip City is a game about designing final chips and building the industrial netw
 The player begins as a chip company that purchases sophisticated chiplets, memory dies, and package components from suppliers, combines them into multi-chip packages, and sells accepted products. Purchased components make it possible to start production without owning an entire semiconductor supply chain, but their prices include supplier margins.
 
 Over time, the player may vertically integrate by building factories that produce selected components internally. Internal production can improve margins, quality control, or supply reliability, but adds capital cost, factory space, operating expense, yield risk, and logistical complexity.
+
+The first complete game should take place on one expandable factory campus. The player unlocks additional floor parcels and specialized production zones, then builds component departments that feed shared storage and final assembly. Multiple sites and inter-factory freight are possible later expansions, not requirements for the first release.
 
 Progression therefore runs backward through the supply chain:
 
@@ -73,15 +76,15 @@ The player should be able to trace a factory pressure back to the chip choice th
 
 ### Reusable production networks
 
-Factories may produce final chips or intermediate component modules. Component factories should be able to:
+Production departments may produce final chips or intermediate component modules. Within the first game's campus, component lines should be able to:
 
 - supply several final-chip products;
 - share machines and logistics with other production lines;
 - send excess output to storage or external sale;
 - compete for common capacity;
-- create bottlenecks elsewhere in the industrial network.
+- create bottlenecks elsewhere on the campus.
 
-This reuse prevents every final-chip product from becoming another isolated linear factory.
+This reuse prevents every final-chip product from becoming another isolated linear factory. A later multi-site game can extend the same rules to freight and distribution between campuses.
 
 ### Economics alongside throughput
 
@@ -125,7 +128,7 @@ It does not provide an exact factory blueprint.
 
 ### Component production
 
-CPU, memory, I/O, cooling, interconnect, and other component factories use production recipes and logistics. They do not repeat the final-chip design interface.
+Memory, thermal, substrate/interconnect, and later component-production departments use production recipes and logistics. They do not repeat the final-chip design interface.
 
 Component recipes define the materials, machine capabilities, cycle times, expected yield, and output quality needed to produce a component module.
 
@@ -171,19 +174,33 @@ Inspection and test failures create real item streams. Rejects must be disposed 
 
 The player buys nearly all component modules and learns final-chip design, routing, factory flow, quality, and contract economics.
 
+### Campus growth
+
+The player expands one site with additional floor parcels, receiving capacity, storage, utilities, and specialized production zones. Growth creates room for integration without introducing inter-site logistics.
+
 ### Selective integration
 
-The player chooses a component family, such as memory, to manufacture internally. The new line introduces materials, dedicated processing, inspection, rejects, and competition for shared capacity.
+The proposed first-release teaching order is:
 
-### Networked producer
+1. thermal components as a low-risk, bulky mechanical-production branch;
+2. memory as the first wafer-production branch, introducing batch yield and quality bins;
+3. substrates and interconnects as a panel-planning and advanced-inspection branch.
 
-Internal component factories supply multiple final products. The player balances shared production, inventory, supplier backup, and external component sales.
+Purchased equivalents remain available and can merge with internal output. These are teaching stages, not hard prerequisites: a later sandbox or campaign structure may allow the player to choose branch order.
+
+### Integrated campus
+
+Internal component departments supply several final products through shared storage, inspection, and logistics. The player balances internal allocation, supplier backup, campus congestion, inventory, and external component sales.
+
+### Advanced packaging
+
+Precision bonding, X-ray inspection, reliability testing, interposers, and advanced thermal packaging unlock new final-chip design space. These capabilities do not require the company to fabricate every component die internally.
 
 ### Deep integration
 
-The company may expand toward more advanced components and upstream materials. Greater control and potential margin come with substantially harder production and capital decisions.
+Post-release or expanded scope may add internal I/O, power-management, and compute fabrication, upstream materials, multiple sites, and inter-factory freight. Greater control and potential margin come with substantially harder production and capital decisions.
 
-This is not intended to be a single mandatory sequence. Different products, contracts, suppliers, and factory strengths should make different integration paths viable.
+The first release should prove depth within one campus before adding breadth through many sites or every possible component branch.
 
 ## Design requirements
 
@@ -193,7 +210,9 @@ This is not intended to be a single mandatory sequence. Different products, cont
 - Internal production must carry real capital, space, operating, and yield costs.
 - Purchased and internal versions of a component must be able to coexist in one supply network.
 - Component factories must have distinct logistical or process characteristics rather than differing only by numbers.
+- Each internal-production branch must differ on at least three gameplay dimensions such as topology, cadence, quality model, output grades, changeovers, physical pressure, or recovery options.
 - Shared machines and routes must create opportunities for reuse and contention.
+- The first complete game must be viable and strategically interesting on one expandable campus.
 - Rejected units never satisfy final-product demand or create final-product revenue.
 - Expected outcomes shown during design must remain distinguishable from observed production results.
 
@@ -202,10 +221,12 @@ This is not intended to be a single mandatory sequence. Different products, cont
 The current browser spike validates a smaller loop:
 
 ```text
-component kits -> process -> inspection -> test -> packaging -> accepted chips
+submitted design kit -> process -> inspection -> test -> packaging -> accepted chips
+                              ^
+optional internal memory -----+
 ```
 
-It currently models components and production as aggregate counts, generic tracks, and a mostly fixed machine sequence. Its deterministic calculations and golden scenarios are useful baselines, but its static-web architecture and simplified factory are not full-game constraints.
+It currently models most components as a submitted aggregate kit, with an optional connected Memory Fabricator replacing the purchased memory portion of that kit. Production still uses aggregate counts, generic tracks, and a mostly fixed machine sequence. Its deterministic calculations and golden scenarios are useful baselines, but its browser architecture and simplified factory are not full-game constraints.
 
 The next experiment should add typed purchased component inputs and one optional internal component line, initially memory. This is the smallest useful test of reverse progression, hybrid sourcing, physical logistics, and the margin-versus-complexity decision.
 

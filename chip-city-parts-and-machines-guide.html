@@ -1,0 +1,1036 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="A visual guide to Chip City's proposed chip parts, factory machines, and the manufacturing profile that connects them.">
+  <title>Chip City - Parts and Machines Guide</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #071018;
+      --surface: #0d1b25;
+      --surface-2: #122632;
+      --surface-3: #183544;
+      --ink: #ecf7f5;
+      --muted: #9cb3ba;
+      --line: #284653;
+      --cyan: #55d6c8;
+      --cyan-soft: #173f42;
+      --amber: #f2b65c;
+      --amber-soft: #46351f;
+      --red: #ff7d75;
+      --green: #84e39c;
+      --blue: #77bdfb;
+      --violet: #c3a1ff;
+      --shadow: 0 24px 70px rgb(0 0 0 / 28%);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 8% 0%, rgb(45 151 149 / 18%), transparent 32rem),
+        radial-gradient(circle at 88% 20%, rgb(69 103 167 / 14%), transparent 28rem),
+        var(--bg);
+      color: var(--ink);
+      font: 16px/1.55 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    a { color: var(--cyan); }
+    button { font: inherit; }
+
+    .shell {
+      width: min(1180px, calc(100% - 36px));
+      margin: 0 auto;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: 76px 0 54px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .hero::after {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      content: "";
+      opacity: .16;
+      background-image:
+        linear-gradient(var(--line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--line) 1px, transparent 1px);
+      background-size: 32px 32px;
+      mask-image: linear-gradient(to right, transparent, #000 40%, transparent);
+    }
+
+    .hero .shell { position: relative; z-index: 1; }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      color: var(--cyan);
+      font-size: .78rem;
+      font-weight: 800;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      max-width: 850px;
+      margin: 0;
+      font-size: clamp(2.6rem, 7vw, 5.8rem);
+      line-height: .95;
+      letter-spacing: -.055em;
+    }
+
+    .lede {
+      max-width: 760px;
+      margin: 24px 0 0;
+      color: #c2d6d9;
+      font-size: clamp(1.05rem, 2.2vw, 1.3rem);
+    }
+
+    .status-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 28px;
+    }
+
+    .status-strip span,
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--muted);
+      background: rgb(9 27 36 / 74%);
+      font-size: .82rem;
+      font-weight: 700;
+    }
+
+    .status-strip span:first-child { color: var(--green); }
+
+    .section-nav {
+      position: sticky;
+      z-index: 10;
+      top: 0;
+      overflow-x: auto;
+      border-bottom: 1px solid var(--line);
+      background: rgb(7 16 24 / 90%);
+      backdrop-filter: blur(16px);
+    }
+
+    .section-nav .shell {
+      display: flex;
+      gap: 6px;
+      padding-block: 10px;
+    }
+
+    .section-nav a {
+      flex: 0 0 auto;
+      padding: 8px 12px;
+      border-radius: 8px;
+      color: var(--muted);
+      font-size: .88rem;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .section-nav a:hover,
+    .section-nav a:focus-visible {
+      color: var(--ink);
+      background: var(--surface-2);
+      outline: none;
+    }
+
+    main { padding: 12px 0 80px; }
+
+    section {
+      scroll-margin-top: 72px;
+      padding-top: 64px;
+    }
+
+    .section-heading {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(260px, 480px);
+      gap: 32px;
+      align-items: end;
+      margin-bottom: 24px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: clamp(2rem, 4vw, 3.25rem);
+      line-height: 1;
+      letter-spacing: -.04em;
+    }
+
+    .section-heading p:last-child {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    h3 {
+      margin: 0;
+      font-size: 1.15rem;
+      line-height: 1.2;
+    }
+
+    h4 {
+      margin: 0;
+      color: var(--muted);
+      font-size: .75rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    p { margin: 10px 0; }
+
+    .mental-model {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .model-step {
+      position: relative;
+      min-height: 160px;
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: linear-gradient(145deg, var(--surface-2), var(--surface));
+      box-shadow: var(--shadow);
+    }
+
+    .model-step:not(:last-child)::after {
+      position: absolute;
+      z-index: 2;
+      top: 64px;
+      right: -21px;
+      display: grid;
+      width: 30px;
+      height: 30px;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: 50%;
+      color: var(--cyan);
+      background: var(--bg);
+      content: "\2192";
+    }
+
+    .model-step strong {
+      display: block;
+      margin: 8px 0;
+      font-size: 1.25rem;
+    }
+
+    .model-step p {
+      color: var(--muted);
+      font-size: .92rem;
+    }
+
+    .number {
+      display: grid;
+      width: 30px;
+      height: 30px;
+      place-items: center;
+      border-radius: 8px;
+      color: var(--bg);
+      background: var(--cyan);
+      font-weight: 900;
+    }
+
+    .callout {
+      margin-top: 18px;
+      padding: 18px 20px;
+      border: 1px solid #5f4929;
+      border-left: 5px solid var(--amber);
+      border-radius: 12px;
+      color: #f3dcba;
+      background: rgb(70 53 31 / 58%);
+    }
+
+    .part-grid,
+    .machine-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .part-card,
+    .machine-card {
+      position: relative;
+      overflow: hidden;
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: linear-gradient(145deg, rgb(18 38 50 / 94%), rgb(10 25 34 / 96%));
+      transition: border-color .2s, opacity .2s, transform .2s;
+    }
+
+    .part-card::before,
+    .machine-card::before {
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 4px;
+      background: var(--accent, var(--cyan));
+      content: "";
+    }
+
+    .part-card:hover,
+    .machine-card:hover {
+      border-color: var(--accent, var(--cyan));
+      transform: translateY(-2px);
+    }
+
+    .card-top {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .part-icon,
+    .machine-icon {
+      display: grid;
+      flex: 0 0 auto;
+      width: 54px;
+      height: 54px;
+      place-items: center;
+      border: 1px solid color-mix(in srgb, var(--accent, var(--cyan)) 70%, transparent);
+      border-radius: 13px;
+      color: var(--accent, var(--cyan));
+      background: color-mix(in srgb, var(--accent, var(--cyan)) 13%, transparent);
+      font-size: 1rem;
+      font-weight: 900;
+      letter-spacing: -.04em;
+    }
+
+    .model-id {
+      margin-top: 3px;
+      color: var(--muted);
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: .78rem;
+    }
+
+    .choice {
+      margin: 16px 0 10px;
+      color: var(--ink);
+      font-size: .92rem;
+    }
+
+    .tradeoff {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .tradeoff div,
+    .machine-facts div {
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: rgb(4 14 20 / 42%);
+    }
+
+    .tradeoff span,
+    .machine-facts span {
+      display: block;
+      margin-bottom: 2px;
+      color: var(--muted);
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .tradeoff strong,
+    .machine-facts strong {
+      font-size: .87rem;
+    }
+
+    .compute { --accent: var(--blue); }
+    .memory { --accent: var(--violet); }
+    .io { --accent: var(--cyan); }
+    .power { --accent: var(--amber); }
+    .thermal { --accent: var(--red); }
+    .link { --accent: var(--green); }
+
+    .machine-facts {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .machine-card > p {
+      min-height: 72px;
+      color: var(--muted);
+      font-size: .9rem;
+    }
+
+    .relationship {
+      display: grid;
+      grid-template-columns: 260px minmax(0, 1fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .filter-panel {
+      position: sticky;
+      top: 72px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--surface);
+    }
+
+    .filter-panel p {
+      color: var(--muted);
+      font-size: .9rem;
+    }
+
+    .filter-list {
+      display: grid;
+      gap: 7px;
+      margin-top: 14px;
+    }
+
+    .filter-list button {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      color: var(--muted);
+      background: var(--surface-2);
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .filter-list button:hover,
+    .filter-list button:focus-visible,
+    .filter-list button.active {
+      border-color: var(--cyan);
+      color: var(--ink);
+      background: var(--cyan-soft);
+      outline: none;
+    }
+
+    .route-detail {
+      min-height: 114px;
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: .88rem;
+    }
+
+    .route-detail strong {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--ink);
+      font-size: 1rem;
+    }
+
+    .flow-board {
+      overflow-x: auto;
+      padding: 28px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background:
+        linear-gradient(rgb(20 48 60 / 26%) 1px, transparent 1px),
+        linear-gradient(90deg, rgb(20 48 60 / 26%) 1px, transparent 1px),
+        rgb(5 17 24 / 74%);
+      background-size: 24px 24px;
+    }
+
+    .flow-row {
+      display: grid;
+      grid-template-columns: 155px 30px 130px 30px 130px 30px 130px 30px 130px 30px 130px 30px 130px;
+      align-items: center;
+      min-width: 1135px;
+    }
+
+    .flow-row + .flow-row { margin-top: 14px; }
+
+    .source-stack {
+      display: grid;
+      gap: 6px;
+    }
+
+    .source-stack .node {
+      min-height: 0;
+      padding: 7px 9px;
+    }
+
+    .feed-row .node { min-height: 52px; }
+
+    .node {
+      display: grid;
+      min-height: 70px;
+      place-items: center;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      color: var(--ink);
+      background: var(--surface-2);
+      font-size: .82rem;
+      font-weight: 800;
+      text-align: center;
+      transition: opacity .2s, border-color .2s, box-shadow .2s;
+    }
+
+    .node.source { border-style: dashed; }
+    .node.reject { color: #ffd2cf; background: #351e21; }
+
+    .arrow {
+      color: var(--cyan);
+      font-size: 1.3rem;
+      text-align: center;
+      transition: opacity .2s;
+    }
+
+    .flow-caption {
+      margin: 22px 0 0;
+      color: var(--muted);
+      font-size: .9rem;
+    }
+
+    .flow-board.filtered .node:not(.active-route),
+    .flow-board.filtered .arrow:not(.active-route) {
+      opacity: .18;
+    }
+
+    .flow-board.filtered .node.active-route {
+      border-color: var(--cyan);
+      box-shadow: 0 0 0 2px rgb(85 214 200 / 16%), 0 0 28px rgb(85 214 200 / 12%);
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+    }
+
+    table {
+      width: 100%;
+      min-width: 780px;
+      border-collapse: collapse;
+      background: rgb(10 25 34 / 80%);
+    }
+
+    th,
+    td {
+      padding: 13px 15px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--cyan);
+      background: var(--surface-2);
+      font-size: .76rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    tr:last-child td { border-bottom: 0; }
+    tbody tr:hover { background: rgb(30 66 80 / 30%); }
+
+    code {
+      padding: 2px 5px;
+      border-radius: 5px;
+      color: #d4fff9;
+      background: var(--cyan-soft);
+      font: .9em ui-monospace, SFMono-Regular, Consolas, monospace;
+    }
+
+    .two-column {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .summary-card {
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--surface);
+    }
+
+    .summary-card h3 { margin-bottom: 12px; }
+
+    .summary-card ul {
+      margin: 0;
+      padding-left: 1.15rem;
+      color: var(--muted);
+    }
+
+    .summary-card li + li { margin-top: 7px; }
+
+    .formula {
+      display: block;
+      margin-top: 14px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      color: #d5e7e8;
+      background: #07131b;
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: .84rem;
+      white-space: normal;
+    }
+
+    footer {
+      margin-top: 70px;
+      padding: 28px 0 48px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: .88rem;
+    }
+
+    footer .shell {
+      display: flex;
+      gap: 20px;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    @media (max-width: 900px) {
+      .part-grid,
+      .machine-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .mental-model { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .model-step:nth-child(2)::after { display: none; }
+      .relationship { grid-template-columns: 1fr; }
+      .filter-panel { position: static; }
+      .filter-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .section-heading { grid-template-columns: 1fr; gap: 12px; }
+    }
+
+    @media (max-width: 620px) {
+      .hero { padding-top: 54px; }
+      .part-grid,
+      .machine-grid,
+      .mental-model,
+      .two-column { grid-template-columns: 1fr; }
+      .model-step::after { display: none !important; }
+      .filter-list { grid-template-columns: 1fr 1fr; }
+      .tradeoff,
+      .machine-facts { grid-template-columns: 1fr; }
+      footer .shell { display: block; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      * { transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="shell">
+      <p class="eyebrow">Full-game design reference</p>
+      <h1>From chip parts to factory pressure.</h1>
+      <p class="lede">A visual guide to the parts inside a Chip City product, the machines that manufacture it, and the manufacturing profile that translates one into the other.</p>
+      <div class="status-strip" aria-label="Document status">
+        <span>Foundational direction</span>
+        <span>Values are provisional</span>
+        <span>Greybox mappings included</span>
+      </div>
+    </div>
+  </header>
+
+  <nav class="section-nav" aria-label="Guide sections">
+    <div class="shell">
+      <a href="#mental-model">Mental model</a>
+      <a href="#parts">Chip parts</a>
+      <a href="#machines">Factory machines</a>
+      <a href="#relationship">Follow a part</a>
+      <a href="#numbers">Workloads</a>
+      <a href="#greybox">Greybox mapping</a>
+    </div>
+  </nav>
+
+  <main class="shell">
+    <section id="mental-model">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">The central idea</p>
+          <h2>The chip does not prescribe the factory.</h2>
+        </div>
+        <p>The design creates requirements and pressure. The player decides how to satisfy them through sourcing, layout, routing, capacity, and quality.</p>
+      </div>
+
+      <div class="mental-model">
+        <article class="model-step">
+          <span class="number">1</span>
+          <strong>Choose parts</strong>
+          <p>Select compute, memory, I/O, power, cooling, and connections to meet a product opportunity.</p>
+        </article>
+        <article class="model-step">
+          <span class="number">2</span>
+          <strong>Generate pressure</strong>
+          <p>The design becomes a bill of materials plus placement, bonding, inspection, test, and packaging workloads.</p>
+        </article>
+        <article class="model-step">
+          <span class="number">3</span>
+          <strong>Build a network</strong>
+          <p>Route purchased or internally produced items through machines with enough capacity and valid outputs.</p>
+        </article>
+        <article class="model-step">
+          <span class="number">4</span>
+          <strong>Ship accepted chips</strong>
+          <p>Throughput, yield, component cost, operating cost, and reject loss determine whether production is profitable.</p>
+        </article>
+      </div>
+
+      <div class="callout"><strong>Manufacturing profile:</strong> the bridge between the chip designer and factory. It describes what production must handle, but never dictates one correct layout.</div>
+    </section>
+
+    <section id="parts">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Inside the product</p>
+          <h2>Starter chip parts</h2>
+        </div>
+        <p>The final product is a multi-chip package. Every part should change product capability, manufacturing difficulty, or both.</p>
+      </div>
+
+      <div class="part-grid">
+        <article class="part-card compute">
+          <div class="card-top">
+            <div class="part-icon">CPU</div>
+            <div><h3>Compute chiplet</h3><div class="model-id">CP-110 / CP-130</div></div>
+          </div>
+          <p class="choice">Dual-core is cheaper and cooler. Quad-core can unlock stronger products but needs more bandwidth and creates more work.</p>
+          <div class="tradeoff">
+            <div><span>Product</span><strong>32 or 72 raw compute</strong></div>
+            <div><span>Factory</span><strong>Placement, inspection, test</strong></div>
+          </div>
+        </article>
+
+        <article class="part-card memory">
+          <div class="card-top">
+            <div class="part-icon">MEM</div>
+            <div><h3>Memory die</h3><div class="model-id">MD-110 / MD-130</div></div>
+          </div>
+          <p class="choice">Choose 1 GB or 2 GB LPDDR. More capacity and bandwidth cost more, use more power, and increase quality work.</p>
+          <div class="tradeoff">
+            <div><span>Product</span><strong>1-2 GB, 12.8-25.6 GB/s</strong></div>
+            <div><span>Factory</span><strong>Placement, inspection, test</strong></div>
+          </div>
+        </article>
+
+        <article class="part-card io">
+          <div class="card-top">
+            <div class="part-icon">I/O</div>
+            <div><h3>Display controller</h3><div class="model-id">IO-110</div></div>
+          </div>
+          <p class="choice">Provides the required external display function and must interface with the edge of the package.</p>
+          <div class="tradeoff">
+            <div><span>Product</span><strong>1 display, up to 4K60</strong></div>
+            <div><span>Factory</span><strong>Assembly and packaging</strong></div>
+          </div>
+        </article>
+
+        <article class="part-card power">
+          <div class="card-top">
+            <div class="part-icon">PWR</div>
+            <div><h3>Power controller</h3><div class="model-id">PM-110</div></div>
+          </div>
+          <p class="choice">Supplies package power. Insufficient capacity blocks the design rather than merely reducing yield.</p>
+          <div class="tradeoff">
+            <div><span>Product</span><strong>20 W delivery capacity</strong></div>
+            <div><span>Factory</span><strong>Component input and assembly</strong></div>
+          </div>
+        </article>
+
+        <article class="part-card thermal">
+          <div class="card-top">
+            <div class="part-icon">THM</div>
+            <div><h3>Heat spreader</h3><div class="model-id">TH-110</div></div>
+          </div>
+          <p class="choice">Costs money and package space, but thermal headroom reduces test time and heat-related reject risk.</p>
+          <div class="tradeoff">
+            <div><span>Product</span><strong>15 W thermal capacity</strong></div>
+            <div><span>Factory</span><strong>Packaging input; safer test</strong></div>
+          </div>
+        </article>
+
+        <article class="part-card link">
+          <div class="card-top">
+            <div class="part-icon">LINK</div>
+            <div><h3>Die-to-die links</h3><div class="model-id">DL-110 / DL-130</div></div>
+          </div>
+          <p class="choice">Standard links are cheap. Wide links carry more data but add material, power, bonding, and inspection work.</p>
+          <div class="tradeoff">
+            <div><span>Product</span><strong>16 or 32 GB/s</strong></div>
+            <div><span>Factory</span><strong>Bonding and inspection</strong></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="machines">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">On the factory floor</p>
+          <h2>Generation-one machines</h2>
+        </div>
+        <p>Machines transform typed items through recipes. They work only when every required input is available and every output has somewhere to go.</p>
+      </div>
+
+      <div class="machine-grid">
+        <article class="machine-card io">
+          <div class="card-top"><div class="machine-icon">IN</div><div><h3>Delivery Dock</h3><div class="model-id">RCV-100</div></div></div>
+          <p>Introduces purchased components and materials with explicit types, sources, prices, quality, and supply limits.</p>
+          <div class="machine-facts"><div><span>Input</span><strong>Supplier deliveries</strong></div><div><span>Output</span><strong>Typed factory items</strong></div></div>
+        </article>
+
+        <article class="machine-card link">
+          <div class="card-top"><div class="machine-icon">MOVE</div><div><h3>Conveyor</h3><div class="model-id">LOG-100</div></div></div>
+          <p>Moves item streams between machine ports within the expandable campus. Direction, finite capacity, filters, splits, and merges make layout matter.</p>
+          <div class="machine-facts"><div><span>Capacity</span><strong>1 item/s provisional</strong></div><div><span>Cost</span><strong>$200 per cell</strong></div></div>
+        </article>
+
+        <article class="machine-card memory">
+          <div class="card-top"><div class="machine-icon">BUF</div><div><h3>Component Storage</h3><div class="model-id">BUF-100</div></div></div>
+          <p>Buffers typed components between uneven campus departments and protects assembly from short supplier interruptions.</p>
+          <div class="machine-facts"><div><span>Benefit</span><strong>Prevents starvation</strong></div><div><span>Tradeoff</span><strong>Space and inventory cost</strong></div></div>
+        </article>
+
+        <article class="machine-card compute">
+          <div class="card-top"><div class="machine-icon">ASM</div><div><h3>Chip Assembler</h3><div class="model-id">ASM-100</div></div></div>
+          <p>Places compute, memory, I/O, and power dies on a package substrate. Die count and component complexity set its workload.</p>
+          <div class="machine-facts"><div><span>Capacity</span><strong>2 placement units/s</strong></div><div><span>Capital</span><strong>$7,000</strong></div></div>
+        </article>
+
+        <article class="machine-card link">
+          <div class="card-top"><div class="machine-icon">BND</div><div><h3>Connection Station</h3><div class="model-id">BND-100</div></div></div>
+          <p>Creates the selected die-to-die links. Wide, long, or congested connections increase bonding time and later inspection.</p>
+          <div class="machine-facts"><div><span>Capacity</span><strong>1.5 connection units/s</strong></div><div><span>Capital</span><strong>$6,000</strong></div></div>
+        </article>
+
+        <article class="machine-card io">
+          <div class="card-top"><div class="machine-icon">SCAN</div><div><h3>Quality Scanner</h3><div class="model-id">INS-100</div></div></div>
+          <p>Finds visible placement and connection defects, producing either an inspected package or a physical reject.</p>
+          <div class="machine-facts"><div><span>Capacity</span><strong>1.25 inspection units/s</strong></div><div><span>Capital</span><strong>$5,000</strong></div></div>
+        </article>
+
+        <article class="machine-card power">
+          <div class="card-top"><div class="machine-icon">TEST</div><div><h3>Chip Tester</h3><div class="model-id">TST-100</div></div></div>
+          <p>Checks compute, memory, I/O, power, thermal behavior, and connections. Heat and quality increase time and failures.</p>
+          <div class="machine-facts"><div><span>Capacity</span><strong>1.5 test units/s</strong></div><div><span>Capital</span><strong>$4,500</strong></div></div>
+        </article>
+
+        <article class="machine-card thermal">
+          <div class="card-top"><div class="machine-icon">PKG</div><div><h3>Packaging Station</h3><div class="model-id">PKG-100</div></div></div>
+          <p>Combines validated work-in-progress with thermal and package materials to create a finished, shippable product.</p>
+          <div class="machine-facts"><div><span>Capacity</span><strong>0.33 packages/s</strong></div><div><span>Capital</span><strong>$4,000</strong></div></div>
+        </article>
+
+        <article class="machine-card thermal">
+          <div class="card-top"><div class="machine-icon">SCRAP</div><div><h3>Scrap Collector</h3><div class="model-id">SCR-100</div></div></div>
+          <p>Receives inspection and test rejects. Failed packages keep every component and processing cost already invested.</p>
+          <div class="machine-facts"><div><span>Input</span><strong>Rejected packages</strong></div><div><span>Revenue</span><strong>None</strong></div></div>
+        </article>
+
+        <article class="machine-card io">
+          <div class="card-top"><div class="machine-icon">SHIP</div><div><h3>Shipping Dock</h3><div class="model-id">SHP-100</div></div></div>
+          <p>Ships accepted products to contracts or markets. Only products that pass every required stage create revenue.</p>
+          <div class="machine-facts"><div><span>Input</span><strong>Finished accepted chips</strong></div><div><span>Output</span><strong>Contract delivery</strong></div></div>
+        </article>
+      </div>
+    </section>
+
+    <section id="relationship">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Interactive map</p>
+          <h2>Follow a part through production</h2>
+        </div>
+        <p>Select a part family to highlight where it enters the proposed starter line and which downstream machines its design pressure affects.</p>
+      </div>
+
+      <div class="relationship">
+        <aside class="filter-panel">
+          <h3>Highlight a part</h3>
+          <p>This is a conceptual route, not a required floor layout.</p>
+          <div class="filter-list">
+            <button type="button" class="active" data-route="all">Show everything</button>
+            <button type="button" data-route="cpu">Compute</button>
+            <button type="button" data-route="memory">Memory</button>
+            <button type="button" data-route="io">Display I/O</button>
+            <button type="button" data-route="power">Power</button>
+            <button type="button" data-route="thermal">Thermal</button>
+            <button type="button" data-route="links">Connections</button>
+          </div>
+          <div id="route-detail" class="route-detail" aria-live="polite">
+            <strong>Complete starter flow</strong>
+            Purchased parts converge at assembly, links are bonded next, defects branch to scrap, and only accepted packages reach shipping.
+          </div>
+        </aside>
+
+        <div class="flow-board" id="flow-board">
+          <div class="flow-row">
+            <div class="source-stack">
+              <div class="node source" data-routes="cpu">CPU</div>
+              <div class="node source" data-routes="memory">Memory</div>
+              <div class="node source" data-routes="io">Display I/O</div>
+              <div class="node source" data-routes="power">Power</div>
+              <div class="node source" data-routes="cpu memory io power">Substrate</div>
+            </div>
+            <div class="arrow" data-routes="cpu memory io power">&rarr;</div>
+            <div class="node" data-routes="cpu memory io power">Chip Assembler</div>
+            <div class="arrow" data-routes="cpu memory io power">&rarr;</div>
+            <div class="node" data-routes="cpu memory io power links">Connection Station</div>
+            <div class="arrow" data-routes="cpu memory io power links">&rarr;</div>
+            <div class="node" data-routes="cpu memory io power links">Quality Scanner</div>
+            <div class="arrow" data-routes="cpu memory io power links">&rarr;</div>
+            <div class="node" data-routes="cpu memory io power thermal links">Chip Tester</div>
+            <div class="arrow" data-routes="cpu memory io power thermal links">&rarr;</div>
+            <div class="node" data-routes="cpu memory io power thermal links">Packaging Station</div>
+            <div class="arrow" data-routes="cpu memory io power thermal links">&rarr;</div>
+            <div class="node" data-routes="cpu memory io power thermal links">Shipping Dock</div>
+          </div>
+          <div class="flow-row feed-row">
+            <div class="node source" style="grid-column:3" data-routes="links">Connection kits</div>
+            <div class="arrow" style="grid-column:4" data-routes="links">&rarr;</div>
+            <div class="node source" style="grid-column:9" data-routes="thermal">Heat spreader + package material</div>
+            <div class="arrow" style="grid-column:10" data-routes="thermal">&rarr;</div>
+          </div>
+          <div class="flow-row feed-row">
+            <div class="node reject" style="grid-column:7 / span 3" data-routes="cpu memory io power thermal links">Inspection and test rejects</div>
+            <div class="arrow" style="grid-column:10" data-routes="cpu memory io power thermal links">&rarr;</div>
+            <div class="node reject" style="grid-column:11" data-routes="cpu memory io power thermal links">Scrap Collector</div>
+          </div>
+          <p class="flow-caption">After assembly consumes the individual dies, downstream transport carries one work-in-progress package. Inspection and test failures leave as physical reject streams.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="numbers">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Why choices matter</p>
+          <h2>Part workload contributions</h2>
+        </div>
+        <p>These provisional units turn component complexity into machine time. Links contribute separate bonding and inspection work.</p>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Component</th><th>Supplier price</th><th>Placement</th><th>Inspection</th><th>Electrical test</th><th>Main pressure</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Dual-Core Processor <code>CP-110</code></td><td>$16</td><td>2</td><td>2</td><td>3</td><td>Low-cost baseline compute</td></tr>
+            <tr><td>Quad-Core Processor <code>CP-130</code></td><td>$28</td><td>3</td><td>4</td><td>6</td><td>Bandwidth, power, and test</td></tr>
+            <tr><td>1 GB LPDDR Memory <code>MD-110</code></td><td>$10</td><td>1</td><td>1</td><td>2</td><td>Baseline capacity</td></tr>
+            <tr><td>2 GB LPDDR Memory <code>MD-130</code></td><td>$20</td><td>1.5</td><td>2</td><td>4</td><td>Capacity, power, and test</td></tr>
+            <tr><td>Display Controller <code>IO-110</code></td><td>$5</td><td>1</td><td>1.5</td><td>1.5</td><td>Package-edge and I/O needs</td></tr>
+            <tr><td>Power Controller <code>PM-110</code></td><td>$4</td><td>1</td><td>1</td><td>1</td><td>Power eligibility</td></tr>
+            <tr><td>Heat Spreader <code>TH-110</code></td><td>$4</td><td>1</td><td>0.5</td><td>0</td><td>Reduces thermal test risk</td></tr>
+            <tr><td>Standard Connection <code>DL-110</code></td><td>$1/link</td><td>-</td><td>0.5</td><td>-</td><td>1 bonding unit, 16 GB/s</td></tr>
+            <tr><td>Wide Connection <code>DL-130</code></td><td>$5/link</td><td>-</td><td>1.5</td><td>-</td><td>2 bonding units, 32 GB/s</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="two-column" style="margin-top:16px">
+        <article class="summary-card">
+          <h3>Throughput</h3>
+          <ul>
+            <li>Each stage has a setup time and workload capacity.</li>
+            <li>The slowest effective stage controls attempted packages per minute.</li>
+            <li>Transport congestion, starvation, or blocking can reduce actual output.</li>
+          </ul>
+          <code class="formula">attempts/min = 60 / largest effective cycle time</code>
+        </article>
+        <article class="summary-card">
+          <h3>Economics</h3>
+          <ul>
+            <li>Every reject loses purchased parts and all processing already completed.</li>
+            <li>More machines can raise output while worsening cash position.</li>
+            <li>A higher-performing chip earns more only when an opportunity pays for it.</li>
+          </ul>
+          <code class="formula">profit/min = accepted/min x margin per accepted chip</code>
+        </article>
+      </div>
+    </section>
+
+    <section id="greybox">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">What exists today</p>
+          <h2>Current greybox vs. full-game direction</h2>
+        </div>
+        <p>The browser prototype validates the design-to-manufacturing loop, but deliberately combines several concepts that the full game separates.</p>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Current greybox</th><th>Full-game interpretation</th><th>Important difference</th></tr></thead>
+          <tbody>
+            <tr><td>Efficient CPU</td><td>Dual-Core Processor <code>CP-110</code></td><td>Scalable specifications replace generic speed labels.</td></tr>
+            <tr><td>Fast CPU</td><td>Quad-Core Processor <code>CP-130</code></td><td>It is a different tradeoff, not a universal upgrade.</td></tr>
+            <tr><td>Standard / fast memory</td><td>1 GB / 2 GB LPDDR Memory</td><td>Capacity and bandwidth become explicit.</td></tr>
+            <tr><td>Cooling / power</td><td>Power Controller + Heat Spreader</td><td>Power eligibility and thermal risk become separate systems.</td></tr>
+            <tr><td>Standard / express link</td><td>Standard / Wide Connection</td><td>Bandwidth, power, bonding, and inspection are explicit.</td></tr>
+            <tr><td>Design Kit Dock + optional internal memory</td><td>Typed CPU, memory, I/O, power, thermal, and package inputs</td><td>The bridge implementation exposes recipe contents and memory sourcing before every item is physically routed.</td></tr>
+            <tr><td>Process machine</td><td>Chip Assembler + Connection Station</td><td>Placement and bonding become separate capacity decisions.</td></tr>
+            <tr><td>Generic tracks</td><td>Directional, finite-capacity conveyors</td><td>Item type, machine ports, starvation, and blocking matter.</td></tr>
+            <tr><td>Garbage</td><td>Scrap Collector</td><td>Rejects remain physical; later systems may recycle or rework them.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout"><strong>Prototype versus full game:</strong> the browser experiment uses memory as its first internal-production test. The proposed full campaign introduces simpler thermal production first, then memory as the first wafer branch, followed by substrates and interconnects. The first release stays on one expandable campus; I/O, power, compute, upstream materials, and multi-site freight remain expansion directions.</div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="shell">
+      <span>Based on the foundational Chip City design documents.</span>
+      <span><a href="chip-city-machine-progression.html">View machine progression</a> &middot; <a href="index.html">Play the current greybox</a></span>
+    </div>
+  </footer>
+
+  <script>
+    const routeCopy = {
+      all: ["Complete starter flow", "Purchased parts converge at assembly, links are bonded next, defects branch to scrap, and only accepted packages reach shipping."],
+      cpu: ["Compute chiplet", "The CPU enters the Chip Assembler. Its complexity raises placement, inspection, and electrical-test workload; its power and bandwidth demand also shape product eligibility."],
+      memory: ["Memory die", "Memory enters the Chip Assembler and then remains inside the work-in-progress package. Higher-capacity memory raises cost, power, inspection, and test work."],
+      io: ["Display controller", "The I/O chiplet enters assembly, contributes inspection and test work, and creates package-edge and final packaging requirements."],
+      power: ["Power controller", "The power die enters assembly. Its capacity determines whether the design is valid, while the completed package is checked again during electrical test."],
+      thermal: ["Heat spreader", "The heat spreader joins after electrical test at the Packaging Station. It costs material and space but improves thermal headroom and reduces test pressure upstream."],
+      links: ["Die-to-die connections", "Connection kits enter the Connection Station. Link width, length, and congestion create bonding workload and additional scanner pressure."]
+    };
+
+    const buttons = document.querySelectorAll("[data-route]");
+    const board = document.querySelector("#flow-board");
+    const detail = document.querySelector("#route-detail");
+    const routeNodes = board.querySelectorAll("[data-routes]");
+
+    buttons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const route = button.dataset.route;
+        buttons.forEach((candidate) => candidate.classList.toggle("active", candidate === button));
+        board.classList.toggle("filtered", route !== "all");
+        routeNodes.forEach((node) => {
+          const routes = node.dataset.routes.split(" ");
+          node.classList.toggle("active-route", route === "all" || routes.includes(route));
+        });
+        detail.innerHTML = `<strong>${routeCopy[route][0]}</strong>${routeCopy[route][1]}`;
+      });
+    });
+  </script>
+</body>
+</html>

@@ -17,17 +17,30 @@
   });
 
   const PARTS = Object.freeze({
-    efficientCpu: { kind: "cpu", label: "Efficient CPU", w: 2, h: 2, cost: 16, response: 72 },
-    fastCpu: { kind: "cpu", label: "Fast CPU", w: 2, h: 2, cost: 28, response: 90 },
-    standardMemory: { kind: "memory", label: "Standard memory", w: 1, h: 3, cost: 10, response: 20 },
-    fastMemory: { kind: "memory", label: "Fast memory", w: 1, h: 3, cost: 20, response: 28 },
-    displayIo: { kind: "io", label: "Display I/O", w: 1, h: 2, cost: 5, response: 0 },
-    cooling: { kind: "cooling", label: "Cooling / power", w: 2, h: 1, cost: 4, response: 0 },
+    efficientCpu: {
+      kind: "cpu", label: "Efficient CPU", catalogId: "CP-110", w: 2, h: 2, cost: 16, response: 72,
+    },
+    fastCpu: {
+      kind: "cpu", label: "Fast CPU", catalogId: "CP-130", w: 2, h: 2, cost: 28, response: 90,
+    },
+    standardMemory: {
+      kind: "memory", label: "Standard memory", catalogId: "MD-110", w: 1, h: 3, cost: 10, internalCost: 6, response: 20,
+    },
+    fastMemory: {
+      kind: "memory", label: "Fast memory", catalogId: "MD-130", w: 1, h: 3, cost: 20, internalCost: 12, response: 28,
+    },
+    displayIo: {
+      kind: "io", label: "Display I/O", catalogId: "IO-110", w: 1, h: 2, cost: 5, response: 0,
+    },
+    cooling: {
+      kind: "cooling", label: "Cooling / power", catalogId: "PM/TH-110", w: 2, h: 1, cost: 4, response: 0,
+    },
   });
 
   const FACTORY_ITEMS = Object.freeze({
-    input: { label: "Input bay", cost: 1500 },
+    input: { label: "Design Kit Dock", cost: 1500 },
     process: { label: "Process", cost: 7000 },
+    memoryFab: { label: "Memory Fabricator", cost: 9000 },
     inspection: { label: "Inspection", cost: 5000 },
     test: { label: "Test", cost: 4500 },
     packaging: { label: "Packaging", cost: 4000 },
@@ -224,6 +237,40 @@
     const materialCost =
       design.parts.reduce((total, part) => total + (partDefinition(part)?.cost || 0), 0) +
       design.connections.reduce((total, connection) => total + (connection.type === "express" ? 5 : 1), 0);
+    const kitItems = design.parts.map((part) => {
+      const definition = partDefinition(part);
+      return {
+        id: part.id,
+        type: part.type,
+        label: definition?.label || part.type,
+        catalogId: definition?.catalogId || "",
+        quantity: 1,
+        supplierCost: definition?.cost || 0,
+        internalCost: definition?.internalCost,
+      };
+    });
+    const standardLinks = design.connections.filter((connection) => connection.type !== "express").length;
+    const wideLinks = design.connections.filter((connection) => connection.type === "express").length;
+    if (standardLinks) {
+      kitItems.push({
+        id: "standard-links",
+        type: "standardConnection",
+        label: "Standard connection kit",
+        catalogId: "DL-110",
+        quantity: standardLinks,
+        supplierCost: standardLinks,
+      });
+    }
+    if (wideLinks) {
+      kitItems.push({
+        id: "wide-links",
+        type: "wideConnection",
+        label: "Wide connection kit",
+        catalogId: "DL-130",
+        quantity: wideLinks,
+        supplierCost: wideLinks * 5,
+      });
+    }
     const operatingCost =
       20 + (isFastCpu ? 4 : 0) + (isFastMemory ? 2 : 0) + (crowded ? 4 : 0) + Math.max(0, heat - 20) * 0.25;
     const processSeconds = 5 + (crowded ? 4 : 0) + (isFastCpu ? 1 : 0);
@@ -259,6 +306,19 @@
       costPerAccepted: round(costPerAccepted),
       marginPerAccepted: round(marginPerAccepted),
       contractResult: round(marginPerAccepted * CONTRACT.quantity),
+      componentKit: {
+        name: `${cpuDefinition.label} controller kit`,
+        items: kitItems,
+        supplierCost: round(materialCost),
+        memory: memory
+          ? {
+              type: memory.type,
+              label: memoryDefinition.label,
+              supplierCost: memoryDefinition.cost,
+              internalCost: memoryDefinition.internalCost,
+            }
+          : null,
+      },
       cycles: {
         process: round(processSeconds, 2),
         inspection: round(inspectionSeconds, 2),
@@ -338,6 +398,29 @@
     ).length;
   }
 
+  function connectedMemoryFabricatorCount(items) {
+    const processes = items.filter((item) => item.type === "process");
+    return items.filter(
+      (fabricator) =>
+        fabricator.type === "memoryFab" &&
+        processes.some((process) => hasTrackPath(items, fabricator, process))
+    ).length;
+  }
+
+  function factorySourcing(profile, items) {
+    const memory = profile.componentKit?.memory;
+    const internalMemory = Boolean(memory && connectedMemoryFabricatorCount(items));
+    const supplierCost = profile.materialCost - (internalMemory ? memory.supplierCost : 0);
+    const internalComponentCost = internalMemory ? memory.internalCost : 0;
+    return {
+      memorySource: internalMemory ? "internal" : "supplier",
+      supplierCost: round(supplierCost),
+      internalComponentCost: round(internalComponentCost),
+      materialCost: round(supplierCost + internalComponentCost),
+      savingsPerAttempt: round(profile.materialCost - supplierCost - internalComponentCost),
+    };
+  }
+
   function validateFactory(items) {
     const errors = [];
     for (const type of ["input", "process", "inspection", "test", "packaging", "garbage", "output"]) {
@@ -358,6 +441,7 @@
       valid: errors.length === 0,
       errors,
       connectedInspections: connectedInspectionCount(items),
+      connectedMemoryFabricators: connectedMemoryFabricatorCount(items),
       cost: factoryCost(items),
     };
   }
@@ -389,6 +473,9 @@
       accepted: 0,
       revenue: 0,
       productionCost: 0,
+      supplierCost: 0,
+      internalComponentCost: 0,
+      operatingCost: 0,
       cash,
       complete: false,
     };
@@ -407,7 +494,11 @@
     const testRejects = (attempts - inspectionRejects) * profile.testReject;
     const accepted = attempts - inspectionRejects - testRejects;
     const revenue = accepted * CONTRACT.price;
-    const cost = attempts * (profile.materialCost + profile.operatingCost);
+    const sourcing = factorySourcing(profile, factoryItems);
+    const supplierCost = attempts * sourcing.supplierCost;
+    const internalComponentCost = attempts * sourcing.internalComponentCost;
+    const operatingCost = attempts * profile.operatingCost;
+    const cost = supplierCost + internalComponentCost + operatingCost;
     const acceptedTotal = state.accepted + accepted;
     const complete = acceptedTotal >= CONTRACT.quantity - 0.0001;
     return {
@@ -419,6 +510,9 @@
       accepted: complete ? CONTRACT.quantity : acceptedTotal,
       revenue: state.revenue + revenue,
       productionCost: state.productionCost + cost,
+      supplierCost: (state.supplierCost || 0) + supplierCost,
+      internalComponentCost: (state.internalComponentCost || 0) + internalComponentCost,
+      operatingCost: (state.operatingCost || 0) + operatingCost,
       cash: state.cash + revenue - cost,
       complete,
     };
@@ -438,6 +532,7 @@
     calculateDesign,
     starterFactory,
     factoryCost,
+    factorySourcing,
     validateFactory,
     productionRate,
     initialProductionState,

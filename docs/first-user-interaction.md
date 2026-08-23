@@ -203,7 +203,13 @@ An agent updating the browser spike should focus on:
 - supplier spending and accepted-unit economics;
 - this one purchased-component scenario.
 
-Internal memory production should be added only after the purchased-component flow is understandable. Its first version can merge internal 1 GB LPDDR Memory with purchased memory at the existing Memory Storage or assembler input.
+Internal memory production should be added only after the purchased-component flow is understandable. Its first version can merge internal 1 GB LPDDR Memory with purchased memory at the existing Memory Storage or assembler input. This remains a focused browser experiment; it does not imply that memory must precede thermal integration in the full game's campaign.
+
+### Current bridge implementation
+
+The current greybox now makes the submitted design's aggregate component kit explicit at the factory. The Design Kit Dock lists the selected parts and connection kits, shows their purchased cost per attempt, and updates whenever the chip is resubmitted. A connected Memory Fabricator replaces the purchased memory portion with its provisional internal variable cost.
+
+This is an intentional intermediate step. It tests whether players understand recipe provenance and the make-versus-buy margin benefit before the factory simulation expands to separate typed deliveries and visible memory items.
 
 ## Open questions for iteration
 

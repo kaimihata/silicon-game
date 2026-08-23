@@ -160,6 +160,8 @@ Internal factories produce items compatible with these catalog specifications. I
 
 An internal component may also have a quality grade. Lower-quality output can remain usable but increase final-package inspection, test time, or reject risk.
 
+For the proposed first complete release, thermal components, memory, substrates, and interconnect kits can be produced internally on one expandable campus. Compute, I/O, and power-management dies remain supplier products while their internal-production branches are reserved for later expansion. This is a scope decision, not a rule that those families can never be manufactured internally.
+
 ## Expansion examples
 
 The catalog can grow without renaming starter components:
