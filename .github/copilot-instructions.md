@@ -1,0 +1,38 @@
+# Copilot instructions for Chip City
+
+## Project scope
+
+- This repository is for designing and eventually building the full Chip City game end to end.
+- The current browser game is a greybox gameplay-validation prototype. Use it to solidify rules, player feedback, balance, and the design-to-manufacturing loop; do not assume its static-web technology or simplified architecture is the target for the production game.
+- Distinguish between changes to the current spike and proposals for the full game. Preserve the spike's verified behavior unless intentionally revising the prototype, but allow broader architecture and feature planning when the task concerns the eventual game.
+- Read `docs/game-design.md` as the canonical full-game design direction. Its linked component catalog, chip-part, machine, and manufacturing-metric documents define the current production model.
+- Use `docs/first-user-interaction.md` as the candidate onboarding scenario when iterating on the next browser spike; it is a testable design story, not locked final content.
+
+## Current prototype commands
+
+- No build step or dependency installation is required; this is a static HTML/CSS/JavaScript prototype.
+- Serve the repository locally with `python3 -m http.server 8000`, then open `http://localhost:8000/`.
+- Run the full automated suite with `npm test` (equivalent to `node --test verification.test.js`).
+- Run one test with `node --test --test-name-pattern="Golden B" verification.test.js`; replace the pattern with part of the test name.
+- There is no configured lint or formatting command.
+
+## Current prototype architecture
+
+- `engine.js` is the deterministic domain layer and the source of truth for game rules, balance, validation, and production calculations. Its UMD-style wrapper exposes the same API as `window.ChipCityEngine` in the browser and `module.exports` in Node tests.
+- `app.js` is the browser-only orchestration and rendering layer. It owns transient session state, binds DOM events, calls the engine, and renders the design, factory, and production screens. Keep game formulas and validation out of this file.
+- `index.html` defines the three-stage player flow: design a chip, build/validate a factory, then run production. Its element IDs and `data-*` attributes are directly coupled to selectors and event delegation in `app.js`.
+- `styles.css` provides the complete responsive greybox UI; there is no component framework or asset pipeline.
+- The HTML handoff documents are specifications for the current spike, not generated output or a complete specification for the eventual game. Read `chip-city-greybox-spike-build-brief.html` for its rules, terminology, and paper balance, and `chip-city-greybox-spike-verification.html` for acceptance behavior and golden scenarios.
+- `verification.test.js` tests the public engine API directly. Its golden scenarios protect both correctness and intentional balance, including the deliberately unprofitable performance-heavy design.
+
+## Current prototype conventions
+
+- Preserve engine determinism: production uses fractional expected counts rather than randomness, so identical inputs must produce identical profiles, rates, rejects, cash, and completion state.
+- Treat returned engine objects as player-facing contracts. `calculateDesign()` supplies eligibility, diagnoses, cost/yield/margin, and per-machine cycles; `validateFactory()` supplies exact blocking route/equipment errors; `productionRate()` identifies the bottleneck.
+- Chip coordinates are zero-based top-left origins. Footprints come from `PARTS`; display I/O must touch an edge; exactly the three pairs in `REQUIRED_LINKS` are required; at most one connection may be `express`.
+- Factory connectivity is orthogonal Manhattan adjacency through `track` cells and endpoint machines. A valid factory requires every route in `REQUIRED_ROUTES`, including separate inspection/test paths to garbage. A scanner counts toward capacity only when connected from process to test.
+- When adding factory items with nonstandard purchase prices, retain the `capitalCost` override pattern used by the second scanner; `factoryCost()` intentionally prefers it over the catalog price.
+- Any design mutation after submission must clear `submittedProfile`, stop production, and require resubmission. UI mutations normally finish by calling `renderAll()`; use a narrower render only for selection-only changes.
+- Keep the expected-versus-observed distinction visible: design metrics are predictions, while production state records observed cumulative values. Rejects never earn revenue or count toward the 1,000 accepted-unit contract.
+- Balance changes must update both the relevant constants/formulas in `engine.js` and the golden assertions/documented paper values that intentionally encode the design.
+- Do not carry browser-specific implementation patterns into a future production-game codebase without an explicit architectural decision. Preserve validated gameplay concepts and terminology independently of the eventual engine, platform, persistence model, content pipeline, and UI framework.
