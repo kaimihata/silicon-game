@@ -1,0 +1,54 @@
+schema_version: 1
+id: scanner-bottleneck
+version: 1
+status: ready
+title: Diagnose and relieve Quality Scanner bottleneck
+milestone: playable-vertical-slice
+environment: headless-domain
+requirements:
+  - req.slice.scanner
+seeds:
+  - 4109
+initial_state:
+  fixture_id: scanner-bottleneck-initial-state
+  label: Valid funded line with one scanner, steady compatible inputs, and enough contract demand.
+  inputs: [starter-catalog, default-qualifying-design, default-manufacturing-plan, complete-reference-factory]
+execution_contract:
+  setup_contract: fixture.setup.scanner-bottleneck
+  runner_contract: runner.semantic-playtest
+  command: "factory.verify.semantic-playtest --scenario scanner-bottleneck --fixture scanner-bottleneck-initial-state --seed {seed} --evidence-dir {evidence_dir}"
+  semantic_api: /api/v1/commands
+  verdict: pass only when setup state assertions pass, every declared scenario assertion evaluates true, budgets are not exceeded, every required evidence artifact validates and its digest is recorded, replay hash mismatch count is zero when replay evidence is required, and the runner exits zero; otherwise fail
+player_knowledge:
+  - Public utilization and bottleneck observations
+  - Construction catalog
+goals:
+  - assertion_id: assert.scanner-bottleneck.goal.01
+    metric: scanner-count
+    operator: equal
+    value: 2
+  - assertion_id: assert.scanner-bottleneck.goal.02
+    metric: accepted-rate-improvement-percent
+    operator: greater_than
+    value: 0
+invariants:
+  - assertion_id: assert.scanner-bottleneck.invariant.01
+    label: No prescribed placement coordinates
+  - assertion_id: assert.scanner-bottleneck.invariant.02
+    label: Added scanner receives split input and merged pass output
+  - assertion_id: assert.scanner-bottleneck.invariant.03
+    label: Reject routing remains complete
+budgets:
+  simulation_minutes: 30
+  player_commands: 100
+required_behaviors:
+  - assertion_id: assert.scanner-bottleneck.required_behavior.01
+    label: Identify scanner from observed status
+  - assertion_id: assert.scanner-bottleneck.required_behavior.02
+    label: Place splitter scanner and merger
+  - assertion_id: assert.scanner-bottleneck.required_behavior.03
+    label: Compare stable observed rates before and after
+evidence:
+  - replay
+  - decision-trace
+  - domain-results

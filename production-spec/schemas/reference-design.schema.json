@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://chip-city.dev/production-spec/reference-design.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "id", "version", "status", "reference_only", "published", "design_id", "revision", "product_base_id", "board_selection", "components", "connections", "packaging_material", "minimum_quality"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "id": {"const": "default-qualifying-design"},
+    "version": {"type": "integer", "minimum": 1},
+    "status": {"enum": ["draft", "ready"]},
+    "reference_only": {"const": true},
+    "published": {"const": true},
+    "design_id": {"$ref": "#/$defs/id"},
+    "revision": {"type": "integer", "minimum": 1},
+    "product_base_id": {"$ref": "#/$defs/id"},
+    "board_selection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["item_id"],
+      "properties": {"item_id": {"$ref": "#/$defs/id"}}
+    },
+    "components": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/placedComponent"}},
+    "connections": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/connection"}},
+    "packaging_material": {"$ref": "#/$defs/quantity"},
+    "minimum_quality": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["item_id", "quality"],
+        "properties": {
+          "item_id": {"$ref": "#/$defs/id"},
+          "quality": {"enum": ["value", "standard", "premium"]}
+        }
+      }
+    }
+  },
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$", "maxLength": 128},
+    "quantity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["item_id", "quantity"],
+      "properties": {
+        "item_id": {"$ref": "#/$defs/id"},
+        "quantity": {"type": "integer", "minimum": 1}
+      }
+    },
+    "position": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["x", "y"],
+      "properties": {
+        "x": {"type": "integer", "minimum": 0},
+        "y": {"type": "integer", "minimum": 0}
+      }
+    },
+    "placedComponent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["instance_id", "item_id", "position", "rotation"],
+      "properties": {
+        "instance_id": {"$ref": "#/$defs/id"},
+        "item_id": {"$ref": "#/$defs/id"},
+        "position": {"$ref": "#/$defs/position"},
+        "rotation": {"enum": [0, 90, 180, 270]}
+      }
+    },
+    "connection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["connection_id", "technology_id", "from_instance_id", "to_instance_id", "route"],
+      "properties": {
+        "connection_id": {"$ref": "#/$defs/id"},
+        "technology_id": {"$ref": "#/$defs/id"},
+        "from_instance_id": {"$ref": "#/$defs/id"},
+        "to_instance_id": {"$ref": "#/$defs/id"},
+        "route": {
+          "type": "array",
+          "minItems": 2,
+          "items": {"$ref": "#/$defs/position"}
+        }
+      }
+    }
+  }
+}

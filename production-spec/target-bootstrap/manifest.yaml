@@ -1,0 +1,43 @@
+schema_version: 1
+id: unity-target-bootstrap
+version: 1
+status: ready
+target_repository: kaimihata/silicon-game-v1
+engine: Unity 6000.3.23f1
+render_pipeline: Universal Render Pipeline
+contents:
+  - Assets/
+  - Packages/manifest.json
+  - Packages/packages-lock.json
+  - ProjectSettings/ProjectVersion.txt
+  - ProjectSettings/GraphicsSettings.asset
+  - ProjectSettings/QualitySettings.asset
+  - LICENSE
+  - README-specification-import.md
+  - specification-provenance.json
+  - specifications/
+  - code-factory/
+  - scenarios/
+  - environments/
+  - verification/
+  - target-bootstrap/
+validation:
+  unity_batch_import: required
+  urp_asset_bound: required
+  empty_scene_build: windows_and_macos
+  specification_import: all_digests_match
+  license_exact: MIT
+branch_controls:
+  integration_branch: develop
+  branch_protection: unavailable_on_current_plan
+  push_access: owner_and_selected_service_identities_only
+  workflow_checks: required_for_exact_head_before_factory_authority
+  base_sha_pinning: direction_packet_base_revision_is_exact_40_hex_develop_head
+  digest_approval: immutable_specification_and_packet_digests_require_separate_human_approval
+  human_promotion: only_human_may_merge_bound_develop_revision_and_create_tag
+  unexpected_movement: invalidate_authority_and_revalidate_from_new_exact_head
+  residual_risk: selected_push_access_can_bypass_workflow_checks_by_direct_push
+provenance:
+  unity_project_creator: Unity Hub or Unity command line using editor 6000.3.23f1 and URP template; record editor executable digest and template/package lock
+  specification_export: production-spec export provenance bound to exact clean source SHA; bundle review disposition is a separate digest-bound human artifact
+  license_source: production-spec/target-bootstrap/LICENSE

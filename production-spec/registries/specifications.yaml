@@ -1,0 +1,19 @@
+schema_version: 1
+id: specifications
+version: 1
+status: ready
+kind: specifications
+entries:
+  - {id: game-context, path: specifications/context.yaml}
+  - {id: technical-architecture, path: specifications/architecture.yaml}
+  - {id: deterministic-simulation, path: specifications/simulation.yaml}
+  - {id: content-catalog, path: specifications/content-catalog.yaml}
+  - {id: chip-design, path: specifications/chip-design.yaml}
+  - {id: contracts-procurement, path: specifications/contracts-procurement.yaml}
+  - {id: factory-logistics, path: specifications/factory-logistics.yaml}
+  - {id: persistence, path: specifications/persistence.yaml}
+  - {id: player-protocol, path: specifications/player-protocol.yaml}
+  - {id: player-api, path: specifications/player-api.yaml}
+  - {id: interaction-accessibility, path: specifications/interaction-accessibility.yaml}
+  - {id: visual-identity, path: specifications/visual-identity.yaml}
+  - {id: onboarding, path: specifications/onboarding.yaml}

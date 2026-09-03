@@ -1,0 +1,13 @@
+schema_version: 1
+id: actors
+version: 1
+status: ready
+kind: actors
+entries:
+  - {id: chip-city-owner, path: code-factory/registries/actors.yaml, description: Human product owner and checkpoint authority}
+  - {id: factory-coordinator, path: code-factory/registries/actors.yaml, description: Existing Silicon Code Factory coordinator identity}
+  - {id: implementation-author, path: code-factory/registries/actors.yaml, description: Bounded implementation producer role}
+  - {id: independent-verifier, path: code-factory/registries/actors.yaml, description: Independent evidence evaluator role}
+  - {id: semantic-test-runner, path: code-factory/registries/actors.yaml, description: Public-observation semantic scenario producer}
+  - {id: black-box-test-runner, path: code-factory/registries/actors.yaml, description: Ordinary-input rendered scenario producer}
+  - {id: factory-control-plane, path: code-factory/registries/actors.yaml, description: Digest-bound promotion request evaluator with no merge or tag authority}

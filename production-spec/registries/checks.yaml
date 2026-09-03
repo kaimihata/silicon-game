@@ -1,0 +1,1767 @@
+schema_version: 1
+id: verification-checks
+version: 1
+status: ready
+kind: checks
+entries:
+  - id: check.foundation.unity
+    suite: build
+    environment: windows-reference
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.build
+  - id: check.foundation.domain
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.foundation.content
+    suite: specification
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - content-provenance
+    runner_contract: runner.specification
+  - id: check.foundation.commands
+    suite: protocol
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+      - audit-log
+    runner_contract: runner.protocol
+  - id: check.foundation.observations
+    suite: protocol
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+      - audit-log
+    runner_contract: runner.protocol
+  - id: check.foundation.determinism
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.foundation.persistence
+    suite: persistence
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - persistence-results
+    runner_contract: runner.persistence
+  - id: check.foundation.grid
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.foundation.design-revisions
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.foundation.multiple
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.foundation.semantic-chip
+    suite: semantic-playtest
+    scenario: sandbox-accepted-chip
+    fixture: sandbox-accepted-chip-initial-state
+    environment: headless-domain
+    producer:
+      actor: semantic-test-runner
+      class: semantic_runner
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - replay
+      - decision-trace
+      - domain-results
+      - content-provenance
+    runner_contract: runner.semantic-playtest
+  - id: check.foundation.harness
+    suite: rendered-integration
+    environment: windows-reference
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - screenshots
+      - domain-results
+    runner_contract: runner.rendered-integration
+  - id: check.foundation.technical-architecture.external-content
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.foundation.technical-architecture.ui-delegated
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.foundation.technical-architecture.dependency-policy
+    suite: asset-provenance
+    environment: windows-reference
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - content-provenance
+    runner_contract: runner.asset-provenance
+  - id: check.foundation.technical-architecture.local-only
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.foundation.technical-architecture.target-license
+    suite: build
+    environment: windows-reference
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.build
+  - id: check.foundation.chip-design.lifecycle
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.foundation.chip-design.identities
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.foundation.chip-design.association
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.foundation.chip-design.archive-delete
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.foundation.chip-design.placement
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.foundation.chip-design.families
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.foundation.chip-design.io-edge
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.foundation.chip-design.thermal-adjacency
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.foundation.chip-design.connections
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.foundation.chip-design.route-congestion
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.foundation.chip-design.undo-redo
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.foundation.content-catalog.starter-models
+    suite: specification
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - content-provenance
+    runner_contract: runner.specification
+  - id: check.foundation.content-catalog.alternatives
+    suite: specification
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - content-provenance
+    runner_contract: runner.specification
+  - id: check.foundation.content-catalog.default-offers
+    suite: specification
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - content-provenance
+    runner_contract: runner.specification
+  - id: check.foundation.content-catalog.quality-values
+    suite: specification
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - content-provenance
+    runner_contract: runner.specification
+  - id: check.foundation.content-catalog.localization
+    suite: rendered-integration
+    environment: windows-reference
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - screenshots
+      - domain-results
+    runner_contract: runner.rendered-integration
+  - id: check.foundation.content-catalog.visual-semantics
+    suite: rendered-integration
+    environment: windows-reference
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - screenshots
+      - domain-results
+    runner_contract: runner.rendered-integration
+  - id: check.foundation.content-catalog.generated-only
+    suite: specification
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - content-provenance
+    runner_contract: runner.specification
+  - id: check.foundation.factory-logistics.fixed-endpoints
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.foundation.factory-logistics.belt-building
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.foundation.factory-logistics.splitter-merger
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.foundation.factory-logistics.recipe-identity
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.foundation.factory-logistics.onboarding-autoconfigure
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.foundation.factory-logistics.input-driven
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.foundation.factory-logistics.starter-ports
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.foundation.factory-logistics.immutable-wip
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.foundation.factory-logistics.recipe-switch
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.foundation.factory-logistics.rejects
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.foundation.factory-logistics.operating-state
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.foundation.factory-logistics.removal
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.foundation.factory-logistics.collection
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.foundation.persistence.logical-format
+    suite: persistence
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - persistence-results
+    runner_contract: runner.persistence
+  - id: check.foundation.persistence.migrations
+    suite: persistence
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - persistence-results
+    runner_contract: runner.persistence
+  - id: check.foundation.persistence.atomic-autosave
+    suite: persistence
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - persistence-results
+    runner_contract: runner.persistence
+  - id: check.foundation.persistence.agent-isolation
+    suite: persistence
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - persistence-results
+    runner_contract: runner.persistence
+  - id: check.foundation.persistence.agent-retention
+    suite: persistence
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - persistence-results
+    runner_contract: runner.persistence
+  - id: check.foundation.player-api.endpoints
+    suite: protocol
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+      - audit-log
+    runner_contract: runner.protocol
+  - id: check.foundation.player-api.command-envelope
+    suite: protocol
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+      - audit-log
+    runner_contract: runner.protocol
+  - id: check.foundation.player-api.simulation-actions
+    suite: protocol
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+      - audit-log
+    runner_contract: runner.protocol
+  - id: check.foundation.player-api.contract-actions
+    suite: protocol
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+      - audit-log
+    runner_contract: runner.protocol
+  - id: check.foundation.player-api.design-actions
+    suite: protocol
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+      - audit-log
+    runner_contract: runner.protocol
+  - id: check.foundation.player-api.procurement-actions
+    suite: protocol
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+      - audit-log
+    runner_contract: runner.protocol
+  - id: check.foundation.player-api.factory-actions
+    suite: protocol
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+      - audit-log
+    runner_contract: runner.protocol
+  - id: check.foundation.player-api.errors
+    suite: protocol
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+      - audit-log
+    runner_contract: runner.protocol
+  - id: check.foundation.player-api.observation-shape
+    suite: protocol
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+      - audit-log
+    runner_contract: runner.protocol
+  - id: check.foundation.player-api.pagination-bounds
+    suite: protocol
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+      - audit-log
+    runner_contract: runner.protocol
+  - id: check.foundation.player-api.compatibility
+    suite: protocol
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+      - audit-log
+    runner_contract: runner.protocol
+  - id: check.foundation.player-protocol.command-result
+    suite: protocol
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+      - audit-log
+    runner_contract: runner.protocol
+  - id: check.foundation.player-protocol.http-only
+    suite: protocol
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+      - audit-log
+    runner_contract: runner.protocol
+  - id: check.foundation.player-protocol.observer-exclusion
+    suite: protocol
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+      - audit-log
+    runner_contract: runner.protocol
+  - id: check.foundation.player-protocol.pacing
+    suite: protocol
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+      - audit-log
+    runner_contract: runner.protocol
+  - id: check.foundation.player-protocol.trace-overlay
+    suite: protocol
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+      - audit-log
+    runner_contract: runner.protocol
+  - id: check.foundation.player-protocol.replay
+    suite: protocol
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+      - audit-log
+    runner_contract: runner.protocol
+  - id: check.foundation.player-protocol.agent-evidence
+    suite: protocol
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+      - audit-log
+    runner_contract: runner.protocol
+  - id: check.foundation.player-protocol.no-bypass
+    suite: protocol
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+      - audit-log
+    runner_contract: runner.protocol
+  - id: check.foundation.player-protocol.destructive-confirmation
+    suite: protocol
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+      - audit-log
+    runner_contract: runner.protocol
+  - id: check.foundation.deterministic-simulation.fixed-tick
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.foundation.deterministic-simulation.state-hash
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.foundation.deterministic-simulation.formulas-product
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.foundation.deterministic-simulation.formulas-power-thermal
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.foundation.deterministic-simulation.workload-compile
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.foundation.deterministic-simulation.yield-model
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.foundation.deterministic-simulation.machine-cycle
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.foundation.deterministic-simulation.accounting
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.foundation.deterministic-simulation.expected-observed
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.foundation.deterministic-simulation.starting-cash
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.slice.contract-design
+    suite: semantic-playtest
+    scenario: onboarding-complete
+    fixture: onboarding-complete-initial-state
+    environment: windows-reference
+    producer:
+      actor: semantic-test-runner
+      class: semantic_runner
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - replay
+      - decision-trace
+      - semantic-report
+      - screenshots
+      - video
+      - accounting-report
+      - requirement-coverage
+    runner_contract: runner.semantic-playtest
+  - id: check.slice.designer
+    suite: black-box-playtest
+    scenario: designer-accessibility
+    fixture: designer-accessibility-initial-state
+    environment: windows-reference
+    producer:
+      actor: black-box-test-runner
+      class: black_box_runner
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - black-box-recording
+      - accessibility-snapshot
+      - screenshots
+    runner_contract: runner.black-box-playtest
+  - id: check.slice.procurement
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.slice.quality
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.slice.factory
+    suite: semantic-playtest
+    scenario: onboarding-complete
+    fixture: onboarding-complete-initial-state
+    environment: windows-reference
+    producer:
+      actor: semantic-test-runner
+      class: semantic_runner
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - replay
+      - decision-trace
+      - semantic-report
+      - screenshots
+      - video
+      - accounting-report
+      - requirement-coverage
+    runner_contract: runner.semantic-playtest
+  - id: check.slice.machine-flow
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.slice.scanner
+    suite: semantic-playtest
+    scenario: scanner-bottleneck
+    fixture: scanner-bottleneck-initial-state
+    environment: headless-domain
+    producer:
+      actor: semantic-test-runner
+      class: semantic_runner
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - replay
+      - decision-trace
+      - domain-results
+    runner_contract: runner.semantic-playtest
+  - id: check.slice.fulfillment
+    suite: semantic-playtest
+    scenario: onboarding-complete
+    fixture: onboarding-complete-initial-state
+    environment: windows-reference
+    producer:
+      actor: semantic-test-runner
+      class: semantic_runner
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - replay
+      - decision-trace
+      - semantic-report
+      - screenshots
+      - video
+      - accounting-report
+      - requirement-coverage
+    runner_contract: runner.semantic-playtest
+  - id: check.slice.balance
+    suite: balance
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - accounting-report
+    runner_contract: runner.balance
+  - id: check.slice.layout
+    suite: black-box-playtest
+    scenario: layout-accessibility
+    fixture: layout-accessibility-initial-state
+    environment: windows-reference
+    producer:
+      actor: black-box-test-runner
+      class: black_box_runner
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - black-box-recording
+      - accessibility-snapshot
+      - screenshots
+      - performance-report
+    runner_contract: runner.black-box-playtest
+  - id: check.slice.accessibility
+    suite: accessibility
+    scenario: layout-accessibility
+    fixture: layout-accessibility-initial-state
+    environment: windows-reference
+    producer:
+      actor: black-box-test-runner
+      class: black_box_runner
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - black-box-recording
+      - accessibility-snapshot
+      - screenshots
+      - performance-report
+    runner_contract: runner.accessibility
+  - id: check.slice.visuals
+    suite: asset-provenance
+    environment: windows-reference
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - content-provenance
+    runner_contract: runner.asset-provenance
+  - id: check.slice.visuals-black-box
+    suite: black-box-playtest
+    scenario: bounded-black-box
+    fixture: bounded-black-box-initial-state
+    environment: windows-reference
+    producer:
+      actor: black-box-test-runner
+      class: black_box_runner
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - black-box-recording
+      - input-trace
+      - screenshots
+    runner_contract: runner.black-box-playtest
+  - id: check.slice.agent-security
+    suite: protocol
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+      - audit-log
+    runner_contract: runner.protocol
+  - id: check.slice.agent-security-isolation
+    suite: persistence
+    scenario: save-recovery
+    fixture: save-recovery-initial-state
+    environment: windows-reference
+    producer:
+      actor: black-box-test-runner
+      class: black_box_runner
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - persistence-results
+      - screenshots
+      - audit-log
+    runner_contract: runner.persistence
+  - id: check.slice.agent-runs
+    suite: semantic-playtest
+    scenario: onboarding-complete
+    fixture: onboarding-complete-initial-state
+    environment: windows-reference
+    producer:
+      actor: semantic-test-runner
+      class: semantic_runner
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - replay
+      - decision-trace
+      - semantic-report
+      - screenshots
+      - video
+      - accounting-report
+      - requirement-coverage
+    runner_contract: runner.semantic-playtest
+  - id: check.slice.black-box
+    suite: black-box-playtest
+    scenario: bounded-black-box
+    fixture: bounded-black-box-initial-state
+    environment: windows-reference
+    producer:
+      actor: black-box-test-runner
+      class: black_box_runner
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - black-box-recording
+      - input-trace
+      - screenshots
+    runner_contract: runner.black-box-playtest
+  - id: check.slice.performance
+    suite: performance
+    environment: windows-reference
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - performance-report
+    runner_contract: runner.performance
+  - id: check.slice.platforms
+    suite: build
+    environment: windows-reference
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.build
+  - id: check.slice.persistence
+    suite: persistence
+    scenario: save-recovery
+    fixture: save-recovery-initial-state
+    environment: windows-reference
+    producer:
+      actor: black-box-test-runner
+      class: black_box_runner
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - persistence-results
+      - screenshots
+      - audit-log
+    runner_contract: runner.persistence
+  - id: check.slice.checkpoint
+    suite: checkpoint
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - requirement-coverage
+      - audit-log
+    runner_contract: runner.checkpoint
+  - id: check.slice.game-context.new-production-foundation
+    suite: specification
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - content-provenance
+    runner_contract: runner.specification
+  - id: check.slice.game-context.audience
+    suite: specification
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - content-provenance
+    runner_contract: runner.specification
+  - id: check.slice.game-context.campus-scope
+    suite: specification
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - content-provenance
+    runner_contract: runner.specification
+  - id: check.slice.game-context.excluded-scope
+    suite: specification
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - content-provenance
+    runner_contract: runner.specification
+  - id: check.slice.game-context.no-automatic-loss
+    suite: specification
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - content-provenance
+    runner_contract: runner.specification
+  - id: check.slice.game-context.english-localized
+    suite: specification
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - content-provenance
+    runner_contract: runner.specification
+  - id: check.slice.contracts-procurement.assignment
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.slice.contracts-procurement.minimum-quality
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.slice.contracts-procurement.explicit-order
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.slice.contracts-procurement.recommendation
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.slice.contracts-procurement.lot-metadata
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.slice.contracts-procurement.unused-inventory
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.slice.contracts-procurement.loss-explanation
+    suite: domain
+    environment: headless-domain
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - domain-results
+    runner_contract: runner.domain
+  - id: check.slice.interaction-accessibility.header
+    suite: accessibility
+    environment: windows-reference
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - accessibility-snapshot
+      - black-box-recording
+    runner_contract: runner.accessibility
+  - id: check.slice.interaction-accessibility.overlays
+    suite: accessibility
+    environment: windows-reference
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - accessibility-snapshot
+      - black-box-recording
+    runner_contract: runner.accessibility
+  - id: check.slice.interaction-accessibility.contextual-inspector
+    suite: accessibility
+    environment: windows-reference
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - accessibility-snapshot
+      - black-box-recording
+    runner_contract: runner.accessibility
+  - id: check.slice.interaction-accessibility.construction-dock
+    suite: accessibility
+    environment: windows-reference
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - accessibility-snapshot
+      - black-box-recording
+    runner_contract: runner.accessibility
+  - id: check.slice.interaction-accessibility.management-shortcuts
+    suite: accessibility
+    environment: windows-reference
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - accessibility-snapshot
+      - black-box-recording
+    runner_contract: runner.accessibility
+  - id: check.slice.interaction-accessibility.world-pointer
+    suite: accessibility
+    environment: windows-reference
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - accessibility-snapshot
+      - black-box-recording
+    runner_contract: runner.accessibility
+  - id: check.slice.interaction-accessibility.display-modes
+    suite: accessibility
+    environment: windows-reference
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - accessibility-snapshot
+      - black-box-recording
+    runner_contract: runner.accessibility
+  - id: check.slice.interaction-accessibility.guidance
+    suite: accessibility
+    environment: windows-reference
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - accessibility-snapshot
+      - black-box-recording
+    runner_contract: runner.accessibility
+  - id: check.slice.onboarding.starts-paused
+    suite: rendered-integration
+    environment: windows-reference
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - screenshots
+      - domain-results
+    runner_contract: runner.rendered-integration
+  - id: check.slice.onboarding.journey
+    suite: rendered-integration
+    environment: windows-reference
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - screenshots
+      - domain-results
+    runner_contract: runner.rendered-integration
+  - id: check.slice.onboarding.alternatives
+    suite: rendered-integration
+    environment: windows-reference
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - screenshots
+      - domain-results
+    runner_contract: runner.rendered-integration
+  - id: check.slice.onboarding.persistent-simulation
+    suite: rendered-integration
+    environment: windows-reference
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - screenshots
+      - domain-results
+    runner_contract: runner.rendered-integration
+  - id: check.slice.onboarding.finish
+    suite: rendered-integration
+    environment: windows-reference
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - screenshots
+      - domain-results
+    runner_contract: runner.rendered-integration
+  - id: check.transition.onboarding.human-final
+    suite: checkpoint
+    environment: headless-domain
+    producer:
+      actor: chip-city-owner
+      class: human_owner
+    evaluator:
+      actor: factory-control-plane
+      class: control_plane
+    required_evidence:
+      - requirement-coverage
+      - audit-log
+    runner_contract: runner.checkpoint
+  - id: check.slice.visual-identity.family-language
+    suite: rendered-integration
+    environment: windows-reference
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - screenshots
+      - domain-results
+    runner_contract: runner.rendered-integration
+  - id: check.slice.visual-identity.state-language
+    suite: rendered-integration
+    environment: windows-reference
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - screenshots
+      - domain-results
+    runner_contract: runner.rendered-integration
+  - id: check.slice.visual-identity.discrete-items
+    suite: rendered-integration
+    environment: windows-reference
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - screenshots
+      - domain-results
+    runner_contract: runner.rendered-integration
+  - id: check.slice.visual-identity.no-concept-gate
+    suite: rendered-integration
+    environment: windows-reference
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - screenshots
+      - domain-results
+    runner_contract: runner.rendered-integration
+  - id: check.slice.visual-identity.asset-provenance
+    suite: asset-provenance
+    environment: windows-reference
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - content-provenance
+    runner_contract: runner.asset-provenance
+  - id: check.slice.visual-identity.captures
+    suite: rendered-integration
+    environment: windows-reference
+    producer:
+      actor: implementation-author
+      class: coding_agent
+    evaluator:
+      actor: independent-verifier
+      class: verification_agent
+    required_evidence:
+      - screenshots
+      - domain-results
+    runner_contract: runner.rendered-integration

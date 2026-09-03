@@ -1,0 +1,52 @@
+schema_version: 1
+id: game-context
+version: 1
+status: ready
+title: Chip City foundation context
+summary: Defines the audience, first-run boundary, outcome, inclusions, exclusions, and terminology for the new production game.
+milestones: [technical-sandbox, playable-vertical-slice]
+sources:
+  - {path: docs/game-design.md, role: authority}
+  - {path: docs/first-user-interaction.md, role: context}
+parameters:
+  - {id: onboarding-contract-quantity, value: 1000, unit: accepted units}
+  - {id: target-first-session-minutes-min, value: 30, unit: minutes}
+  - {id: target-first-session-minutes-max, value: 45, unit: minutes}
+rules:
+  - id: new-production-foundation
+    statement: This specification targets a new Unity production-game foundation; browser-spike architecture is not carried forward.
+    level: normative
+    acceptance_notes: The target starts as an empty Unity repository and imports only approved data and behavior contracts.
+  - id: audience
+    statement: The primary audience is factory and management players with no semiconductor expertise; authentic terms always receive plain-language explanations.
+    level: normative
+    acceptance_notes: Usability evidence verifies that required terms are explained in context.
+  - id: first-scope
+    statement: Milestone 2 contains one 32 by 20 factory floor and one Basic Display Controller contract, while domain models support multiple designs, products, and concurrent contracts.
+    level: normative
+    acceptance_notes: Tests instantiate at least two designs and contracts although only one onboarding contract is player-visible.
+  - id: campus-scope
+    statement: Architecture represents one expandable campus; Milestone 2 implements purchased-component final assembly and previews future internal thermal production.
+    level: normative
+    acceptance_notes: No second campus or internal production line is needed to complete onboarding.
+  - id: excluded-scope
+    statement: Internal production, audio, multiplayer, cloud, gamepad, mixed belts, crossings, floor storage, lead times, resale, bankruptcy, deadlines, and broader campaign content are excluded from both milestones.
+    level: normative
+    acceptance_notes: Feature inventory and checkpoint notes show these items as absent or inert preview copy.
+  - id: no-automatic-loss
+    statement: Cash may become negative without bankruptcy or deadline failure; restart is explicit and contract fulfillment still explains profit or loss.
+    level: normative
+    acceptance_notes: A negative-cash deterministic scenario remains playable and can fulfill the contract.
+  - id: english-localized
+    statement: The first build is English-only, but every player-facing string is addressed through a localization key rather than embedded rule text.
+    level: normative
+    acceptance_notes: Static checks reject unapproved player-facing literals in presentation surfaces.
+decisions:
+  - id: supersede-browser-foundation
+    choice: Use Unity 6.3 LTS and pure C# domain assemblies instead of the browser implementation.
+    rationale: The browser project validated concepts but is not the production architecture.
+    supersedes: [browser static-web technology]
+  - id: purchased-only-m2
+    choice: Keep internal thermal, memory, substrate, and interconnect production outside Milestone 2.
+    rationale: The first slice must fully prove the design-to-purchased-assembly loop before vertical integration.
+    supersedes: [optional browser thermal forming cell]

@@ -1,0 +1,64 @@
+schema_version: 1
+id: player-api
+version: 1
+status: ready
+title: Semantic JSON HTTP endpoint and command catalog
+summary: Freezes the minimum v1 endpoint, envelope, command, error, observation, profile, and compatibility surface so implementation does not invent agent-visible behavior.
+milestones: [technical-sandbox, playable-vertical-slice]
+sources:
+  - {path: docs/code-factory/player-protocol.md, role: authority}
+  - {path: docs/code-factory/verification.md, role: authority}
+parameters:
+  - {id: base-path, value: /api/v1}
+  - {id: media-type, value: application/json}
+  - {id: authentication-header, value: Authorization-Bearer}
+rules:
+  - id: endpoints
+    statement: GET endpoints are /api/v1/health, /api/v1/catalog, /api/v1/goals, /api/v1/observation with optional since_command_revision and after_event_sequence, and /api/v1/profiles; the only mutation endpoint is POST /api/v1/commands except POST /api/v1/profiles to create an agent-test profile and DELETE /api/v1/profiles/{id} to delete an owned agent-test profile.
+    level: normative
+    acceptance_notes: Generated API contract closes routes and rejects unknown fields and non-JSON media types.
+  - id: command-envelope
+    statement: Every command body validates against schemas/protocol-wire.schema.json and contains protocol_version 1, globally unique command_id, actor_id, agent_test_profile_id, expected_command_revision, action, that action's closed arguments object, and optional confirmation_token; the result echoes command_id, accepted, command_revision, simulation_tick, latest_event_sequence, closed events and closed effects, or a closed error object. Unknown action-specific arguments fail closed.
+    level: normative
+    acceptance_notes: Serialization round-trips and command ID retry returns the original result without repeating effects.
+  - id: simulation-actions
+    statement: Simulation actions are set_speed with speed 0, 1, 2, or 4; save_now; and disconnect_agent. Headless stepping is test-harness-only and is not exposed to players.
+    level: normative
+    acceptance_notes: Speed does not change equal-tick outcome and unsupported values return INVALID_ARGUMENT.
+  - id: contract-actions
+    statement: Contract actions are accept_contract, create_linked_design, assign_design_revision, assign_manufacturing_plan, set_shipping_priority, reserve_finished_inventory, release_finished_inventory, and reassign_finished_inventory; abandon_contract is absent in Milestone 2.
+    level: normative
+    acceptance_notes: Available-actions observations expose only lifecycle-valid commands and stable disabled reasons.
+  - id: design-actions
+    statement: Design actions are create_standalone_design, associate_design, rename_design, add_component, move_component, rotate_component, remove_component, add_connection, remove_connection, set_minimum_quality, undo_design, redo_design, publish_design, archive_design, and delete_design.
+    level: normative
+    acceptance_notes: Each action maps to one human management action and immutable revisions reject mutation.
+  - id: procurement-actions
+    statement: Procurement actions are purchase_items with a nonempty array of offer_id and positive integer quantity pairs; recommendations are observations, not a privileged purchase command, and Purchase All submits the same purchase_items action.
+    level: normative
+    acceptance_notes: Duplicate offers normalize by summing in stable offer order before one atomic affordability and compatibility check.
+  - id: factory-actions
+    statement: Factory actions are place_entity, rotate_entity, remove_entity, build_belt_path, set_machine_recipe, set_receiving_assignment, begin_collection, end_collection, and set_selected_contract; UI tool selection and camera changes are presentation state and not authoritative commands.
+    level: normative
+    acceptance_notes: Placement uses integer zero-based top-left coordinates and rotations 0, 90, 180, or 270.
+  - id: errors
+    statement: Closed v1 error codes are AUTH_REQUIRED, AGENT_DISABLED, PROFILE_FORBIDDEN, STALE_REVISION, DUPLICATE_COMMAND_MISMATCH, RATE_LIMITED, INVALID_ARGUMENT, ACTION_UNAVAILABLE, NOT_FOUND, INSUFFICIENT_FUNDS, INVALID_PLACEMENT, INVALID_ROUTE, INCOMPATIBLE_ITEM, BUFFER_BLOCKED, RECIPE_AMBIGUOUS, DESIGN_INVALID, DESIGN_REFERENCED, CONTRACT_STATE_INVALID, CONFIRMATION_REQUIRED, CONFIRMATION_STALE, EVENT_CURSOR_EXPIRED, and INTERNAL_ERROR.
+    level: normative
+    acceptance_notes: Contract tests pin code and localization key while diagnostic text may improve compatibly.
+  - id: observation-shape
+    statement: Observation includes protocol_version, profile_id, command_revision, simulation_tick, latest_event_sequence, speed, public goals, cash and expected/observed accounting, contracts, reservations, designs, manufacturing plans and qualification, off-floor inventory, visible campus entities, machine and port status, visible items, available actions with disabled codes, alerts, recent events, and optional delta base command revision.
+    level: normative
+    acceptance_notes: Stable entity and item IDs survive rendering changes and deltas reconstruct the same current observation.
+  - id: pagination-bounds
+    statement: Catalog and full observations are bounded by current Milestone 2 scope; event deltas return at most 500 events with next_event_sequence and has_more, never silently truncate, and unknown or pruned command revisions return full_snapshot_required while pruned event cursors return EVENT_CURSOR_EXPIRED.
+    level: normative
+    acceptance_notes: Boundary tests cover empty, 500-event, continuation, and pruned revisions.
+  - id: compatibility
+    statement: Unknown protocol versions, actions, fields, and enum values fail closed; additive diagnostics may not change command semantics, and any semantic change requires a new protocol version plus replay migration or explicit incompatibility.
+    level: normative
+    acceptance_notes: Compatibility fixtures pin every v1 request and response family.
+decisions:
+  - id: command-granularity
+    choice: Expose semantic player intentions, never optimal-layout, bulk-completion, or oracle commands.
+    rationale: Agents must play under the same rule and information constraints as humans.
+    supersedes: []

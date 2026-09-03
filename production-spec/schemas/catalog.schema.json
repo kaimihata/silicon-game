@@ -1,0 +1,282 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://chip-city.dev/production-spec/catalog.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "id", "version", "status", "families", "quality_tiers", "components", "boards", "items", "offers", "machines", "recipe_templates", "outcome_algorithm", "contract", "balance"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "id": {"const": "starter-catalog"},
+    "version": {"type": "integer", "minimum": 1},
+    "status": {"enum": ["draft", "ready"]},
+    "families": {
+      "type": "array",
+      "minItems": 8,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "label_key", "icon_key", "silhouette", "color_token"],
+        "properties": {
+          "id": {"$ref": "#/$defs/id"},
+          "label_key": {"$ref": "#/$defs/key"},
+          "icon_key": {"$ref": "#/$defs/id"},
+          "silhouette": {"type": "string", "minLength": 1},
+          "color_token": {"$ref": "#/$defs/id"}
+        }
+      }
+    },
+    "quality_tiers": {
+      "type": "array",
+      "minItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "rank", "label_key", "inspection_work_multiplier", "test_work_multiplier"],
+        "properties": {
+          "id": {"enum": ["value", "standard", "premium"]},
+          "rank": {"type": "integer", "minimum": 1, "maximum": 3},
+          "label_key": {"$ref": "#/$defs/key"},
+          "inspection_work_multiplier": {"type": "number", "exclusiveMinimum": 0},
+          "test_work_multiplier": {"type": "number", "exclusiveMinimum": 0}
+        }
+      }
+    },
+    "components": {"type": "array", "minItems": 9, "items": {"$ref": "#/$defs/component"}},
+    "boards": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/board"}},
+    "items": {"type": "array", "minItems": 8, "items": {"$ref": "#/$defs/item"}},
+    "offers": {"type": "array", "minItems": 10, "items": {"$ref": "#/$defs/offer"}},
+    "machines": {"type": "array", "minItems": 10, "items": {"$ref": "#/$defs/machine"}},
+    "recipe_templates": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {"$ref": "#/$defs/recipeTemplate"}
+    },
+    "outcome_algorithm": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version", "key_fields", "canonical_key", "draw", "decision"],
+      "properties": {
+        "id": {"const": "keyed-sha256-u53"},
+        "version": {"const": 1},
+        "key_fields": {
+          "const": ["scenario_seed", "product_unit_id", "stage", "outcome_version"]
+        },
+        "canonical_key": {"const": "UTF-8 JSON array in key_fields order using canonical decimal integers and lowercase stage IDs"},
+        "draw": {"const": "Unsigned big-endian first 53 SHA-256 digest bits divided by 2^53"},
+        "decision": {"const": "Reject exactly when draw is less than the stage reject probability; otherwise pass"}
+      }
+    },
+    "contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name_key", "product_id", "quantity", "unit_price_usd", "minimum_quality", "requirements"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "name_key": {"$ref": "#/$defs/key"},
+        "product_id": {"$ref": "#/$defs/id"},
+        "quantity": {"type": "integer", "minimum": 1},
+        "unit_price_usd": {"type": "number", "exclusiveMinimum": 0},
+        "minimum_quality": {"enum": ["value", "standard", "premium"]},
+        "requirements": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/requirementValue"}}
+      }
+    },
+    "balance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["expected_yield", "material_cost_per_attempt_usd", "operating_cost_per_attempt_usd", "expected_cost_per_accepted_usd", "expected_margin_percent", "recommended_attempts", "reference_factory_capital_usd", "starting_cash_usd"],
+      "properties": {
+        "expected_yield": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
+        "material_cost_per_attempt_usd": {"type": "number", "minimum": 0},
+        "operating_cost_per_attempt_usd": {"type": "number", "minimum": 0},
+        "expected_cost_per_accepted_usd": {"type": "number", "minimum": 0},
+        "expected_margin_percent": {"type": "number", "minimum": 10, "maximum": 15},
+        "recommended_attempts": {"type": "integer", "minimum": 1000},
+        "reference_factory_capital_usd": {"type": "number", "minimum": 0},
+        "starting_cash_usd": {"type": "number", "minimum": 0}
+      }
+    }
+  },
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$", "maxLength": 128},
+    "key": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$"},
+    "vec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["width", "height"],
+      "properties": {"width": {"type": "integer", "minimum": 1}, "height": {"type": "integer", "minimum": 1}}
+    },
+    "work": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["placement", "bonding", "inspection", "test", "packaging"],
+      "properties": {
+        "placement": {"type": "number", "minimum": 0},
+        "bonding": {"type": "number", "minimum": 0},
+        "inspection": {"type": "number", "minimum": 0},
+        "test": {"type": "number", "minimum": 0},
+        "packaging": {"type": "number", "minimum": 0}
+      }
+    },
+    "component": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name_key", "family", "footprint", "rotatable", "power_watts", "transport_units", "work", "properties"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "name_key": {"$ref": "#/$defs/key"},
+        "family": {"$ref": "#/$defs/id"},
+        "footprint": {"$ref": "#/$defs/vec"},
+        "rotatable": {"type": "boolean"},
+        "power_watts": {"type": "number", "minimum": 0},
+        "transport_units": {"type": "number", "exclusiveMinimum": 0},
+        "work": {"$ref": "#/$defs/work"},
+        "properties": {"type": "object", "additionalProperties": {"type": ["string", "number", "integer", "boolean"]}}
+      }
+    },
+    "board": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name_key", "family", "board_size", "max_components", "transport_units", "work"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "name_key": {"$ref": "#/$defs/key"},
+        "family": {"const": "substrate"},
+        "board_size": {"$ref": "#/$defs/vec"},
+        "max_components": {"type": "integer", "minimum": 1},
+        "transport_units": {"type": "number", "exclusiveMinimum": 0},
+        "work": {"$ref": "#/$defs/work"}
+      }
+    },
+    "item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name_key", "family", "category", "identity_scope"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "name_key": {"$ref": "#/$defs/key"},
+        "family": {"$ref": "#/$defs/id"},
+        "category": {"enum": ["material", "wip", "product", "reject"]},
+        "identity_scope": {"enum": ["static-material", "design-revision-template"]}
+      }
+    },
+    "offer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "specification_id", "supplier", "quality", "unit_price_usd", "defect_probability", "default"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "specification_id": {"$ref": "#/$defs/id"},
+        "supplier": {"type": "string", "minLength": 1},
+        "quality": {"enum": ["value", "standard", "premium"]},
+        "unit_price_usd": {"type": "number", "minimum": 0},
+        "defect_probability": {"type": "number", "minimum": 0, "exclusiveMaximum": 1},
+        "default": {"type": "boolean"}
+      }
+    },
+    "port": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "direction", "side", "offset", "capacity"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "direction": {"enum": ["input", "output"]},
+        "side": {"enum": ["north", "east", "south", "west", "edge"]},
+        "offset": {"type": "integer", "minimum": 0},
+        "capacity": {"type": "integer", "minimum": 1}
+      }
+    },
+    "machine": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name_key", "kind", "footprint", "rotatable", "capital_cost_usd", "fixed", "capabilities", "ports"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "name_key": {"$ref": "#/$defs/key"},
+        "kind": {"enum": ["receiving", "processing", "shipping", "scrap", "belt", "splitter", "merger"]},
+        "footprint": {"$ref": "#/$defs/vec"},
+        "rotatable": {"type": "boolean"},
+        "capital_cost_usd": {"type": "number", "minimum": 0},
+        "fixed": {"type": "boolean"},
+        "capabilities": {"type": "array", "items": {"$ref": "#/$defs/id"}},
+        "ports": {"type": "array", "items": {"$ref": "#/$defs/port"}}
+      }
+    },
+    "itemQuantity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["item_id", "quantity", "port_id"],
+      "properties": {
+        "item_id": {"$ref": "#/$defs/id"},
+        "quantity": {"type": "integer", "minimum": 1},
+        "port_id": {"$ref": "#/$defs/id"}
+      }
+    },
+    "portBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["port_id", "source"],
+      "properties": {
+        "port_id": {"$ref": "#/$defs/id"},
+        "source": {
+          "enum": [
+            "design-compute-components",
+            "design-memory-components",
+            "design-io-components",
+            "design-power-components",
+            "substrate",
+            "prior-wip",
+            "connection-kits",
+            "selected-thermal-components",
+            "packaging-material"
+          ]
+        }
+      }
+    },
+    "outputBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["port_id", "kind"],
+      "properties": {
+        "port_id": {"$ref": "#/$defs/id"},
+        "kind": {"enum": ["wip-unconnected", "wip-bonded", "wip-inspected", "wip-validated", "product", "reject-inspection", "reject-test"]}
+      }
+    },
+    "recipeTemplate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "stage", "capability", "input_bindings", "pass_output", "outcome_mode", "setup_seconds", "work_capacity_per_second", "fixed_work", "operating_cost_usd"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "stage": {"enum": ["assembly", "bonding", "inspection", "test", "packaging"]},
+        "capability": {"$ref": "#/$defs/id"},
+        "input_bindings": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/portBinding"}},
+        "pass_output": {"$ref": "#/$defs/outputBinding"},
+        "reject_output": {"$ref": "#/$defs/outputBinding"},
+        "outcome_mode": {"enum": ["deterministic", "exactly_one_seeded"]},
+        "setup_seconds": {"type": "number", "minimum": 0},
+        "work_capacity_per_second": {"type": "number", "exclusiveMinimum": 0},
+        "fixed_work": {"type": "number", "minimum": 0},
+        "operating_cost_usd": {"type": "number", "minimum": 0}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"outcome_mode": {"const": "exactly_one_seeded"}}},
+          "then": {"required": ["reject_output"]},
+          "else": {"not": {"required": ["reject_output"]}}
+        }
+      ]
+    },
+    "requirementValue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "operator", "value", "unit"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "operator": {"enum": ["greater_than_or_equal", "less_than_or_equal", "contains"]},
+        "value": {"type": ["number", "string"]},
+        "unit": {"type": "string"}
+      }
+    }
+  }
+}

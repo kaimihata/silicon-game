@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://chip-city.dev/production-spec/registry.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "id", "version", "status", "kind", "entries"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "id": {"$ref": "#/$defs/id"},
+    "version": {"type": "integer", "minimum": 1},
+    "status": {"enum": ["draft", "ready"]},
+    "kind": {"enum": ["actors", "specifications", "suites", "scenarios", "evidence", "environments", "services", "metrics"]},
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "path"],
+        "properties": {
+          "id": {"$ref": "#/$defs/id"},
+          "path": {"type": "string", "pattern": "^[^/].*"},
+          "unit": {"enum": ["milliseconds", "seconds", "bytes", "kilobytes", "megabytes", "frames_per_second", "requests_per_second", "percent", "count"]},
+          "description": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  },
+  "$defs": {"id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$", "maxLength": 128}}
+}

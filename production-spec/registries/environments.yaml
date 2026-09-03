@@ -1,0 +1,9 @@
+schema_version: 1
+id: environments
+version: 1
+status: ready
+kind: environments
+entries:
+  - {id: headless-domain, path: environments/headless.yaml}
+  - {id: windows-reference, path: environments/windows-reference.yaml}
+  - {id: macos-compatibility, path: environments/macos-compatibility.yaml}

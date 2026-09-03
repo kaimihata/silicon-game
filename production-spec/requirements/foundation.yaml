@@ -1,0 +1,1008 @@
+schema_version: 1
+catalog_id: foundation-requirements
+version: 1
+status: ready
+milestones:
+  - id: technical-sandbox
+    title: Technical sandbox
+    owner: chip-city-owner
+    depends_on: []
+    checkpoint_required: false
+requirements:
+  - id: req.foundation.unity
+    statement: The repository imports and builds with Unity 6000.3.23f1 and URP for both required targets.
+    priority: must
+    milestone: technical-sandbox
+    source:
+      specification: technical-architecture
+      rule: exact-editor
+    acceptance:
+      - check_id: check.foundation.unity
+        type: integration_test
+        suite: build
+    lifecycle: milestone
+  - id: req.foundation.domain
+    statement: Pure C# authoritative assemblies run headlessly and have no Unity rendering dependency.
+    priority: must
+    milestone: technical-sandbox
+    source:
+      specification: technical-architecture
+      rule: pure-domain
+    acceptance:
+      - check_id: check.foundation.domain
+        type: static_check
+        suite: domain
+    lifecycle: milestone
+  - id: req.foundation.content
+    statement: Safe YAML content validates, compiles to canonical runtime JSON, and reproduces its digest.
+    priority: must
+    milestone: technical-sandbox
+    source:
+      specification: content-catalog
+      rule: yaml-source
+    acceptance:
+      - check_id: check.foundation.content
+        type: schema
+        suite: specification
+    lifecycle: milestone
+  - id: req.foundation.commands
+    statement: Human, semantic, and replay adapters share typed atomic revision-aware command handlers.
+    priority: must
+    milestone: technical-sandbox
+    source:
+      specification: player-protocol
+      rule: shared-handlers
+    acceptance:
+      - check_id: check.foundation.commands
+        type: automated_test
+        suite: protocol
+    lifecycle: milestone
+  - id: req.foundation.observations
+    statement: Public observations are revisioned, delta-capable, player-visible, and free of oracle state.
+    priority: must
+    milestone: technical-sandbox
+    source:
+      specification: player-protocol
+      rule: observations
+    acceptance:
+      - check_id: check.foundation.observations
+        type: automated_test
+        suite: protocol
+    lifecycle: milestone
+  - id: req.foundation.determinism
+    statement: Fixed-tick seeded simulation and exact replay produce stable state hashes across speeds and adapters.
+    priority: must
+    milestone: technical-sandbox
+    source:
+      specification: deterministic-simulation
+      rule: seeded-unit-outcomes
+    acceptance:
+      - check_id: check.foundation.determinism
+        type: property_test
+        suite: domain
+    lifecycle: milestone
+  - id: req.foundation.persistence
+    statement: Versioned canonical saves migrate explicitly, write atomically, and recover from verified backup without reset.
+    priority: must
+    milestone: technical-sandbox
+    source:
+      specification: persistence
+      rule: recovery
+    acceptance:
+      - check_id: check.foundation.persistence
+        type: automated_test
+        suite: persistence
+    lifecycle: milestone
+  - id: req.foundation.grid
+    statement: Headless grid placement, rotated footprints, generic ports, directional routing, splitters, mergers, buffers, starvation, and blocking obey deterministic conservation rules.
+    priority: must
+    milestone: technical-sandbox
+    source:
+      specification: factory-logistics
+      rule: belts
+    acceptance:
+      - check_id: check.foundation.grid
+        type: property_test
+        suite: domain
+    lifecycle: milestone
+  - id: req.foundation.design-revisions
+    statement: Editable drafts publish immutable design revisions that compile exact revision-aware BOM and recipes.
+    priority: must
+    milestone: technical-sandbox
+    source:
+      specification: chip-design
+      rule: publish-output
+    acceptance:
+      - check_id: check.foundation.design-revisions
+        type: automated_test
+        suite: domain
+    lifecycle: milestone
+  - id: req.foundation.multiple
+    statement: Domain state represents multiple designs, products, recipes, and concurrent contracts without machine-global design assignment.
+    priority: must
+    milestone: technical-sandbox
+    source:
+      specification: game-context
+      rule: first-scope
+    acceptance:
+      - check_id: check.foundation.multiple
+        type: automated_test
+        suite: domain
+    lifecycle: milestone
+  - id: req.foundation.semantic-chip
+    statement: A semantic player configures a sandbox factory and produces one contract-eligible accepted chip using only public observations and commands.
+    priority: must
+    milestone: technical-sandbox
+    source:
+      specification: onboarding
+      rule: sandbox-gate
+    acceptance:
+      - check_id: check.foundation.semantic-chip
+        type: semantic_scenario
+        suite: semantic-playtest
+        scenario: sandbox-accepted-chip
+    lifecycle: milestone
+  - id: req.foundation.harness
+    statement: A minimal rendered Unity harness exposes the same placement, routing, state, and command results as headless execution.
+    priority: must
+    milestone: technical-sandbox
+    source:
+      specification: technical-architecture
+      rule: adapter-boundary
+    acceptance:
+      - check_id: check.foundation.harness
+        type: integration_test
+        suite: rendered-integration
+    lifecycle: milestone
+  - id: req.foundation.technical-architecture.external-content
+    statement: Runtime content originates in external safe YAML validated against pinned schemas and compiled deterministically to canonical JSON; runtime does not interpret YAML.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: technical-architecture
+      rule: external-content
+    acceptance:
+      - check_id: check.foundation.technical-architecture.external-content
+        type: automated_test
+        suite: domain
+  - id: req.foundation.technical-architecture.ui-delegated
+    statement: The Unity UI framework is an implementation choice only if interaction, accessibility, automated test, scaling, and performance contracts pass.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: technical-architecture
+      rule: ui-delegated
+    acceptance:
+      - check_id: check.foundation.technical-architecture.ui-delegated
+        type: automated_test
+        suite: domain
+  - id: req.foundation.technical-architecture.dependency-policy
+    statement: Every dependency is pinned, maintained, license-allowed, scanned, justified, and introduces no new secret or paid service without human approval.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: technical-architecture
+      rule: dependency-policy
+    acceptance:
+      - check_id: check.foundation.technical-architecture.dependency-policy
+        type: asset_validation
+        suite: asset-provenance
+  - id: req.foundation.technical-architecture.local-only
+    statement: Gameplay, saves, telemetry, and the semantic interface operate locally without external analytics, crash reporting, or required network service.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: technical-architecture
+      rule: local-only
+    acceptance:
+      - check_id: check.foundation.technical-architecture.local-only
+        type: automated_test
+        suite: domain
+  - id: req.foundation.technical-architecture.target-license
+    statement: The target game repository source is licensed under MIT; third-party dependencies and assets retain their own recorded approved licenses and notices.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: technical-architecture
+      rule: target-license
+    acceptance:
+      - check_id: check.foundation.technical-architecture.target-license
+        type: integration_test
+        suite: build
+  - id: req.foundation.chip-design.lifecycle
+    statement: A design is an editable draft until published; publication creates an immutable revision, and every redesign creates a new immutable revision under the same stable design ID.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: chip-design
+      rule: lifecycle
+    acceptance:
+      - check_id: check.foundation.chip-design.lifecycle
+        type: automated_test
+        suite: domain
+  - id: req.foundation.chip-design.identities
+    statement: Contract-derived designs receive a stable contract-derived ID and default localized name; display names are editable and revisions are explicit.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: chip-design
+      rule: identities
+    acceptance:
+      - check_id: check.foundation.chip-design.identities
+        type: automated_test
+        suite: domain
+  - id: req.foundation.chip-design.association
+    statement: Default flow creates a linked draft from a contract, while standalone design supports speculative designs and later contract association; internally valid designs may publish without a contract.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: chip-design
+      rule: association
+    acceptance:
+      - check_id: check.foundation.chip-design.association
+        type: automated_test
+        suite: domain
+  - id: req.foundation.chip-design.archive-delete
+    statement: Archive and delete are manual and blocked while any contract, recipe, inventory, WIP, replay, or retained evidence references the design revision.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: chip-design
+      rule: archive-delete
+    acceptance:
+      - check_id: check.foundation.chip-design.archive-delete
+        type: automated_test
+        suite: domain
+  - id: req.foundation.chip-design.placement
+    statement: Components occupy their rotated integer footprints on a zero-based top-left 6 by 6 substrate, cannot overlap or leave it, and the provisional maximum is eight components.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: chip-design
+      rule: placement
+    acceptance:
+      - check_id: check.foundation.chip-design.placement
+        type: automated_test
+        suite: domain
+  - id: req.foundation.chip-design.families
+    statement: Component-family minimums and maximums are content data; onboarding requires compute, memory, power, thermal, at least one display I/O, a substrate, interconnects, and packaging material. Multiple instances in one family must use the same exact model while starter Assembler ports remain family-bound single-item inputs.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: chip-design
+      rule: families
+    acceptance:
+      - check_id: check.foundation.chip-design.families
+        type: automated_test
+        suite: domain
+  - id: req.foundation.chip-design.io-edge
+    statement: Every required display I/O component touches a package edge.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: chip-design
+      rule: io-edge
+    acceptance:
+      - check_id: check.foundation.chip-design.io-edge
+        type: automated_test
+        suite: domain
+  - id: req.foundation.chip-design.thermal-adjacency
+    statement: TH-110 is a draggable rotatable 2 by 1 part; every compute footprint must share an orthogonal edge with a spreader, and each spreader's 15 W capacity is shared among touching compute loads.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: chip-design
+      rule: thermal-adjacency
+    acceptance:
+      - check_id: check.foundation.chip-design.thermal-adjacency
+        type: automated_test
+        suite: domain
+  - id: req.foundation.chip-design.connections
+    statement: The player selects Standard or Wide and drags compatible endpoints. Each endpoint anchor is the footprint cell nearest the other footprint by Manhattan distance, with topmost then leftmost tie-break. Breadth-first routing uses neighbor order east, south, west, north across in-bounds cells, may start/end on endpoint cells, cannot traverse another component, and may share or cross existing routes. Preview shows the resulting cell path, distance, capacity, power, material cost, bonding work, and inspection work before atomic creation.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: chip-design
+      rule: connections
+    acceptance:
+      - check_id: check.foundation.chip-design.connections
+        type: automated_test
+        suite: domain
+  - id: req.foundation.chip-design.route-congestion
+    statement: For a route of distance d, distance efficiency is clamp from 0.4 to 1 of 1 minus 0.15 times max of zero and d minus 2. Effective route bandwidth is technology bandwidth times distance efficiency divided by the largest number of routes sharing any route cell. Bonding and inspection work are each multiplied by 1 plus 0.10 times the sum across its cells of max zero and route occupancy minus one.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: chip-design
+      rule: route-congestion
+    acceptance:
+      - check_id: check.foundation.chip-design.route-congestion
+        type: automated_test
+        suite: domain
+  - id: req.foundation.chip-design.undo-redo
+    statement: Draft component, placement, rotation, connection, supplier-minimum, rename, and association edits support deterministic undo and redo.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: chip-design
+      rule: undo-redo
+    acceptance:
+      - check_id: check.foundation.chip-design.undo-redo
+        type: automated_test
+        suite: domain
+  - id: req.foundation.content-catalog.starter-models
+    statement: Catalog includes CP-110, CP-130, MD-110, MD-130, IO-110, PM-110, TH-110, SUB-110, DL-110, DL-130, static PKG-MAT-100, and design-revision identity templates for WIP states, rejects, and PRODUCT-DISPLAY-100.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: content-catalog
+      rule: starter-models
+    acceptance:
+      - check_id: check.foundation.content-catalog.starter-models
+        type: schema
+        suite: specification
+  - id: req.foundation.content-catalog.alternatives
+    statement: CP and MD alternatives are visible in the designer; every model changes product metrics, manufacturing work, cost, yield exposure, or multiple dimensions.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: content-catalog
+      rule: alternatives
+    acceptance:
+      - check_id: check.foundation.content-catalog.alternatives
+        type: schema
+        suite: specification
+  - id: req.foundation.content-catalog.default-offers
+    statement: The default memory offer is PrimeMemory Premium MD-110 and the onboarding alternative is ValueMemory Value MD-110; all other required BOM items have a compatible default offer.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: content-catalog
+      rule: default-offers
+    acceptance:
+      - check_id: check.foundation.content-catalog.default-offers
+        type: schema
+        suite: specification
+  - id: req.foundation.content-catalog.quality-values
+    statement: Current supplier prices and defect probabilities are promoted as provisional where available, with explicit inspection and test work multipliers added for each tier.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: content-catalog
+      rule: quality-values
+    acceptance:
+      - check_id: check.foundation.content-catalog.quality-values
+        type: schema
+        suite: specification
+  - id: req.foundation.content-catalog.localization
+    statement: Content stores localization keys for player-facing name, description, guidance, state, and failure copy; IDs are never the sole player label.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: content-catalog
+      rule: localization
+    acceptance:
+      - check_id: check.foundation.content-catalog.localization
+        type: integration_test
+        suite: rendered-integration
+  - id: req.foundation.content-catalog.visual-semantics
+    statement: Every family maps to a stable icon key, silhouette motif, accessible color token, and text label used in contracts, designer, procurement, docks, belts, recipes, alerts, and reports.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: content-catalog
+      rule: visual-semantics
+    acceptance:
+      - check_id: check.foundation.content-catalog.visual-semantics
+        type: integration_test
+        suite: rendered-integration
+  - id: req.foundation.content-catalog.generated-only
+    statement: Generated runtime JSON and revision-specific compiled recipes are never hand-edited. The catalog stores universal stage recipe templates rather than CP-110 or MD-110 recipe instances, and generated provenance records source paths, compiler version, schema version, and digest.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: content-catalog
+      rule: generated-only
+    acceptance:
+      - check_id: check.foundation.content-catalog.generated-only
+        type: schema
+        suite: specification
+  - id: req.foundation.factory-logistics.fixed-endpoints
+    statement: Preplaced edge receiving bays, one Shipping Dock, and one unlimited Scrap Collector are free, immovable, and nonremovable; onboarding auto-assigns one receiving stream per BOM item.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: factory-logistics
+      rule: fixed-endpoints
+    acceptance:
+      - check_id: check.foundation.factory-logistics.fixed-endpoints
+        type: automated_test
+        suite: domain
+  - id: req.foundation.factory-logistics.belt-building
+    statement: Dragging endpoints previews a deterministic default L path; release atomically builds the entire valid route or rejects it in red without charge, and alternate bends use multiple segments.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: factory-logistics
+      rule: belt-building
+    acceptance:
+      - check_id: check.foundation.factory-logistics.belt-building
+        type: automated_test
+        suite: domain
+  - id: req.foundation.factory-logistics.splitter-merger
+    statement: Splitters route single-item streams round-robin across unblocked outputs; mergers select the oldest waiting item with stable input-port order as a tie-break.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: factory-logistics
+      rule: splitter-merger
+    acceptance:
+      - check_id: check.foundation.factory-logistics.splitter-merger
+        type: automated_test
+        suite: domain
+  - id: req.foundation.factory-logistics.recipe-identity
+    statement: Machines are not globally tied to a design; an active recipe is compiled from universal stage templates, references one published immutable design revision, binds exact typed inputs to generic ports, and emits only WIP, product, or reject IDs carrying that revision identity.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: factory-logistics
+      rule: recipe-identity
+    acceptance:
+      - check_id: check.foundation.factory-logistics.recipe-identity
+        type: automated_test
+        suite: domain
+  - id: req.foundation.factory-logistics.onboarding-autoconfigure
+    statement: A newly placed onboarding machine auto-selects the sole compatible current-contract recipe and visibly shows it; zero or multiple compatible recipes leave it unconfigured.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: factory-logistics
+      rule: onboarding-autoconfigure
+    acceptance:
+      - check_id: check.foundation.factory-logistics.onboarding-autoconfigure
+        type: automated_test
+        suite: domain
+  - id: req.foundation.factory-logistics.input-driven
+    statement: A configured machine consumes a complete available input set whenever all required per-port buffers are ready, stops when any input is missing, and needs no production order.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: factory-logistics
+      rule: input-driven
+    acceptance:
+      - check_id: check.foundation.factory-logistics.input-driven
+        type: automated_test
+        suite: domain
+  - id: req.foundation.factory-logistics.starter-ports
+    statement: Starter ports are ASM five inputs and one output, BND two and one, INS one and two, TST one and two, and PKG three and one.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: factory-logistics
+      rule: starter-ports
+    acceptance:
+      - check_id: check.foundation.factory-logistics.starter-ports
+        type: automated_test
+        suite: domain
+  - id: req.foundation.factory-logistics.immutable-wip
+    statement: WIP carries immutable design-revision identity and accumulated source, lot, quality, input cost, operating cost, and processing history through every stage.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: factory-logistics
+      rule: immutable-wip
+    acceptance:
+      - check_id: check.foundation.factory-logistics.immutable-wip
+        type: automated_test
+        suite: domain
+  - id: req.foundation.factory-logistics.recipe-switch
+    statement: Switching recipe has no setup time or fee; after explicit confirmation it immediately scraps an in-process unit and incompatible buffered inputs, while incompatible incoming belt items stop at the port and may block.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: factory-logistics
+      rule: recipe-switch
+    acceptance:
+      - check_id: check.foundation.factory-logistics.recipe-switch
+        type: automated_test
+        suite: domain
+  - id: req.foundation.factory-logistics.rejects
+    statement: Only Quality Scanner and Chip Tester choose a reject outcome, each through its reject port; each consumed unit creates exactly one mutually exclusive pass or reject output. Scrap accepts unlimited items and logs type, reason, design revision, source metadata, and lost value.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: factory-logistics
+      rule: rejects
+    acceptance:
+      - check_id: check.foundation.factory-logistics.rejects
+        type: automated_test
+        suite: domain
+  - id: req.foundation.factory-logistics.operating-state
+    statement: Machines independently expose No recipe, Missing input or starved, Working, Output blocked, utilization, overload, and bottleneck contribution while incomplete factories may run.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: factory-logistics
+      rule: operating-state
+    acceptance:
+      - check_id: check.foundation.factory-logistics.operating-state
+        type: automated_test
+        suite: domain
+  - id: req.foundation.factory-logistics.removal
+    statement: Equipment removal is allowed only while paused, refunds full capital, and after confirmation scraps contained input, WIP, and output while preserving prior material and operating spend.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: factory-logistics
+      rule: removal
+    acceptance:
+      - check_id: check.foundation.factory-logistics.removal
+        type: automated_test
+        suite: domain
+  - id: req.foundation.factory-logistics.collection
+    statement: Holding the remappable collection action over a belt continuously collects advancing items; purchased inputs return to matching off-floor inventory, while WIP and finished goods require one confirmation per collection action and become logged scrap.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: factory-logistics
+      rule: collection
+    acceptance:
+      - check_id: check.foundation.factory-logistics.collection
+        type: automated_test
+        suite: domain
+  - id: req.foundation.persistence.logical-format
+    statement: Logical save state is versioned canonical JSON with stable identifiers and explicit schema; future physical binary encoding may wrap but not redefine it.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: persistence
+      rule: logical-format
+    acceptance:
+      - check_id: check.foundation.persistence.logical-format
+        type: integration_test
+        suite: persistence
+  - id: req.foundation.persistence.migrations
+    statement: Every supported prior save version has an explicit deterministic migration chain or a clear unsupported error; silent reinterpretation is prohibited.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: persistence
+      rule: migrations
+    acceptance:
+      - check_id: check.foundation.persistence.migrations
+        type: integration_test
+        suite: persistence
+  - id: req.foundation.persistence.atomic-autosave
+    statement: Human state saves atomically after major decisions and every 60 seconds of active simulation time, retaining one last verified backup.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: persistence
+      rule: atomic-autosave
+    acceptance:
+      - check_id: check.foundation.persistence.atomic-autosave
+        type: integration_test
+        suite: persistence
+  - id: req.foundation.persistence.agent-isolation
+    statement: Agent-test profiles use a separate namespace and storage root; the semantic service cannot enumerate, read, overwrite, migrate, or delete human saves.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: persistence
+      rule: agent-isolation
+    acceptance:
+      - check_id: check.foundation.persistence.agent-isolation
+        type: integration_test
+        suite: persistence
+  - id: req.foundation.persistence.agent-retention
+    statement: Agents may reset or delete only their own profiles; retain the latest ten successful runs per scenario and all failed regressions unless manually pinned or deleted.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: persistence
+      rule: agent-retention
+    acceptance:
+      - check_id: check.foundation.persistence.agent-retention
+        type: integration_test
+        suite: persistence
+  - id: req.foundation.player-api.endpoints
+    statement: GET endpoints are /api/v1/health, /api/v1/catalog, /api/v1/goals, /api/v1/observation with independent since_command_revision and after_event_sequence cursors, and /api/v1/profiles; mutations use the closed profile and command endpoints only.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: player-api
+      rule: endpoints
+    acceptance:
+      - check_id: check.foundation.player-api.endpoints
+        type: integration_test
+        suite: protocol
+  - id: req.foundation.player-api.command-envelope
+    statement: Every command validates against the closed action-discriminated v1 wire schema with expected_command_revision; results separately report command_revision, simulation_tick, latest_event_sequence, closed effects/events, or a closed error.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: player-api
+      rule: command-envelope
+    acceptance:
+      - check_id: check.foundation.player-api.command-envelope
+        type: integration_test
+        suite: protocol
+  - id: req.foundation.player-api.simulation-actions
+    statement: Simulation actions are set_speed with speed 0, 1, 2, or 4; save_now; and disconnect_agent. Headless stepping is test-harness-only and is not exposed to players.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: player-api
+      rule: simulation-actions
+    acceptance:
+      - check_id: check.foundation.player-api.simulation-actions
+        type: integration_test
+        suite: protocol
+  - id: req.foundation.player-api.contract-actions
+    statement: Contract actions cover acceptance, linked design, immutable design/manufacturing-plan assignment, shipping priority, and explicit finished-inventory reserve, release, and reassignment; abandon is absent.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: player-api
+      rule: contract-actions
+    acceptance:
+      - check_id: check.foundation.player-api.contract-actions
+        type: integration_test
+        suite: protocol
+  - id: req.foundation.player-api.design-actions
+    statement: Design actions are create_standalone_design, associate_design, rename_design, add_component, move_component, rotate_component, remove_component, add_connection, remove_connection, set_minimum_quality, undo_design, redo_design, publish_design, archive_design, and delete_design.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: player-api
+      rule: design-actions
+    acceptance:
+      - check_id: check.foundation.player-api.design-actions
+        type: integration_test
+        suite: protocol
+  - id: req.foundation.player-api.procurement-actions
+    statement: Procurement actions are purchase_items with a nonempty array of offer_id and positive integer quantity pairs; recommendations are observations, not a privileged purchase command, and Purchase All submits the same purchase_items action.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: player-api
+      rule: procurement-actions
+    acceptance:
+      - check_id: check.foundation.player-api.procurement-actions
+        type: integration_test
+        suite: protocol
+  - id: req.foundation.player-api.factory-actions
+    statement: Factory actions are place_entity, rotate_entity, remove_entity, build_belt_path, set_machine_recipe, set_receiving_assignment, begin_collection, end_collection, and set_selected_contract; UI tool selection and camera changes are presentation state and not authoritative commands.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: player-api
+      rule: factory-actions
+    acceptance:
+      - check_id: check.foundation.player-api.factory-actions
+        type: integration_test
+        suite: protocol
+  - id: req.foundation.player-api.errors
+    statement: Closed v1 errors include authority, optimistic revision, cursor expiry, rate, arguments, availability, resources, placement/route, compatibility, design/contract, confirmation, and internal failure codes defined by player-api/errors.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: player-api
+      rule: errors
+    acceptance:
+      - check_id: check.foundation.player-api.errors
+        type: integration_test
+        suite: protocol
+  - id: req.foundation.player-api.observation-shape
+    statement: Observation separately exposes command_revision, simulation_tick, latest_event_sequence and state hash plus public goals, accounting, contracts and reservations, design/manufacturing-plan identities, inventory, factory state, available actions, alerts, events, and optional delta base command revision.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: player-api
+      rule: observation-shape
+    acceptance:
+      - check_id: check.foundation.player-api.observation-shape
+        type: integration_test
+        suite: protocol
+  - id: req.foundation.player-api.pagination-bounds
+    statement: Event deltas return at most 500 strictly ordered events with next_event_sequence and has_more; pruned state revisions require a full snapshot and pruned event cursors return EVENT_CURSOR_EXPIRED without silent loss.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: player-api
+      rule: pagination-bounds
+    acceptance:
+      - check_id: check.foundation.player-api.pagination-bounds
+        type: integration_test
+        suite: protocol
+  - id: req.foundation.player-api.compatibility
+    statement: Unknown protocol versions, actions, fields, and enum values fail closed; additive diagnostics may not change command semantics, and any semantic change requires a new protocol version plus replay migration or explicit incompatibility.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: player-api
+      rule: compatibility
+    acceptance:
+      - check_id: check.foundation.player-api.compatibility
+        type: integration_test
+        suite: protocol
+  - id: req.foundation.player-protocol.command-result
+    statement: Accepted commands increment revision and return effects; rejected commands are atomic, do not increment revision, and return stable code, localization key, related entities, and locations when relevant.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: player-protocol
+      rule: command-result
+    acceptance:
+      - check_id: check.foundation.player-protocol.command-result
+        type: integration_test
+        suite: protocol
+  - id: req.foundation.player-protocol.http-only
+    statement: The first semantic surface is versioned JSON HTTP on loopback only; future CLI or MCP tools must remain thin clients over this contract.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: player-protocol
+      rule: http-only
+    acceptance:
+      - check_id: check.foundation.player-protocol.http-only
+        type: integration_test
+        suite: protocol
+  - id: req.foundation.player-protocol.observer-exclusion
+    statement: Human and agent commands are mutually exclusive in observer mode; a human may pause, disconnect, and take over through an explicit control.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: player-protocol
+      rule: observer-exclusion
+    acceptance:
+      - check_id: check.foundation.player-protocol.observer-exclusion
+        type: integration_test
+        suite: protocol
+  - id: req.foundation.player-protocol.pacing
+    statement: The service enforces a default 500 millisecond minimum between accepted commands, configurable or disableable for testing without changing simulation results.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: player-protocol
+      rule: pacing
+    acceptance:
+      - check_id: check.foundation.player-protocol.pacing
+        type: integration_test
+        suite: protocol
+  - id: req.foundation.player-protocol.trace-overlay
+    statement: Rendered observer mode may show current goal, action, result, and recent decision trace but never hidden state.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: player-protocol
+      rule: trace-overlay
+    acceptance:
+      - check_id: check.foundation.player-protocol.trace-overlay
+        type: integration_test
+        suite: protocol
+  - id: req.foundation.player-protocol.replay
+    statement: Replay records versions, profile initialization, seed, ordered accepted and rejected commands, results, events, revisions, and state hashes; playback fails explicitly on incompatible semantics.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: player-protocol
+      rule: replay
+    acceptance:
+      - check_id: check.foundation.player-protocol.replay
+        type: integration_test
+        suite: protocol
+  - id: req.foundation.player-protocol.agent-evidence
+    statement: An agent run emits replay plus concise decision trace linking observation revision, goal, chosen action, expected result, actual result, and recovery.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: player-protocol
+      rule: agent-evidence
+    acceptance:
+      - check_id: check.foundation.player-protocol.agent-evidence
+        type: integration_test
+        suite: protocol
+  - id: req.foundation.player-protocol.no-bypass
+    statement: The semantic interface exposes no resource creation, time travel, teleportation, hidden route planner, optimal factory command, oracle query, or rule bypass.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: player-protocol
+      rule: no-bypass
+    acceptance:
+      - check_id: check.foundation.player-protocol.no-bypass
+        type: integration_test
+        suite: protocol
+  - id: req.foundation.player-protocol.destructive-confirmation
+    statement: A destructive command without confirmation returns CONFIRMATION_REQUIRED, a localized loss summary, and an ephemeral confirmation token bound to actor, exact arguments, and current revision; resubmission with that token executes atomically or fails stale.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: player-protocol
+      rule: destructive-confirmation
+    acceptance:
+      - check_id: check.foundation.player-protocol.destructive-confirmation
+        type: integration_test
+        suite: protocol
+  - id: req.foundation.deterministic-simulation.fixed-tick
+    statement: Authoritative simulation advances at exactly 10 fixed ticks per simulated second; pause, 1x, 2x, and 4x alter wall-time scheduling but never outcomes.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: deterministic-simulation
+      rule: fixed-tick
+    acceptance:
+      - check_id: check.foundation.deterministic-simulation.fixed-tick
+        type: automated_test
+        suite: domain
+  - id: req.foundation.deterministic-simulation.state-hash
+    statement: Canonical authoritative state has a versioned hash algorithm and emits hashes at command and replay checkpoints.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: deterministic-simulation
+      rule: state-hash
+    acceptance:
+      - check_id: check.foundation.deterministic-simulation.state-hash
+        type: automated_test
+        suite: domain
+  - id: req.foundation.deterministic-simulation.formulas-product
+    statement: Raw compute is sum of cores times GHz times architecture factor times 10; effective bandwidth follows graph paths and is limited by memory, links, distance and congestion; sustained compute is raw compute times min of one and bandwidth supply over demand.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: deterministic-simulation
+      rule: formulas-product
+    acceptance:
+      - check_id: check.foundation.deterministic-simulation.formulas-product
+        type: automated_test
+        suite: domain
+  - id: req.foundation.deterministic-simulation.formulas-power-thermal
+    statement: Package power sums components and links; power delivery must cover load; each compute must touch thermal capacity, and shared spreader capacity is allocated across all touching compute.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: deterministic-simulation
+      rule: formulas-power-thermal
+    acceptance:
+      - check_id: check.foundation.deterministic-simulation.formulas-power-thermal
+        type: automated_test
+        suite: domain
+  - id: req.foundation.deterministic-simulation.workload-compile
+    statement: A published immutable design revision compiles exact placement, bonding, inspection, test, and packaging workloads and stage recipes from component, route, quality, congestion, and thermal data; every compiled recipe and WIP or product type carries that revision identity.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: deterministic-simulation
+      rule: workload-compile
+    acceptance:
+      - check_id: check.foundation.deterministic-simulation.workload-compile
+        type: automated_test
+        suite: domain
+  - id: req.foundation.deterministic-simulation.yield-model
+    statement: Each sourced component's base inspection and test work is multiplied by its quality tier before stage totals are calculated. Inspection reject probability is clamp from 0 to 0.25 of 0.006 plus quality-adjusted inspection workload times 0.0015 plus incoming defect exposure times 0.5; test reject probability is clamp from 0 to 0.30 of 0.01 plus quality-adjusted test workload times 0.0015 plus incoming defect exposure times 0.5 plus uncovered thermal watts times 0.008; total expected yield is both pass probabilities multiplied. Inspection and test are the only Milestone 2 reject stages.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: deterministic-simulation
+      rule: yield-model
+    acceptance:
+      - check_id: check.foundation.deterministic-simulation.yield-model
+        type: automated_test
+        suite: domain
+  - id: req.foundation.deterministic-simulation.machine-cycle
+    statement: Per-unit cycle seconds equal stage setup seconds plus compiled stage workload divided by capacity; ASM is 2 and 2 units/s, BND 1.5 and 1.5, INS 2 and 1.25, TST 2 and 1.5, and PKG 1 and 0.75. Recipe operating cost is charged once for each active cycle that begins consuming inputs.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: deterministic-simulation
+      rule: machine-cycle
+    acceptance:
+      - check_id: check.foundation.deterministic-simulation.machine-cycle
+        type: automated_test
+        suite: domain
+  - id: req.foundation.deterministic-simulation.accounting
+    statement: Purchases charge once at order, operating cost accrues only during active processing, rejected and scrapped items retain accumulated cost, and revenue is recognized only at Shipping per accepted unit.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: deterministic-simulation
+      rule: accounting
+    acceptance:
+      - check_id: check.foundation.deterministic-simulation.accounting
+        type: automated_test
+        suite: domain
+  - id: req.foundation.deterministic-simulation.expected-observed
+    statement: Design and procurement values are explicitly expected estimates; production counters and reports are observed cumulative outcomes.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: deterministic-simulation
+      rule: expected-observed
+    acceptance:
+      - check_id: check.foundation.deterministic-simulation.expected-observed
+        type: automated_test
+        suite: domain
+  - id: req.foundation.deterministic-simulation.starting-cash
+    statement: Starting cash equals the default-offer recommended buffered material purchase plus complete reference player-built factory capital plus 15 percent reserve.
+    priority: must
+    lifecycle: milestone
+    milestone: technical-sandbox
+    source:
+      specification: deterministic-simulation
+      rule: starting-cash
+    acceptance:
+      - check_id: check.foundation.deterministic-simulation.starting-cash
+        type: automated_test
+        suite: domain

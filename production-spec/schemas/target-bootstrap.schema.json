@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://chip-city.dev/production-spec/target-bootstrap.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "id",
+    "version",
+    "status",
+    "target_repository",
+    "engine",
+    "render_pipeline",
+    "contents",
+    "validation",
+    "branch_controls",
+    "provenance"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "id": {"const": "unity-target-bootstrap"},
+    "version": {"const": 1},
+    "status": {"enum": ["draft", "ready"]},
+    "target_repository": {"const": "kaimihata/silicon-game-v1"},
+    "engine": {"const": "Unity 6000.3.23f1"},
+    "render_pipeline": {"const": "Universal Render Pipeline"},
+    "contents": {
+      "const": [
+        "Assets/",
+        "Packages/manifest.json",
+        "Packages/packages-lock.json",
+        "ProjectSettings/ProjectVersion.txt",
+        "ProjectSettings/GraphicsSettings.asset",
+        "ProjectSettings/QualitySettings.asset",
+        "LICENSE",
+        "README-specification-import.md",
+        "specification-provenance.json",
+        "specifications/",
+        "code-factory/",
+        "scenarios/",
+        "environments/",
+        "verification/",
+        "target-bootstrap/"
+      ]
+    },
+    "validation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["unity_batch_import", "urp_asset_bound", "empty_scene_build", "specification_import", "license_exact"],
+      "properties": {
+        "unity_batch_import": {"const": "required"},
+        "urp_asset_bound": {"const": "required"},
+        "empty_scene_build": {"const": "windows_and_macos"},
+        "specification_import": {"const": "all_digests_match"},
+        "license_exact": {"const": "MIT"}
+      }
+    },
+    "branch_controls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "integration_branch",
+        "branch_protection",
+        "push_access",
+        "workflow_checks",
+        "base_sha_pinning",
+        "digest_approval",
+        "human_promotion",
+        "unexpected_movement",
+        "residual_risk"
+      ],
+      "properties": {
+        "integration_branch": {"const": "develop"},
+        "branch_protection": {"const": "unavailable_on_current_plan"},
+        "push_access": {"const": "owner_and_selected_service_identities_only"},
+        "workflow_checks": {"const": "required_for_exact_head_before_factory_authority"},
+        "base_sha_pinning": {"const": "direction_packet_base_revision_is_exact_40_hex_develop_head"},
+        "digest_approval": {"const": "immutable_specification_and_packet_digests_require_separate_human_approval"},
+        "human_promotion": {"const": "only_human_may_merge_bound_develop_revision_and_create_tag"},
+        "unexpected_movement": {"const": "invalidate_authority_and_revalidate_from_new_exact_head"},
+        "residual_risk": {"const": "selected_push_access_can_bypass_workflow_checks_by_direct_push"}
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["unity_project_creator", "specification_export", "license_source"],
+      "properties": {
+        "unity_project_creator": {"const": "Unity Hub or Unity command line using editor 6000.3.23f1 and URP template; record editor executable digest and template/package lock"},
+        "specification_export": {"const": "production-spec export provenance bound to exact clean source SHA; bundle review disposition is a separate digest-bound human artifact"},
+        "license_source": {"const": "production-spec/target-bootstrap/LICENSE"}
+      }
+    }
+  }
+}

@@ -1,0 +1,60 @@
+schema_version: 1
+id: onboarding
+version: 1
+status: ready
+title: First complete player and semantic-agent journey
+summary: Defines the New Game through 1,000-unit fulfillment route, guidance, optimization lesson, checkpoint evidence, and advancement rules.
+milestones: [technical-sandbox, playable-vertical-slice]
+sources:
+  - {path: docs/first-user-interaction.md, role: authority}
+  - {path: docs/code-factory/verification.md, role: authority}
+parameters:
+  - {id: contract-id, value: basic-display-1000}
+  - {id: product-id, value: product-display-100}
+  - {id: required-agent-runs, value: 3, unit: runs}
+rules:
+  - id: sandbox-gate
+    statement: Milestone 1 automatically advances only after independent evidence validates deterministic headless simulation, content pipeline, command boundary, observations, replay and hashes, saves, grid routing, recipes, multi-design and contract representation, minimal Unity harness, and tests.
+    level: normative
+    acceptance_notes: One semantic agent configures a sandbox factory and produces one accepted chip eligible for the Milestone 2 contract.
+  - id: starts-paused
+    statement: New Game begins paused on the campus with guidance active, one available contract, no purchased materials, fixed docks visible, and sufficient formula-derived starting cash.
+    level: normative
+    acceptance_notes: New-profile snapshot exactly matches content and has no simulation progress before resume.
+  - id: journey
+    statement: Guidance teaches contract acceptance, linked design draft, qualification and publication, procurement, machine and belt construction, recipe visibility, reject routing, production, bottleneck diagnosis, parallel scanner expansion, and delivery of 1,000 accepted chips.
+    level: normative
+    acceptance_notes: The goal-oriented scenario completes without debug state, prescribed coordinates, or hidden commands.
+  - id: alternatives
+    statement: Guidance permits valid layout and supplier alternatives and does not hard-gate adding the required parallel scanner through splitter and merger.
+    level: normative
+    acceptance_notes: Three seeds may use distinct layouts or purchases while satisfying the same invariants.
+  - id: persistent-simulation
+    statement: Production continues at current speed while Contracts, Designer, Procurement, reports, and menu overlays are open; global controls and alerts remain available.
+    level: normative
+    acceptance_notes: Tick counts advance equally behind each overlay and pause remains immediate.
+  - id: finish
+    statement: At the 1,000th eligible Shipping acceptance the contract becomes fulfilled, Shipping blocks extras, guidance explains contribution and loss if any, and future internal thermal production is previewed without unlocking it.
+    level: normative
+    acceptance_notes: Fulfillment event, finances, physical extra item, and preview copy are deterministic.
+  - id: three-agent-runs
+    statement: Milestone 2 requires three successful fresh agent-test profile playthroughs using different seeds, public observations, normal commands, and the default pacing.
+    level: normative
+    acceptance_notes: Each run has replay, decision trace, state hashes, captures, accounting, and requirement coverage.
+  - id: black-box
+    statement: A bounded black-box player uses ordinary mouse and keyboard input plus rendered output and accessibility semantics to validate discovery and visual feedback.
+    level: normative
+    acceptance_notes: Black-box evidence cannot call semantic endpoints or oracle state.
+  - id: checkpoint
+    statement: After every automated Milestone 2 requirement passes at one exact develop commit, the factory generates exactly one candidate checkpoint bound to that commit and exact evidence, packet, specification, and policy digests. It contains unsigned native builds, launch instructions, coverage, tests, traces, captures, Windows performance report, provisional decisions, risks, and deferred scope.
+    level: normative
+    acceptance_notes: Manifest verifies every deliverable; artifacts upload direct to Blob, are at most 5 GiB each, retain for 30 days, and leave only digest and metadata records in factory storage.
+  - id: human-final
+    statement: After the single candidate checkpoint exists, the named human personally playtests it and may emit an approval event authorizing only that exact checkpoint digest. The factory may then emit only a promotion request for the bound verified develop commit; a human verifies the head, merges that exact revision to main, and creates one immutable tag. Stale digest, commit, evidence, ancestry, approval, or unexpected develop movement is rejected and invalidates authority pending revalidation.
+    level: normative
+    acceptance_notes: Human approval is a post-checkpoint digest-bound transition, never a checkpoint-generation prerequisite or automated milestone requirement, and no automated signal may represent it.
+decisions:
+  - id: scanner-lesson
+    choice: Make Quality Scanner the initial reference bottleneck and require the agent to relieve it with parallel capacity.
+    rationale: This demonstrates diagnosis, split and merge logistics, and nonprescriptive optimization.
+    supersedes: [first-user-interaction open bottleneck question]

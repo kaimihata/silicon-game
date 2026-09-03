@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://chip-city.dev/production-spec/policy.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "id", "version", "status", "repositories", "branch_policy", "authority", "checkpoint_lifecycle", "epoch", "models", "notifications", "stops", "licenses", "artifact_policy", "retention_days", "critical_path_placeholders"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "id": {"$ref": "#/$defs/id"},
+    "version": {"type": "integer", "minimum": 1},
+    "status": {"enum": ["draft", "ready"]},
+    "repositories": {"type": "array", "minItems": 3, "items": {"type": "string", "pattern": "^[a-z0-9-]+/[a-z0-9-]+$"}},
+    "branch_policy": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "authority": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "checkpoint_lifecycle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["automated_gate", "candidate_generation", "personal_playtest", "approval_binding", "promotion", "stale_rejection"],
+      "properties": {
+        "automated_gate": {"const": "All automated Milestone 2 requirements pass through workflow checks at one exact develop commit"},
+        "candidate_generation": {"const": "Generate one candidate checkpoint over the exact develop commit and evidence, packet, specification, and policy digests"},
+        "personal_playtest": {"const": "The named human personally playtests the generated candidate checkpoint"},
+        "approval_binding": {"const": "The named human approval event authorizes only the exact candidate checkpoint digest"},
+        "promotion": {"const": "The factory emits a digest-bound promotion request; a human merges the bound develop commit to main and creates the requested immutable tag outside factory authority"},
+        "stale_rejection": {"const": "Reject changed or unexpectedly moved develop head, commit, ancestry, evidence, packet, specification, policy, checkpoint, or approval digests; invalidate authority until exact-head revalidation completes"}
+      }
+    },
+    "epoch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["wall_time_days", "agent_tasks", "external_cost_cents", "contingency_percent", "retries_per_task", "retries_per_unchanged_failure", "authors", "reviewers", "integrators", "rendered_playtests"],
+      "properties": {
+        "wall_time_days": {"const": 30},
+        "agent_tasks": {"const": 100},
+        "external_cost_cents": {"const": 500000},
+        "contingency_percent": {"const": 15},
+        "retries_per_task": {"const": 2},
+        "retries_per_unchanged_failure": {"const": 1},
+        "authors": {"const": 3},
+        "reviewers": {"const": 2},
+        "integrators": {"const": 1},
+        "rendered_playtests": {"const": 1}
+      }
+    },
+    "models": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "notifications": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "stops": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "licenses": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["software_allowlist", "asset_allowlist", "provenance_required", "new_paid_services"],
+      "properties": {
+        "software_allowlist": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
+        "asset_allowlist": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
+        "provenance_required": {"const": true},
+        "new_paid_services": {"const": "human_approval_required"}
+      }
+    },
+    "artifact_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["transport", "maximum_bytes", "retention_days", "factory_record"],
+      "properties": {
+        "transport": {"const": "direct_to_blob"},
+        "maximum_bytes": {"const": 5368709120},
+        "retention_days": {"const": 30},
+        "factory_record": {"const": "digest_and_metadata_only"}
+      }
+    },
+    "retention_days": {"const": 30},
+    "critical_path_placeholders": {"type": "array", "maxItems": 0}
+  },
+  "$defs": {"id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$", "maxLength": 128}}
+}

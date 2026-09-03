@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://chip-city.dev/production-spec/requirement-fragment-index.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "status", "entries"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "status": {"enum": ["draft", "ready"]},
+    "entries": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["requirement_id", "principal_source", "linked_sources"],
+        "properties": {
+          "requirement_id": {"$ref": "#/$defs/id"},
+          "principal_source": {"$ref": "#/$defs/source"},
+          "linked_sources": {"type": "array", "items": {"$ref": "#/$defs/source"}}
+        }
+      }
+    }
+  },
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$", "maxLength": 128},
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["specification", "rule", "fragment"],
+      "properties": {
+        "specification": {"$ref": "#/$defs/id"},
+        "rule": {"$ref": "#/$defs/id"},
+        "fragment": {"type": "string", "pattern": "^/rules/[0-9]+$"}
+      }
+    }
+  }
+}

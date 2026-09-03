@@ -1,0 +1,68 @@
+schema_version: 1
+id: player-protocol
+version: 1
+status: ready
+title: Shared command, observation, replay, and semantic HTTP protocol
+summary: Defines agent-native testing through the same public rule boundary as human play without oracle access.
+milestones: [technical-sandbox, playable-vertical-slice]
+sources:
+  - {path: docs/code-factory/player-protocol.md, role: authority}
+  - {path: docs/code-factory/verification.md, role: authority}
+parameters:
+  - {id: protocol-version, value: 1}
+  - {id: minimum-command-interval-ms, value: 500, unit: milliseconds}
+  - {id: semantic-host, value: 127.0.0.1}
+rules:
+  - id: shared-handlers
+    statement: Every meaningful human, semantic-agent, and replay mutation invokes the same typed atomic command handler with command ID and expected state revision.
+    level: normative
+    acceptance_notes: Adapter contract tests produce equivalent commands, results, state revisions, events, and hashes.
+  - id: command-result
+    statement: command_revision is an optimistic concurrency counter changed only by accepted commands; simulation_tick is changed only after a completed fixed tick; event_sequence is a globally monotonic unsigned integer assigned to every emitted event and never reused. A command received before phase 1 is stamped for the current not-yet-started tick, otherwise for the next tick; phase 1 orders equal-tick commands by command_id. Accepted commands increment command_revision exactly once at admission and return closed effects; rejected commands are atomic, do not increment revision or tick, may emit one rejection event with the next event_sequence, and return stable code, localization key, related entities, and locations when relevant. A command ID is idempotently bound to its canonical request bytes and original result.
+    level: normative
+    acceptance_notes: Stale revision, invalid state, funds, bounds, confirmation, and incompatible item errors are contract tested.
+  - id: observations
+    statement: Public observation carries command_revision, simulation_tick, latest_event_sequence, and a canonical state hash. Full snapshots expose only player-known entities, actions, disabled reasons, goals, inventories, rates, costs, statuses, events, and visible metadata. Delta requests provide since_command_revision and after_event_sequence independently; state changes are selected by command revision while event pages contain event_sequence strictly greater than the cursor, at most 500 events, and return next_event_sequence plus has_more. Pruned state revisions require a full snapshot; pruned event cursors return EVENT_CURSOR_EXPIRED and never silently skip.
+    level: normative
+    acceptance_notes: Semantic scenarios complete from observations while oracle-leak tests compare public and privileged projections.
+  - id: http-only
+    statement: The first semantic surface is versioned JSON HTTP on loopback only; future CLI or MCP tools must remain thin clients over this contract.
+    level: normative
+    acceptance_notes: Requests from non-loopback interfaces fail and OpenAPI or equivalent generated contract is versioned.
+  - id: opt-in-security
+    statement: Semantic service is disabled unless enabled by menu toggle or launch flag, uses an ephemeral launch token, and shows a persistent Agent Connected banner while connected.
+    level: normative
+    acceptance_notes: Missing, stale, or wrong token requests fail and the banner tracks actual connection state.
+  - id: observer-exclusion
+    statement: Human and agent commands are mutually exclusive in observer mode; a human may pause, disconnect, and take over through an explicit control.
+    level: normative
+    acceptance_notes: Race tests prove only one authority can submit at a revision.
+  - id: pacing
+    statement: The service enforces a default 500 millisecond minimum between accepted commands, configurable or disableable for testing without changing simulation results.
+    level: normative
+    acceptance_notes: Rate-limited attempts return a stable error and no revision change.
+  - id: trace-overlay
+    statement: Rendered observer mode may show current goal, action, result, and recent decision trace but never hidden state.
+    level: normative
+    acceptance_notes: Overlay fields are all derivable from public observations and submitted trace.
+  - id: replay
+    statement: Replay records versions, canonical profile initialization, seed, command submitted_at_tick, ordered accepted and rejected commands, results, command revisions, simulation ticks, event sequences, events, and state hashes. Playback applies commands only at their recorded tick boundary, verifies every cursor and checkpoint, and fails explicitly at the first incompatible semantic version or divergent digest.
+    level: normative
+    acceptance_notes: Exact replay reproduces final state and identifies first divergence when tampered.
+  - id: agent-evidence
+    statement: An agent run emits replay plus concise decision trace linking observation revision, goal, chosen action, expected result, actual result, and recovery.
+    level: normative
+    acceptance_notes: Evidence schema validation rejects missing reasoning links or revision mismatches.
+  - id: no-bypass
+    statement: The semantic interface exposes no resource creation, time travel, teleportation, hidden route planner, optimal factory command, oracle query, or rule bypass.
+    level: normative
+    acceptance_notes: Endpoint allowlist and behavior review confirm parity with meaningful human actions.
+  - id: destructive-confirmation
+    statement: A destructive command without confirmation returns CONFIRMATION_REQUIRED, a localized loss summary, and an ephemeral confirmation token bound to actor, exact arguments, and current revision; resubmission with that token executes atomically or fails stale.
+    level: normative
+    acceptance_notes: Recipe switch, equipment removal, New Game, WIP collection, archive, and delete share this confirmation contract.
+decisions:
+  - id: local-json-http
+    choice: Use loopback JSON HTTP as the first semantic transport.
+    rationale: It is engine-independent, observable, and thin wrappers can follow later.
+    supersedes: []

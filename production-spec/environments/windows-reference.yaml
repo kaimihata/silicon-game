@@ -1,0 +1,9 @@
+schema_version: 1
+id: windows-reference
+version: 1
+status: ready
+platform: windows-x86_64
+runner: factory-self-hosted
+hardware: [Windows 11, 6-core CPU, 16 GB RAM, RTX 3060 or RX 6600 class GPU, 1920x1080 display]
+software: [Unity 6000.3.23f1, Windows x86-64 player build, GPU driver version captured in evidence]
+purpose: [First-epoch semantic suite, first-epoch rendered suite, full gameplay reference, rendered agent playtest, 60 FPS measurement, cold-load and RAM measurement, native launch smoke]

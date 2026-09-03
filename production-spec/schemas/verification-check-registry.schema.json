@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://chip-city.dev/production-spec/verification-check-registry.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "id", "version", "status", "kind", "entries"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "id": {"const": "verification-checks"},
+    "version": {"type": "integer", "minimum": 1},
+    "status": {"enum": ["draft", "ready"]},
+    "kind": {"const": "checks"},
+    "entries": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "suite", "environment", "producer", "evaluator", "required_evidence", "runner_contract"],
+        "properties": {
+          "id": {"$ref": "#/$defs/id"},
+          "suite": {"$ref": "#/$defs/id"},
+          "scenario": {"$ref": "#/$defs/id"},
+          "fixture": {"$ref": "#/$defs/id"},
+          "environment": {"$ref": "#/$defs/id"},
+          "producer": {"$ref": "#/$defs/role"},
+          "evaluator": {"$ref": "#/$defs/role"},
+          "required_evidence": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/id"}},
+          "runner_contract": {"$ref": "#/$defs/id"}
+        }
+      }
+    }
+  },
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$", "maxLength": 128},
+    "role": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["actor", "class"],
+      "properties": {
+        "actor": {"$ref": "#/$defs/id"},
+        "class": {"enum": ["coding_agent", "verification_agent", "semantic_runner", "black_box_runner", "human_owner", "control_plane"]}
+      }
+    }
+  }
+}

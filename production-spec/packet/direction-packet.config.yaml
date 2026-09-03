@@ -1,0 +1,22 @@
+schema_version: 1
+status: ready
+packet_id: chip-city-foundation-01
+revision: 1
+title: Chip City production foundation and onboarding vertical slice
+target_repository: kaimihata/silicon-game-v1
+base_ref: develop
+owner: chip-city-owner
+approver: {github_user_id: 22643220, github_login: kaimihata}
+requirement_catalogs: [requirements/foundation.yaml, requirements/vertical-slice.yaml]
+policy: policy/first-run.yaml
+outcome: A new player and an observation-driven semantic test agent can design, procure, build, diagnose, optimize, and fulfill the 1,000-unit Basic Display Controller contract in a deterministic Unity production-direction vertical slice.
+excluded:
+  - Internal thermal, memory, substrate, interconnect, compute, I/O, and power production
+  - Audio, multiplayer, cloud saves, external telemetry, gamepad, and localization beyond English
+  - Multiple campuses, freight, mixed belts, belt crossings, floor storage, lead times, resale, bankruptcy, and campaign progression
+  - Final production art and autonomous final release approval
+principles:
+  - Preserve physical and readable cause and effect between chip design and factory behavior.
+  - Humans own product intent, factory authority, spending expansion, final merge, and tag creation; factory promotion authority is request-only.
+  - Deterministic evidence and player-visible observations outrank agent confidence.
+  - Continue around reversible noncritical gaps but stop affected work for critical ambiguity.

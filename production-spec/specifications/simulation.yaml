@@ -1,0 +1,74 @@
+schema_version: 1
+id: deterministic-simulation
+version: 1
+status: ready
+title: Deterministic simulation and economics
+summary: Defines time, seeded outcomes, workloads, yield, economics, conservation, and replay semantics.
+milestones: [technical-sandbox, playable-vertical-slice]
+sources:
+  - {path: docs/manufacturing-metrics.md, role: authority}
+  - {path: engine.js, role: provisional_values}
+  - {path: verification.test.js, role: validated_spike_behavior}
+parameters:
+  - {id: ticks-per-second, value: 10, unit: ticks per second}
+  - {id: speed-paused, value: 0, unit: multiplier}
+  - {id: speed-normal, value: 1, unit: multiplier}
+  - {id: speed-fast, value: 2, unit: multiplier}
+  - {id: speed-faster, value: 4, unit: multiplier}
+  - {id: procurement-buffer, value: 1.05, unit: multiplier, provisional: true}
+  - {id: starting-reserve, value: 0.15, unit: fraction, provisional: true}
+rules:
+  - id: fixed-tick
+    statement: >-
+      Authoritative simulation advances at exactly 10 fixed ticks per simulated second; pause, 1x, 2x, and 4x alter wall-time scheduling but never outcomes. One tick executes these stable phases in order, each iterating entities by ascending stable ID and never mutating the active collection during iteration: (1) admit commands whose submitted_at_tick equals the current tick in ascending command_id order, (2) reserve contract and lot inventory, (3) receiving and transport movement, (4) machine cycle completion and atomic outputs, (5) machine cycle starts and atomic input consumption, (6) inspection and test outcome resolution, (7) shipping reservation and delivery, (8) accounting and contract transitions, (9) emit events, increment tick, and checkpoint canonical state.
+    level: normative
+    acceptance_notes: Equivalent command traces at all speeds produce equal hashes at equal simulation ticks.
+  - id: seeded-unit-outcomes
+    statement: Every attempt is assigned product unit ID `unit:<design-revision-id>:<manufacturing-plan-digest-prefix-16>:<attempt-sequence>` when assembly atomically consumes its inputs; attempt-sequence is a zero-based monotonically increasing integer scoped to the design revision and manufacturing-plan digest and is never reused. Every attempted unit receives exactly one pass or reject outcome at inspection and exactly one pass or reject outcome at test. Each draw is keyed independently by the canonical tuple of scenario seed, full stable product unit ID, stage ID, and outcome algorithm version; SHA-256's first unsigned big-endian 53 bits divided by 2^53 is compared with the stage reject probability represented as integer ppm. Draws never depend on frame rate, collection iteration order, machine identity, or presentation timing.
+    level: normative
+    acceptance_notes: Counter-order permutations, frame schedules, machine layouts, and accepted-command replay reproduce every mutually exclusive unit result and checkpoint hash.
+  - id: state-hash
+    statement: Canonical authoritative state is RFC 8785 JSON encoded as UTF-8 and hashed with SHA-256. It includes save schema version, simulation semantics version, scenario seed, next product attempt sequences, command revision, simulation tick, next event sequence, speed, cash in integer micro-USD, contracts and reservations, immutable designs and manufacturing plans by digest, inventories and lot provenance, entities, buffers, WIP and product units, machine progress in integer microticks, and accepted command-id results; it excludes wall clocks, render state, localized strings, connection tokens, transient diagnostics, and derived caches. Arrays are sorted by their schema-defined stable IDs. Hashes are emitted only after a completed command boundary or tick.
+    level: normative
+    acceptance_notes: Property tests prove identical input state and command sequence yield identical hashes.
+  - id: formulas-product
+    statement: Raw compute is sum of cores times GHz times architecture factor times 10; effective bandwidth follows graph paths and is limited by memory, links, distance and congestion; sustained compute is raw compute times min of one and bandwidth supply over demand.
+    level: normative
+    acceptance_notes: Golden tests cover CP-110 and CP-130, Standard and Wide links, shared routes, and bandwidth bottlenecks.
+  - id: formulas-power-thermal
+    statement: Package power sums components and links; power delivery must cover load; each compute must touch thermal capacity, and shared spreader capacity is allocated across all touching compute.
+    level: normative
+    acceptance_notes: Tests cover uncovered compute, overcommitted shared spreader, sufficient power, and headroom display.
+  - id: workload-compile
+    statement: A published immutable design revision plus immutable lot-bound manufacturing-plan digest compiles exact placement, bonding, inspection, test, and packaging workloads and stage recipes from component, route, allocated lot quality, congestion, and thermal data; every compiled recipe and WIP or product type carries both identities. Lot consumption is deterministic by BOM item ID, product attempt sequence, allocation declaration index, then lot ID; an attempt never blends two lots for one indivisible BOM unit, while different BOM units and attempts may use different lots.
+    level: normative
+    acceptance_notes: Golden reference fixtures compile stable workloads and recipes, while CP-130 and MD-130 compile a distinct compatible BOM and workload set.
+  - id: yield-model
+    statement: Each manufacturing-plan lot allocation snapshots quality, integer micro-USD unit cost, and integer defect probability ppm. Per-attempt quality multipliers and incoming defect exposure are quantity-weighted across the exact lots consumed by that attempt; plan-level expected workload and yield are allocation-unit weighted. Inspection reject probability is clamp from 0 to 250000 ppm of 6000 plus quality-adjusted inspection workload times 1500 ppm plus incoming defect exposure times 0.5; test reject probability is clamp from 0 to 300000 ppm of 10000 plus quality-adjusted test workload times 1500 ppm plus incoming defect exposure times 0.5 plus uncovered thermal watts times 8000 ppm. Intermediate workloads and cycle seconds round half away from zero to six decimal places after each formula; money remains integer micro-USD, probabilities remain integer ppm, and division rounds half away from zero. Total expected yield is the two integer pass probabilities multiplied and rounded to ppm. Inspection and test are the only Milestone 2 reject stages.
+    level: normative
+    acceptance_notes: Functional product metrics are equal across compatible quality offers, while yield and stage work differ.
+  - id: machine-cycle
+    statement: Per-unit cycle seconds equal stage setup seconds plus compiled stage workload divided by capacity; ASM is 2 and 2 units/s, BND 1.5 and 1.5, INS 2 and 1.25, TST 2 and 1.5, and PKG 1 and 0.75. Recipe operating cost is charged once for each active cycle that begins consuming inputs.
+    level: normative
+    acceptance_notes: With default Premium MD-110 sourcing, stage cycles are 5, 3.5, 8.32, 6.87, and 4.33 seconds and sum to 30 USD operating cost per attempt.
+  - id: accounting
+    statement: Purchases charge once at order, operating cost accrues only during active processing, rejected and scrapped items retain accumulated cost, and revenue is recognized only at Shipping per accepted unit.
+    level: normative
+    acceptance_notes: Conservation properties reconcile cash, inventory, WIP, scrap, accepted deliveries, capital, operating expense, and revenue.
+  - id: expected-observed
+    statement: Design and procurement values are explicitly expected estimates; production counters and reports are observed cumulative outcomes.
+    level: normative
+    acceptance_notes: UI and API use distinct expected and observed field names and labels.
+  - id: starting-cash
+    statement: Starting cash equals the default-offer recommended buffered material purchase plus complete reference player-built factory capital plus 15 percent reserve.
+    level: normative
+    acceptance_notes: Content compiler emits the arithmetic inputs and exact derived starting cash.
+  - id: contribution-target
+    statement: The reasonable starter design targets 10 to 15 percent expected contribution margin after input, operating, and reject loss, excluding reusable capital.
+    level: normative
+    acceptance_notes: Balance report calculates the percentage and fails outside the range.
+decisions:
+  - id: stochastic-replaces-fractional
+    choice: Use seeded per-unit results rather than fractional expected production counts.
+    rationale: Production gameplay needs visible discrete items and exact replay.
+    supersedes: [browser fractional expected production]

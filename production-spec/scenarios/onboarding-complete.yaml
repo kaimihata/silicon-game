@@ -1,0 +1,81 @@
+schema_version: 1
+id: onboarding-complete
+version: 1
+status: ready
+title: Fresh semantic player completes the full onboarding contract
+milestone: playable-vertical-slice
+environment: windows-reference
+requirements:
+  - req.slice.contract-design
+  - req.slice.factory
+  - req.slice.fulfillment
+  - req.slice.agent-runs
+seeds:
+  - 1103
+  - 2207
+  - 3301
+initial_state:
+  fixture_id: onboarding-complete-initial-state
+  label: Brand-new isolated agent-test profile at paused campus with guidance enabled and no purchased inventory.
+  inputs: [starter-catalog, default-qualifying-design, default-manufacturing-plan, complete-reference-factory]
+execution_contract:
+  setup_contract: fixture.setup.onboarding-complete
+  runner_contract: runner.semantic-playtest
+  command: "factory.verify.semantic-playtest --scenario onboarding-complete --fixture onboarding-complete-initial-state --seed {seed} --evidence-dir {evidence_dir}"
+  semantic_api: /api/v1/commands
+  verdict: pass only when setup state assertions pass, every declared scenario assertion evaluates true, budgets are not exceeded, every required evidence artifact validates and its digest is recorded, replay hash mismatch count is zero when replay evidence is required, and the runner exits zero; otherwise fail
+player_knowledge:
+  - Public observations
+  - English UI and localization semantics
+  - Goal and budget shown by the game
+  - No reference coordinates or command sequence
+goals:
+  - assertion_id: assert.onboarding-complete.goal.01
+    metric: accepted-deliveries
+    operator: equal
+    value: 1000
+  - assertion_id: assert.onboarding-complete.goal.02
+    metric: fulfilled-contracts
+    operator: equal
+    value: 1
+  - assertion_id: assert.onboarding-complete.goal.03
+    metric: replay-hash-mismatches
+    operator: equal
+    value: 0
+invariants:
+  - assertion_id: assert.onboarding-complete.invariant.01
+    label: Contract is never abandoned
+  - assertion_id: assert.onboarding-complete.invariant.02
+    label: Rejected and scrapped units never count
+  - assertion_id: assert.onboarding-complete.invariant.03
+    label: All purchases and active processing are charged once
+  - assertion_id: assert.onboarding-complete.invariant.04
+    label: No item disappears
+  - assertion_id: assert.onboarding-complete.invariant.05
+    label: Agent never accesses human profiles or oracle state
+budgets:
+  simulation_minutes: 180
+  player_commands: 1500
+required_behaviors:
+  - assertion_id: assert.onboarding-complete.required_behavior.01
+    label: Accept contract and publish linked design
+  - assertion_id: assert.onboarding-complete.required_behavior.02
+    label: Use Purchase All then make any needed supplemental purchase
+  - assertion_id: assert.onboarding-complete.required_behavior.03
+    label: Build a complete line with reject routes
+  - assertion_id: assert.onboarding-complete.required_behavior.04
+    label: Diagnose Quality Scanner as the first bottleneck
+  - assertion_id: assert.onboarding-complete.required_behavior.05
+    label: Add parallel scanner through splitter and merger
+  - assertion_id: assert.onboarding-complete.required_behavior.06
+    label: Deliver exactly one thousand accepted chips
+  - assertion_id: assert.onboarding-complete.required_behavior.07
+    label: Explain final contribution or loss
+evidence:
+  - replay
+  - decision-trace
+  - semantic-report
+  - screenshots
+  - video
+  - accounting-report
+  - requirement-coverage

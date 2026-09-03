@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://chip-city.dev/production-spec/compiled-recipes.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "id", "version", "status", "reference_only", "derived_from", "recipes"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "id": {"const": "default-compiled-recipes"},
+    "version": {"type": "integer", "minimum": 1},
+    "status": {"enum": ["draft", "ready"]},
+    "reference_only": {"const": true},
+    "derived_from": {"const": "default-manufacturing-plan"},
+    "recipes": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "stage", "design_revision_id", "manufacturing_plan_id", "inputs", "pass_output", "workload", "cycle_seconds", "operating_cost_usd"],
+        "properties": {
+          "id": {"$ref": "#/$defs/id"},
+          "stage": {"enum": ["assembly", "bonding", "inspection", "test", "packaging"]},
+          "design_revision_id": {"$ref": "#/$defs/id"},
+          "manufacturing_plan_id": {"const": "default-manufacturing-plan"},
+          "inputs": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/quantity"}},
+          "pass_output": {"$ref": "#/$defs/quantity"},
+          "reject_output": {"$ref": "#/$defs/quantity"},
+          "outcome_mode": {"enum": ["deterministic", "exactly_one_seeded"]},
+          "workload": {"type": "number", "minimum": 0},
+          "cycle_seconds": {"type": "number", "exclusiveMinimum": 0},
+          "operating_cost_usd": {"type": "number", "minimum": 0}
+        }
+      }
+    }
+  },
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$", "maxLength": 180},
+    "quantity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["item_id", "quantity", "port_id"],
+      "properties": {
+        "item_id": {"$ref": "#/$defs/id"},
+        "quantity": {"type": "integer", "minimum": 1},
+        "port_id": {"$ref": "#/$defs/id"}
+      }
+    }
+  }
+}

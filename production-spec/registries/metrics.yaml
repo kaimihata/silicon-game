@@ -1,0 +1,126 @@
+schema_version: 1
+id: metrics
+version: 1
+status: ready
+kind: metrics
+entries:
+  - id: frame-time-p95
+    path: code-factory/registries/metrics.yaml
+    value_type: number
+    unit: milliseconds
+    definition: 95th percentile of rendered frame elapsed time after warm-up on the reference gameplay route.
+    sources: [render.frame_elapsed_milliseconds]
+    aggregation: percentile_95
+    window: All rendered frames during the fixed 15-minute post-warm-up reference route
+  - id: cold-main-menu-load
+    path: code-factory/registries/metrics.yaml
+    value_type: number
+    unit: milliseconds
+    definition: Elapsed monotonic time from process start to the first interactive main-menu frame.
+    sources: [process.started_monotonic_ms, ui.main_menu_interactive_monotonic_ms]
+    aggregation: identity
+    window: One cold process launch with caches cleared by the runner contract
+  - id: process-ram
+    path: code-factory/registries/metrics.yaml
+    value_type: number
+    unit: megabytes
+    definition: Maximum resident set size of the player process during the reference gameplay route.
+    sources: [process.resident_set_bytes]
+    aggregation: maximum
+    window: Fixed 15-minute post-warm-up reference route
+  - id: accepted-deliveries
+    path: code-factory/registries/metrics.yaml
+    value_type: integer
+    unit: count
+    definition: Count of shipping.accepted events for products eligible for the selected contract.
+    sources: [shipping.accepted.contract_id, shipping.accepted.product_unit_id]
+    aggregation: count
+    window: Scenario start through terminal assertion
+  - id: fulfilled-contracts
+    path: code-factory/registries/metrics.yaml
+    value_type: integer
+    unit: count
+    definition: Count of distinct contract.fulfilled events.
+    sources: [contract.fulfilled.contract_id]
+    aggregation: count
+    window: Scenario start through terminal assertion
+  - id: replay-hash-mismatches
+    path: code-factory/registries/metrics.yaml
+    value_type: integer
+    unit: count
+    definition: Count of replay checkpoints whose recomputed authoritative state hash differs from the recorded hash.
+    sources: [replay.checkpoint.recorded_hash, replay.checkpoint.recomputed_hash]
+    aggregation: count
+    window: Complete replay of the scenario accepted-command trace
+  - id: scanner-count
+    path: code-factory/registries/metrics.yaml
+    value_type: integer
+    unit: count
+    definition: Count of placed INS-100 entities in the authoritative campus state.
+    sources: [campus.entities.machine_model_id]
+    aggregation: count
+    window: At terminal assertion revision
+  - id: accepted-rate-improvement-percent
+    path: code-factory/registries/metrics.yaml
+    value_type: number
+    unit: percent
+    definition: One hundred times post-change accepted-unit rate minus baseline rate divided by baseline rate.
+    sources: [production.accepted_units, simulation.elapsed_seconds, scenario.phase]
+    aggregation: ratio_percent
+    window: Equal stable 10-minute baseline and post-change simulation windows
+  - id: published-eligible-designs
+    path: code-factory/registries/metrics.yaml
+    value_type: integer
+    unit: count
+    definition: Count of immutable published revisions currently eligible for the selected contract.
+    sources: [design.revision.published, design.revision.qualification.contract_id]
+    aggregation: count
+    window: At terminal assertion revision
+  - id: unexplained-validation-errors
+    path: code-factory/registries/metrics.yaml
+    value_type: integer
+    unit: count
+    definition: Count of rejected design commands lacking a stable error code, localization key, and related visible entities or cells when relevant.
+    sources: [command.rejected.error_code, command.rejected.localization_key, command.rejected.related_entities, command.rejected.locations]
+    aggregation: count
+    window: Complete scenario command trace
+  - id: unreachable-management-actions
+    path: code-factory/registries/metrics.yaml
+    value_type: integer
+    unit: count
+    definition: Count of required nonspatial management actions not invocable using the registered keyboard traversal and activation inputs.
+    sources: [accessibility.required_action_id, accessibility.keyboard_invocable]
+    aggregation: count
+    window: Complete accessibility action inventory at each supported layout
+  - id: clipped-required-controls
+    path: code-factory/registries/metrics.yaml
+    value_type: integer
+    unit: count
+    definition: Count of required controls whose rendered bounds are outside the safe viewport or whose text is truncated.
+    sources: [ui.control.required, ui.control.bounds, ui.control.text_clipped, ui.viewport.safe_bounds]
+    aggregation: count
+    window: Every mandated overlay at 1280x720 1920x1080 and 3840x2160
+  - id: unresolved-visible-faults
+    path: code-factory/registries/metrics.yaml
+    value_type: integer
+    unit: count
+    definition: Count of fixture-declared visible starvation blockage reject or route faults still active.
+    sources: [fixture.visible_fault_ids, observation.active_fault_ids]
+    aggregation: count
+    window: At terminal assertion revision
+  - id: recovered-human-saves
+    path: code-factory/registries/metrics.yaml
+    value_type: integer
+    unit: count
+    definition: Count of human profiles loaded from a hash-verified backup after the primary load failed.
+    sources: [save.primary_load_failed.profile_id, save.backup_verified.profile_id, save.backup_loaded.profile_id]
+    aggregation: count
+    window: Complete recovery scenario
+  - id: human-save-agent-accesses
+    path: code-factory/registries/metrics.yaml
+    value_type: integer
+    unit: count
+    definition: Count of successful agent-service enumerate read write migrate or delete operations against the human profile storage root.
+    sources: [audit.actor_class, audit.profile_namespace, audit.operation, audit.accepted]
+    aggregation: count
+    window: Complete recovery and isolation scenario

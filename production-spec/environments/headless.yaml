@@ -1,0 +1,9 @@
+schema_version: 1
+id: headless-domain
+version: 1
+status: ready
+platform: headless
+runner: github-hosted
+hardware: [No GPU requirement, At least 4 logical CPU cores, At least 8 GB RAM]
+software: [Unity 6000.3.23f1 batch mode, dotnet runtime selected by Unity, compiled canonical content]
+purpose: [Domain tests, content compilation, deterministic replay, semantic sandbox scenarios]

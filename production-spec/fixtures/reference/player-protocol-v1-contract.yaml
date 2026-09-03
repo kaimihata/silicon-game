@@ -1,0 +1,59 @@
+schema_version: 1
+id: player-protocol-v1-contract
+version: 1
+status: ready
+request_defaults: {protocol_version: 1, actor_id: agent-1, agent_test_profile_id: profile-1, expected_command_revision: 0}
+request_cases:
+  - {command_id: cmd-01, action: set_speed, arguments: {speed: 1}}
+  - {command_id: cmd-02, action: save_now, arguments: {}}
+  - {command_id: cmd-03, action: disconnect_agent, arguments: {}}
+  - {command_id: cmd-04, action: accept_contract, arguments: {contract_id: contract-1}}
+  - {command_id: cmd-05, action: create_linked_design, arguments: {contract_id: contract-1, name: Controller}}
+  - {command_id: cmd-06, action: assign_design_revision, arguments: {contract_id: contract-1, design_revision_id: controller-r1}}
+  - {command_id: cmd-07, action: assign_manufacturing_plan, arguments: {contract_id: contract-1, manufacturing_plan_digest: "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}}
+  - {command_id: cmd-08, action: set_shipping_priority, arguments: {contract_id: contract-1, priority: 1}}
+  - {command_id: cmd-09, action: reserve_finished_inventory, arguments: {product_unit_id: "unit:controller-r1:aaaaaaaaaaaaaaaa:0", contract_id: contract-1}}
+  - {command_id: cmd-10, action: release_finished_inventory, arguments: {product_unit_id: "unit:controller-r1:aaaaaaaaaaaaaaaa:0"}}
+  - {command_id: cmd-11, action: reassign_finished_inventory, arguments: {product_unit_id: "unit:controller-r1:aaaaaaaaaaaaaaaa:0", from_contract_id: contract-1, to_contract_id: contract-2}}
+  - {command_id: cmd-12, action: create_standalone_design, arguments: {name: Controller}}
+  - {command_id: cmd-13, action: associate_design, arguments: {design_id: design-1, contract_id: contract-1}}
+  - {command_id: cmd-14, action: rename_design, arguments: {design_id: design-1, name: Controller}}
+  - {command_id: cmd-15, action: add_component, arguments: {design_id: design-1, instance_id: compute-1, item_id: cp-110, position: {x: 1, y: 1}, rotation: 0}}
+  - {command_id: cmd-16, action: move_component, arguments: {design_id: design-1, instance_id: compute-1, position: {x: 2, y: 1}}}
+  - {command_id: cmd-17, action: rotate_component, arguments: {design_id: design-1, instance_id: memory-1, rotation: 90}}
+  - {command_id: cmd-18, action: remove_component, arguments: {design_id: design-1, instance_id: compute-1}}
+  - {command_id: cmd-19, action: add_connection, arguments: {design_id: design-1, connection_id: link-1, technology_id: dl-110, from_instance_id: compute-1, to_instance_id: memory-1, route: [{x: 2, y: 1}, {x: 3, y: 1}]}}
+  - {command_id: cmd-20, action: remove_connection, arguments: {design_id: design-1, connection_id: link-1}}
+  - {command_id: cmd-21, action: set_minimum_quality, arguments: {design_id: design-1, item_id: cp-110, quality: value}}
+  - {command_id: cmd-22, action: undo_design, arguments: {design_id: design-1}}
+  - {command_id: cmd-23, action: redo_design, arguments: {design_id: design-1}}
+  - {command_id: cmd-24, action: publish_design, arguments: {design_id: design-1}}
+  - {command_id: cmd-25, action: archive_design, arguments: {design_id: design-1}}
+  - {command_id: cmd-26, action: delete_design, arguments: {design_id: design-1}}
+  - {command_id: cmd-27, action: purchase_items, arguments: {items: [{offer_id: northstar-cp-110-value, quantity: 1}]}}
+  - {command_id: cmd-28, action: place_entity, arguments: {entity_id: asm-1, catalog_id: asm-100, position: {x: 1, y: 1}, rotation: 0}}
+  - {command_id: cmd-29, action: rotate_entity, arguments: {entity_id: asm-1, rotation: 90}}
+  - {command_id: cmd-30, action: remove_entity, arguments: {entity_id: asm-1}}
+  - {command_id: cmd-31, action: build_belt_path, arguments: {belt_id: belt-1, path: [{x: 1, y: 1}, {x: 2, y: 1}]}}
+  - {command_id: cmd-32, action: set_machine_recipe, arguments: {entity_id: asm-1, recipe_id: assembly-controller-r1}}
+  - {command_id: cmd-33, action: set_receiving_assignment, arguments: {entity_id: receiving-1, lot_id: lot-cp-001}}
+  - {command_id: cmd-34, action: begin_collection, arguments: {entity_id: collector-1}}
+  - {command_id: cmd-35, action: end_collection, arguments: {entity_id: collector-1}}
+  - {command_id: cmd-36, action: set_selected_contract, arguments: {entity_id: shipping-1, contract_id: contract-1}}
+responses:
+  - protocol_version: 1
+    command_id: cmd-01
+    accepted: true
+    command_revision: 1
+    simulation_tick: 0
+    latest_event_sequence: 1
+    effects: [{type: simulation_changed, subject_id: simulation}]
+    events: [{event_sequence: 1, simulation_tick: 0, type: command_accepted, subject_id: cmd-01}]
+    state_hash: "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  - protocol_version: 1
+    command_id: cmd-37
+    accepted: false
+    command_revision: 1
+    simulation_tick: 0
+    latest_event_sequence: 2
+    error: {code: STALE_REVISION, localization_key: error.stale-revision, related_entities: [], locations: []}

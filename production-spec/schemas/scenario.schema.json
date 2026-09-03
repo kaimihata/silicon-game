@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://chip-city.dev/production-spec/scenario.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "id", "version", "status", "title", "milestone", "environment", "requirements", "seeds", "initial_state", "execution_contract", "player_knowledge", "goals", "invariants", "budgets", "required_behaviors", "evidence"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "id": {"$ref": "#/$defs/id"},
+    "version": {"type": "integer", "minimum": 1},
+    "status": {"enum": ["draft", "ready"]},
+    "title": {"type": "string", "minLength": 1},
+    "milestone": {"$ref": "#/$defs/id"},
+    "environment": {"$ref": "#/$defs/id"},
+    "requirements": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/id"}},
+    "seeds": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "integer", "minimum": 0}},
+    "initial_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fixture_id", "label", "inputs"],
+      "properties": {
+        "fixture_id": {"$ref": "#/$defs/id"},
+        "label": {"type": "string", "minLength": 1},
+        "inputs": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/id"}}
+      }
+    },
+    "execution_contract": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": ["setup_contract", "runner_contract", "command", "semantic_api", "verdict"],
+     "properties": {
+       "setup_contract": {"$ref": "#/$defs/id"},
+       "runner_contract": {"$ref": "#/$defs/id"},
+       "command": {"type": "string", "pattern": "^factory\\.[a-z0-9.-]+ --scenario [a-z0-9._-]+ --fixture [a-z0-9._-]+ --seed \\{seed\\} --evidence-dir \\{evidence_dir\\}$"},
+       "semantic_api": {"enum": ["/api/v1/commands", "ordinary_input_only"]},
+       "verdict": {"const": "pass only when setup state assertions pass, every declared scenario assertion evaluates true, budgets are not exceeded, every required evidence artifact validates and its digest is recorded, replay hash mismatch count is zero when replay evidence is required, and the runner exits zero; otherwise fail"}
+     }
+    },
+    "player_knowledge": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "goals": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["assertion_id", "metric", "operator", "value"],
+        "properties": {
+          "assertion_id": {"$ref": "#/$defs/id"},
+          "metric": {"$ref": "#/$defs/id"},
+          "operator": {"$ref": "#/$defs/operator"},
+          "value": {"type": "number"}
+        }
+      }
+    },
+    "invariants": {"$ref": "#/$defs/checks"},
+    "budgets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["simulation_minutes", "player_commands"],
+      "properties": {
+        "simulation_minutes": {"type": "integer", "minimum": 1},
+        "player_commands": {"type": "integer", "minimum": 1}
+      }
+    },
+    "required_behaviors": {"$ref": "#/$defs/checks"},
+    "evidence": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/id"}}
+  },
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$", "maxLength": 128},
+    "operator": {"enum": ["equal", "not_equal", "less_than", "less_than_or_equal", "greater_than", "greater_than_or_equal"]},
+    "checks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["assertion_id", "label"],
+        "properties": {
+          "assertion_id": {"$ref": "#/$defs/id"},
+          "label": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,90 @@
+schema_version: 1
+id: factory-logistics
+version: 1
+status: ready
+title: Factory placement, logistics, machines, recipes, and item flow
+summary: Defines the 32 by 20 factory, fixed endpoints, directional belts, machine execution, WIP identity, recipe switching, collection, and diagnostics.
+milestones: [technical-sandbox, playable-vertical-slice]
+sources:
+  - {path: docs/factory-machines.md, role: authority}
+  - {path: docs/first-user-interaction.md, role: authority}
+  - {path: engine.js, role: validated_spike_behavior}
+parameters:
+  - {id: floor-width, value: 32, unit: cells, provisional: true}
+  - {id: floor-height, value: 20, unit: cells, provisional: true}
+  - {id: belt-capacity, value: 1, unit: item per cell}
+  - {id: belt-rate, value: 1, unit: items per second, provisional: true}
+rules:
+  - id: fixed-endpoints
+    statement: Preplaced edge receiving bays, one Shipping Dock, and one unlimited Scrap Collector are free, immovable, and nonremovable; onboarding auto-assigns one receiving stream per BOM item.
+    level: normative
+    acceptance_notes: New-game fixture contains distinct truck-loading bays and fixed endpoint commands reject move or removal.
+  - id: machine-placement
+    statement: Processing machines occupy rotatable 3 by 3 footprints, expose rotated generic ports, build instantly while paused or running when affordable, and remain selected for repeated placement until cancel or tool change.
+    level: normative
+    acceptance_notes: Bounds, overlap, cost, rotation, repeat, Escape, right-click, and tool-switch tests pass.
+  - id: belts
+    statement: Belts are directional, occupy one cell, carry one discrete visible item per cell at finite rate, cannot cross or overlap equipment, and support no mixed stream in onboarding.
+    level: normative
+    acceptance_notes: Conservation tests cover movement, blocking, invalid intersections, and type mismatch.
+  - id: belt-building
+    statement: Dragging endpoints previews a deterministic default L path; release atomically builds the entire valid route or rejects it in red without charge, and alternate bends use multiple segments.
+    level: normative
+    acceptance_notes: Same endpoints and occupancy yield the same path; any invalid cell rejects the transaction.
+  - id: splitter-merger
+    statement: Splitters route single-item streams round-robin across unblocked outputs; mergers select the oldest waiting item with stable input-port order as a tie-break.
+    level: normative
+    acceptance_notes: Deterministic tests cover blocked outputs, equal ages, fairness, and exact replay.
+  - id: recipe-identity
+    statement: Machines are not globally tied to a design; an active recipe is compiled from universal stage templates, references one published immutable design revision, binds exact typed inputs to generic ports, and emits only WIP, product, or reject IDs carrying that revision identity.
+    level: normative
+    acceptance_notes: Two machines concurrently execute different revisions and report their exact recipe identity.
+  - id: onboarding-autoconfigure
+    statement: A newly placed onboarding machine auto-selects the sole compatible current-contract recipe and visibly shows it; zero or multiple compatible recipes leave it unconfigured.
+    level: normative
+    acceptance_notes: Fixtures cover sole, none, and ambiguous compatibility.
+  - id: input-driven
+    statement: A configured machine consumes a complete available input set whenever all required per-port buffers are ready, stops when any input is missing, and needs no production order.
+    level: normative
+    acceptance_notes: Tick tests prove no partial consumption and correct starvation.
+  - id: machine-buffers
+    statement: Each input port independently accepts only its recipe-bound type up to finite capacity; processing locks one set; output waits in finite capacity and blocks the machine until routed.
+    level: normative
+    acceptance_notes: No item disappears under full ports, output blocking, or incompatible arrival.
+  - id: starter-ports
+    statement: Starter ports are ASM five inputs and one output, BND two and one, INS one and two, TST one and two, and PKG three and one.
+    level: normative
+    acceptance_notes: Catalog and rendered port labels exactly match recipe bindings.
+  - id: immutable-wip
+    statement: WIP carries immutable design-revision identity and accumulated source, lot, quality, input cost, operating cost, and processing history through every stage.
+    level: normative
+    acceptance_notes: Downstream execution uses WIP identity and accounting metadata after save, load, and replay.
+  - id: recipe-switch
+    statement: Switching recipe has no setup time or fee; after explicit confirmation it immediately scraps an in-process unit and incompatible buffered inputs, while incompatible incoming belt items stop at the port and may block.
+    level: normative
+    acceptance_notes: Preview identifies losses and one accepted command records each scrapped item and value.
+  - id: rejects
+    statement: Only Quality Scanner and Chip Tester choose a reject outcome, each through its reject port; each consumed unit creates exactly one mutually exclusive pass or reject output. Scrap accepts unlimited items and logs type, reason, design revision, source metadata, and lost value.
+    level: normative
+    acceptance_notes: Reject streams never reach Packaging or count toward delivery.
+  - id: operating-state
+    statement: Machines independently expose No recipe, Missing input or starved, Working, Output blocked, utilization, overload, and bottleneck contribution while incomplete factories may run.
+    level: normative
+    acceptance_notes: Public observations and visuals explain every state from player-visible causes.
+  - id: removal
+    statement: Equipment removal is allowed only while paused, refunds full capital, and after confirmation scraps contained input, WIP, and output while preserving prior material and operating spend.
+    level: normative
+    acceptance_notes: Removal preview and accounting reconcile capital refund and material loss.
+  - id: collection
+    statement: Holding the remappable collection action over a belt continuously collects advancing items; purchased inputs return to matching off-floor inventory, while WIP and finished goods require one confirmation per collection action and become logged scrap.
+    level: normative
+    acceptance_notes: Continuous collection preserves lots and the confirmation scope ends when the key is released.
+  - id: scanner-bottleneck
+    statement: The reference line's intentional initial bottleneck is INS-100; adding a parallel scanner through splitter and merger removes it without tutorial hard gating.
+    level: normative
+    acceptance_notes: Semantic acceptance must diagnose and relieve this bottleneck.
+decisions:
+  - id: directional-discrete-logistics
+    choice: Replace browser bidirectional connectivity checks and fractional flow with directional discrete item simulation.
+    rationale: Player-visible causality, blocking, and exact unit provenance are foundation goals.
+    supersedes: [browser bidirectional track graph, browser aggregate production]

@@ -1,0 +1,62 @@
+schema_version: 1
+id: sandbox-accepted-chip
+version: 1
+status: ready
+title: Semantic sandbox produces one accepted chip
+milestone: technical-sandbox
+environment: headless-domain
+requirements:
+  - req.foundation.semantic-chip
+seeds:
+  - 101
+initial_state:
+  fixture_id: sandbox-accepted-chip-initial-state
+  label: Empty agent-test profile with two representable contracts and starter content; no factory layout or inventory.
+  inputs: [starter-catalog, default-qualifying-design, default-manufacturing-plan]
+execution_contract:
+  setup_contract: fixture.setup.sandbox-accepted-chip
+  runner_contract: runner.semantic-playtest
+  command: "factory.verify.semantic-playtest --scenario sandbox-accepted-chip --fixture sandbox-accepted-chip-initial-state --seed {seed} --evidence-dir {evidence_dir}"
+  semantic_api: /api/v1/commands
+  verdict: pass only when setup state assertions pass, every declared scenario assertion evaluates true, budgets are not exceeded, every required evidence artifact validates and its digest is recorded, replay hash mismatch count is zero when replay evidence is required, and the runner exits zero; otherwise fail
+player_knowledge:
+  - Public starter catalog
+  - Public command descriptions
+  - Goal to produce one eligible accepted Basic Display Controller
+goals:
+  - assertion_id: assert.sandbox-accepted-chip.goal.01
+    metric: accepted-deliveries
+    operator: greater_than_or_equal
+    value: 1
+  - assertion_id: assert.sandbox-accepted-chip.goal.02
+    metric: replay-hash-mismatches
+    operator: equal
+    value: 0
+invariants:
+  - assertion_id: assert.sandbox-accepted-chip.invariant.01
+    label: No oracle access
+  - assertion_id: assert.sandbox-accepted-chip.invariant.02
+    label: No item or currency creation
+  - assertion_id: assert.sandbox-accepted-chip.invariant.03
+    label: Every mutation uses expected revision
+  - assertion_id: assert.sandbox-accepted-chip.invariant.04
+    label: Replaying accepted commands produces identical state hashes
+budgets:
+  simulation_minutes: 20
+  player_commands: 250
+required_behaviors:
+  - assertion_id: assert.sandbox-accepted-chip.required_behavior.01
+    label: Publish a qualifying revision
+  - assertion_id: assert.sandbox-accepted-chip.required_behavior.02
+    label: Purchase explicit inputs
+  - assertion_id: assert.sandbox-accepted-chip.required_behavior.03
+    label: Configure machines and routes
+  - assertion_id: assert.sandbox-accepted-chip.required_behavior.04
+    label: Explain a starvation or blocked state
+  - assertion_id: assert.sandbox-accepted-chip.required_behavior.05
+    label: Ship one accepted chip
+evidence:
+  - replay
+  - decision-trace
+  - domain-results
+  - content-provenance
