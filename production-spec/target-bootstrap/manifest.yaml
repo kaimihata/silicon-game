@@ -5,6 +5,12 @@ status: ready
 target_repository: kaimihata/silicon-game-v1
 engine: Unity 6000.3.23f1
 render_pipeline: Universal Render Pipeline
+observed_integration:
+  repository_state: existing_private_unity_project
+  integration_branch: develop
+  observed_head: 19137ee04ddd5020c3e7520b33a3b819ea4b4348
+  runner_contracts: landed
+  authority: informational_snapshot_requires_fresh_preflight_observation
 contents:
   - Assets/
   - Packages/manifest.json
@@ -13,7 +19,7 @@ contents:
   - ProjectSettings/GraphicsSettings.asset
   - ProjectSettings/QualitySettings.asset
   - LICENSE
-  - README-specification-import.md
+  - README.specification-import.md
   - specification-provenance.json
   - specifications/
   - code-factory/

@@ -12,6 +12,7 @@
     "validate": "tsx src/cli.ts validate",
     "compile": "tsx src/cli.ts compile",
     "export": "tsx src/cli.ts export",
+    "clean": "tsx src/cli.ts clean",
     "generate:packet": "tsx src/cli.ts generate-packet",
     "validate:packet": "tsx src/cli.ts validate-packet"
   },

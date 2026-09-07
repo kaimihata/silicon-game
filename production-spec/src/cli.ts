@@ -1,7 +1,8 @@
 #!/usr/bin/env node
-import { readFile, rm } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { parseSafeYaml } from "./safe-yaml.js";
+import { cleanGeneratedOutput } from "./clean.js";
 import { compileContent, exportBundle } from "./export.js";
 import { generatePacket, packetYaml, validatePacket } from "./packet.js";
 import { validateBundle } from "./validate.js";
@@ -58,7 +59,7 @@ async function main(): Promise<void> {
     return;
   }
   if (command === "clean") {
-    await rm(resolve(option("--out") ?? "generated"), { recursive: true, force: true });
+    await cleanGeneratedOutput(option("--out"));
     return;
   }
   throw new Error("Usage: validate | compile --out DIR | export --out DIR --source-sha SHA | generate-packet --out FILE --base-sha SHA | validate-packet --file FILE");

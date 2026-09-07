@@ -3,7 +3,6 @@ import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import { canonicalJson } from "../src/canonical.js";
-import { exportBundle } from "../src/export.js";
 import {
   buildEvidenceAdapters,
   FACTORY_BUNDLE_MAX_BYTES,
@@ -16,10 +15,12 @@ import {
 } from "../src/factory-bundle.js";
 import { readYaml, ROOT } from "../src/io.js";
 import { generatePacket } from "../src/packet.js";
+import { createGitExportFixture, type GitExportFixture } from "./git-export-fixture.js";
 
 const WORK = join(ROOT, "tests/.factory-generated");
 const BASE = join(WORK, "base");
 const GOLDEN = join(ROOT, "fixtures/generated/game-spec-bundle-v1.json");
+let sourceFixture: GitExportFixture;
 
 function hash(source: Buffer | string): string {
   return createHash("sha256").update(source).digest("hex");
@@ -37,7 +38,8 @@ async function copyBase(name: string): Promise<string> {
 
 beforeAll(async () => {
   await rm(WORK, {recursive: true, force: true});
-  await exportBundle(BASE, "b".repeat(40), {testOnlySkipRepositoryVerification: true});
+  sourceFixture = await createGitExportFixture();
+  await sourceFixture.exportBundle(BASE);
   if (process.env.UPDATE_FACTORY_BUNDLE_GOLDEN === "1") {
     await mkdir(join(ROOT, "fixtures/generated"), {recursive: true});
     await cp(join(BASE, "bundle.json"), GOLDEN);
@@ -46,6 +48,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await rm(WORK, {recursive: true, force: true});
+  await sourceFixture.remove();
 });
 
 describe("factory game-spec bundle v1", () => {

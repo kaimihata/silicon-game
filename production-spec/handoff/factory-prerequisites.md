@@ -4,6 +4,8 @@
 
 Read-only inspection pinned the current factory contract at `kaimihata/silicon-code-factory@742b825e9b9ecf90fb638aae40da91527baa7c57`. Direction Packet v1 is single-target-repository, uses target-local registries, prohibits unknown fields, and separates packet approval from epoch lifecycle. The existing factory currently stops at candidate-ready and prohibits autonomous merges.
 
+The private Unity target exists, its runner contracts are landed, and its current observed integration snapshot is `develop` at `19137ee04ddd5020c3e7520b33a3b819ea4b4348`. This recorded observation is context only. Every packet and authority transition must freshly observe `develop`, bind the explicit current SHA, and reject movement; the snapshot is not permanent canonical authority.
+
 The private target's current repository plan does not provide true branch protection. Before this bundle can be used, a **separate human-reviewed factory change** must:
 
 1. Add policy-bounded integration support for independently reviewed, current-head PRs into `develop`. Require workflow checks against the exact proposed head SHA before every factory integration; workflow status is a control, not branch protection.

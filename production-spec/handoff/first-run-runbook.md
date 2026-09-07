@@ -21,15 +21,16 @@ This is a prerequisite checklist, not permission to execute.
 
 ## C. Prepare the private target
 
-- Create `kaimihata/silicon-game-v1` privately only after explicit human action.
+- Confirm the existing private `kaimihata/silicon-game-v1` remains accessible to only the owner and named service identities.
+- Treat `develop` at `19137ee04ddd5020c3e7520b33a3b819ea4b4348` as the current observed integration snapshot, not a permanent base or execution authority. Runner contracts are landed.
 - Limit access to owner and named service identities.
-- Bootstrap Unity `6000.3.23f1` from the URP template. The initial commit contains only the skeleton paths in `target-bootstrap/manifest.yaml`, complete exported `specifications/` and `code-factory/` trees, `specification-provenance.json`, and the exact exported MIT `LICENSE`.
-- Record Unity editor executable digest, template/package provenance, source export provenance, and license source. Validate batch import, URP binding, empty Windows/macOS builds, every imported byte digest, and then record the exact `develop` initial commit SHA. Do not invent a SHA in advance.
+- Verify the existing Unity `6000.3.23f1` URP skeleton and the paths in `target-bootstrap/manifest.yaml`, including complete exported `specifications/` and `code-factory/` trees, `specification-provenance.json`, canonical `README.specification-import.md`, and the exact exported MIT `LICENSE`.
+- Verify Unity editor executable digest, template/package provenance, source export provenance, and license source. Validate batch import, URP binding, empty Windows/macOS builds, every imported byte digest, and the landed runner contracts.
 - Configure Unity and required checks without adding secrets or paid services outside approval.
 
 ## D. Generate and review authority
 
-- Run `npm run generate:packet -- --base-sha <initial-target-sha> --out <review-path>`.
+- Freshly observe the full 40-hex `develop` head immediately before generation, then run `npm run generate:packet -- --base-sha <freshly-observed-target-sha> --out <review-path>`.
 - Treat local generation as source-bundle-valid and structurally v1-valid only.
 - In deployed preflight, verify the explicit packet base SHA is the observed `develop` head, required workflow checks passed for that exact SHA, imported provenance and every file digest reproduce, specification/policy digests match, and all verification producers compile.
 - Validate semantically with the deployed factory validator in addition to the vendored v1 schema.

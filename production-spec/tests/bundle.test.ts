@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { promisify } from "node:util";
 import { afterEach, describe, expect, test } from "vitest";
@@ -12,11 +12,12 @@ import {
   manufacturingPlanDigest,
   validateManufacturingPlan,
 } from "../src/derive.js";
-import { compileContent, exportBundle, verifySourceRepository } from "../src/export.js";
+import { compileContent, verifySourceRepository } from "../src/export.js";
 import { ROOT } from "../src/io.js";
 import { generatePacket, validatePacket } from "../src/packet.js";
 import { assertReadyForExport, validateBundle, validateCatalogReferences } from "../src/validate.js";
 import { readYaml } from "../src/io.js";
+import { createGitExportFixture } from "./git-export-fixture.js";
 
 const WORK = join(ROOT, "tests/.generated");
 const execFileAsync = promisify(execFile);
@@ -162,6 +163,13 @@ describe("bundle", () => {
 
   test("models compensating controls for the unprotected private target", async () => {
     const bootstrap = await readYaml<any>(join(ROOT, "target-bootstrap/manifest.yaml"));
+    expect(bootstrap.observed_integration).toEqual({
+      repository_state: "existing_private_unity_project",
+      integration_branch: "develop",
+      observed_head: "19137ee04ddd5020c3e7520b33a3b819ea4b4348",
+      runner_contracts: "landed",
+      authority: "informational_snapshot_requires_fresh_preflight_observation",
+    });
     expect(bootstrap.branch_controls).toEqual({
       integration_branch: "develop",
       branch_protection: "unavailable_on_current_plan",
@@ -181,7 +189,8 @@ describe("bundle", () => {
 
   test("exports target paths and binds each exported file to a byte digest", async () => {
     const out = join(WORK, "export");
-    await exportBundle(out, "b".repeat(40), { testOnlySkipRepositoryVerification: true });
+    const fixture = await createGitExportFixture();
+    await fixture.exportBundle(out);
     const provenance = JSON.parse(await readFile(join(out, "specification-provenance.json"), "utf8"));
     const artifacts = provenance.exported_artifacts as {
       source_path: string;
@@ -197,6 +206,13 @@ describe("bundle", () => {
     expect(artifacts.some((artifact) => artifact.target_path === "LICENSE")).toBe(true);
     expect(provenance.status).toBe("ready");
     expect(provenance.authority_state).toBe("author_complete_not_executable");
+    expect(provenance.source_revision).toBe(fixture.head);
+    const exportedPaths = await readdir(out);
+    expect(exportedPaths).toContain("README.specification-import.md");
+    expect(exportedPaths).not.toContain("README-specification-import.md");
+    expect(artifacts.filter((artifact) =>
+      artifact.target_path === "README.specification-import.md"
+    )).toHaveLength(1);
     const packetConfig = await readYaml<any>(
       join(out, "code-factory/direction-packets/templates/chip-city-foundation-01.config.yaml")
     );
@@ -205,6 +221,50 @@ describe("bundle", () => {
       "specifications/requirements/vertical-slice.yaml",
     ]);
     expect(packetConfig.policy).toBe("code-factory/policy/first-run.yaml");
+    await fixture.remove();
+  });
+
+  test("rejects stale or symlink destinations instead of retaining authority files", async () => {
+    const fixture = await createGitExportFixture();
+    const stale = join(WORK, "stale-export");
+    await mkdir(stale, { recursive: true });
+    await writeFile(join(stale, "old-approval.json"), "{}");
+    await expect(fixture.exportBundle(stale)).rejects.toMatchObject({
+      stderr: expect.stringContaining("stale authority files"),
+    });
+    expect(await readFile(join(stale, "old-approval.json"), "utf8")).toBe("{}");
+
+    const real = join(WORK, "real-export");
+    const linked = join(WORK, "linked-export");
+    await mkdir(real, { recursive: true });
+    await symlink(real, linked, "dir");
+    await expect(fixture.exportBundle(linked)).rejects.toMatchObject({
+      stderr: expect.stringContaining("must not be a symlink"),
+    });
+    await fixture.remove();
+  });
+
+  test("cleans its temporary sibling when atomic publication fails", async () => {
+    const fixture = await createGitExportFixture();
+    const out = join(WORK, "raced-export");
+    await mkdir(out, { recursive: true });
+    const exporting = fixture.exportBundle(out);
+    const temporaryPrefix = ".raced-export.tmp-";
+    let sawTemporary = false;
+    for (let attempt = 0; attempt < 1_000; attempt += 1) {
+      if ((await readdir(WORK)).some((entry) => entry.startsWith(temporaryPrefix))) {
+        sawTemporary = true;
+        break;
+      }
+      await new Promise((resolveWait) => setTimeout(resolveWait, 1));
+    }
+    expect(sawTemporary).toBe(true);
+    await writeFile(join(out, "stale-authority.json"), "{}");
+    await expect(exporting).rejects.toMatchObject({
+      stderr: expect.stringContaining("stale authority files"),
+    });
+    expect((await readdir(WORK)).some((entry) => entry.startsWith(temporaryPrefix))).toBe(false);
+    await fixture.remove();
   });
 
   test("requires an explicit full target base SHA", async () => {
@@ -225,6 +285,7 @@ describe("bundle", () => {
     await git("init", "--quiet");
     await git("config", "user.name", "Production Spec Test");
     await git("config", "user.email", "production-spec@example.invalid");
+    await git("remote", "add", "origin", "https://github.com/kaimihata/silicon-game.git");
     await git("add", "production-spec/authority.yaml");
     await git("commit", "--quiet", "-m", "fixture");
     const head = (await git("rev-parse", "HEAD")).stdout.trim();
@@ -232,6 +293,9 @@ describe("bundle", () => {
     await expect(verifySourceRepository(head, repository)).resolves.toBeUndefined();
     await writeFile(join(repository, "production-spec", "authority.yaml"), "status: changed\n");
     await expect(verifySourceRepository(head, repository)).rejects.toThrow("not clean");
+    await git("checkout", "--quiet", "--", "production-spec/authority.yaml");
+    await git("remote", "set-url", "origin", "https://github.com/example/not-authoritative.git");
+    await expect(verifySourceRepository(head, repository)).rejects.toThrow("not the authoritative");
   });
 
   test("CLI export has no arbitrary source-SHA bypass", async () => {
