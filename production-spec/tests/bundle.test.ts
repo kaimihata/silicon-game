@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { mkdir, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
+import { chmod, mkdir, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { promisify } from "node:util";
 import { afterEach, describe, expect, test } from "vitest";
@@ -12,7 +12,11 @@ import {
   manufacturingPlanDigest,
   validateManufacturingPlan,
 } from "../src/derive.js";
-import { compileContent, verifyRepositorySource } from "../src/export.js";
+import {
+  compileContent,
+  exportBundleFromRepository,
+  verifyRepositorySource,
+} from "../src/export.js";
 import { ROOT } from "../src/io.js";
 import { generatePacket, validatePacket } from "../src/packet.js";
 import { assertReadyForExport, validateBundle, validateCatalogReferences } from "../src/validate.js";
@@ -190,7 +194,17 @@ describe("bundle", () => {
   test("exports target paths and binds each exported file to a byte digest", async () => {
     const out = join(WORK, "export");
     const fixture = await createGitExportFixture();
-    await fixture.exportBundle(out);
+    await exportBundleFromRepository(
+      out,
+      fixture.head,
+      fixture.sourceRef,
+      fixture.repository,
+      {
+        remoteName: "origin",
+        remoteUrl: fixture.remote,
+        sourceRepository: "fixture/chip-city",
+      },
+    );
     const provenance = JSON.parse(await readFile(join(out, "specification-provenance.json"), "utf8"));
     const artifacts = provenance.exported_artifacts as {
       source_path: string;
@@ -325,6 +339,44 @@ describe("bundle", () => {
     const result = await exporting;
     expect(result).toEqual({ ok: true, error: undefined });
     expect(await readFile(join(out, "README.specification-import.md"), "utf8")).toBe(original);
+    await fixture.remove();
+  });
+
+  test("materializes source blobs without repository checkout hooks or filters", async () => {
+    const fixture = await createGitExportFixture();
+    const out = join(WORK, "plumbing-export");
+    const marker = join(WORK, "post-checkout-ran");
+    const hook = join(fixture.repository, ".git/hooks/post-checkout");
+    const attributes = join(fixture.repository, ".git/attack-attributes");
+    await mkdir(WORK, { recursive: true });
+    await writeFile(hook, `#!/bin/sh\nprintf executed > "${marker}"\n`);
+    await chmod(hook, 0o755);
+    await writeFile(
+      attributes,
+      "production-spec/handoff/target-import.md filter=attack\n",
+    );
+    await fixture.git("config", "core.attributesFile", attributes);
+    await fixture.git("config", "filter.attack.smudge", "printf 'tampered\\n'");
+    const original = await readFile(
+      join(fixture.specificationRoot, "handoff/target-import.md"),
+      "utf8",
+    );
+
+    await exportBundleFromRepository(
+      out,
+      fixture.head,
+      fixture.sourceRef,
+      fixture.repository,
+      {
+        remoteName: "origin",
+        remoteUrl: fixture.remote,
+        sourceRepository: "fixture/chip-city",
+      },
+    );
+
+    await expect(readFile(marker, "utf8")).rejects.toMatchObject({ code: "ENOENT" });
+    expect(await readFile(join(out, "README.specification-import.md"), "utf8"))
+      .toBe(original);
     await fixture.remove();
   });
 

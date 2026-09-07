@@ -10,6 +10,7 @@ import {
   rename,
   rm,
   rmdir,
+  writeFile,
 } from "node:fs/promises";
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { tmpdir } from "node:os";
@@ -111,6 +112,8 @@ function remoteProofEnvironment(): NodeJS.ProcessEnv {
   environment.GIT_CONFIG_GLOBAL = process.platform === "win32" ? "NUL" : "/dev/null";
   environment.GIT_CONFIG_NOSYSTEM = "1";
   environment.GIT_TERMINAL_PROMPT = "0";
+  environment.GIT_NO_LAZY_FETCH = "1";
+  environment.GIT_NO_REPLACE_OBJECTS = "1";
   return environment;
 }
 
@@ -298,6 +301,97 @@ async function validateCompleteExport(
   await validateFactoryBundleDirectory(root, undefined, sourceRoot);
 }
 
+type SourceTreeEntry = {
+  objectSha: string;
+  sourcePath: string;
+  targetPath: string;
+};
+
+async function materializeVerifiedSourceTree(
+  verifiedSource: VerifiedRepositorySource,
+  destination: string,
+  gitEnvironment: NodeJS.ProcessEnv,
+): Promise<void> {
+  const { stdout } = await execFileAsync(
+    "git",
+    [
+      "-C",
+      verifiedSource.repositoryRoot,
+      "ls-tree",
+      "-r",
+      "-z",
+      "--full-tree",
+      verifiedSource.sourceSha,
+      "--",
+      "production-spec",
+    ],
+    {
+      encoding: "utf8",
+      env: gitEnvironment,
+      maxBuffer: 16 * 1024 * 1024,
+    },
+  );
+  const entries: SourceTreeEntry[] = stdout.split("\0").filter(Boolean).map((record) => {
+    const match = /^([0-9]{6}) ([^ ]+) ([0-9a-f]{40})\t([\s\S]+)$/.exec(record);
+    if (!match) throw new Error("immutable source snapshot contains an invalid Git tree entry");
+    const mode = match[1]!;
+    const type = match[2]!;
+    const objectSha = match[3]!;
+    const sourcePath = match[4]!;
+    if (
+      type !== "blob" ||
+      (mode !== "100644" && mode !== "100755") ||
+      !sourcePath!.startsWith("production-spec/")
+    ) {
+      throw new Error(`immutable source snapshot contains an unsupported entry: ${sourcePath}`);
+    }
+    const relativePath = sourcePath.slice("production-spec/".length);
+    const segments = relativePath.split("/");
+    if (!relativePath || segments.some((segment) => !segment || segment === "." || segment === "..")) {
+      throw new Error(`immutable source snapshot contains an unsafe path: ${sourcePath}`);
+    }
+    const targetPath = resolve(destination, relativePath);
+    const targetRelative = relative(destination, targetPath);
+    if (!targetRelative || targetRelative.startsWith(`..${sep}`) || isAbsolute(targetRelative)) {
+      throw new Error(`immutable source snapshot path escapes its destination: ${sourcePath}`);
+    }
+    return { objectSha, sourcePath, targetPath };
+  });
+  if (!entries.length) throw new Error("verified source commit has no production-spec tree");
+  if (new Set(entries.map((entry) => entry.targetPath)).size !== entries.length) {
+    throw new Error("immutable source snapshot contains duplicate target paths");
+  }
+  for (let offset = 0; offset < entries.length; offset += 12) {
+    await Promise.all(entries.slice(offset, offset + 12).map(async (entry) => {
+      const { stdout: blob } = await execFileAsync(
+        "git",
+        [
+          "-C",
+          verifiedSource.repositoryRoot,
+          "cat-file",
+          "blob",
+          entry.objectSha,
+        ],
+        {
+          encoding: "buffer",
+          env: gitEnvironment,
+          maxBuffer: 16 * 1024 * 1024,
+        },
+      );
+      const bytes = Buffer.isBuffer(blob) ? blob : Buffer.from(blob);
+      const actualObjectSha = createHash("sha1")
+        .update(`blob ${bytes.byteLength}\0`)
+        .update(bytes)
+        .digest("hex");
+      if (actualObjectSha !== entry.objectSha) {
+        throw new Error(`immutable source snapshot object mismatch: ${entry.sourcePath}`);
+      }
+      await mkdir(dirname(entry.targetPath), { recursive: true });
+      await writeFile(entry.targetPath, bytes);
+    }));
+  }
+}
+
 async function writeBundle(
   root: string,
   verifiedSource: VerifiedRepositorySource,
@@ -454,49 +548,18 @@ async function publishVerifiedBundle(
   await mkdir(dirname(destination), { recursive: true });
   const temporary = await mkdtemp(join(dirname(destination), `.${basename(destination)}.tmp-`));
   const snapshotContainer = await mkdtemp(join(tmpdir(), "chip-city-source-snapshot-"));
-  const snapshotRepository = join(snapshotContainer, "repository");
+  const snapshotSpecification = join(snapshotContainer, "production-spec");
   const gitEnvironment = remoteProofEnvironment();
   try {
-    await execFileAsync(
-      "git",
-      [
-        "-C",
-        verifiedSource.repositoryRoot,
-        "worktree",
-        "add",
-        "--quiet",
-        "--detach",
-        snapshotRepository,
-        verifiedSource.sourceSha,
-      ],
-      { encoding: "utf8", env: gitEnvironment },
+    await materializeVerifiedSourceTree(
+      verifiedSource,
+      snapshotSpecification,
+      gitEnvironment,
     );
-    const snapshotHead = (
-      await execFileAsync("git", ["-C", snapshotRepository, "rev-parse", "HEAD"], {
-        encoding: "utf8",
-        env: gitEnvironment,
-      })
-    ).stdout.trim();
-    if (snapshotHead !== verifiedSource.sourceSha) {
-      throw new Error("immutable source snapshot does not match the verified source SHA");
-    }
     const result = await writeBundle(
       temporary,
       verifiedSource,
-      join(snapshotRepository, "production-spec"),
-    );
-    const snapshotStatus = (
-      await execFileAsync(
-        "git",
-        ["-C", snapshotRepository, "status", "--porcelain=v1", "--untracked-files=all"],
-        { encoding: "utf8", env: gitEnvironment },
-      )
-    ).stdout.trim();
-    if (snapshotStatus) throw new Error("immutable source snapshot changed during export");
-    await execFileAsync(
-      "git",
-      ["-C", verifiedSource.repositoryRoot, "worktree", "remove", "--force", snapshotRepository],
-      { encoding: "utf8", env: gitEnvironment },
+      snapshotSpecification,
     );
     await rm(snapshotContainer, { recursive: true, force: true });
     await reverify();
@@ -509,11 +572,6 @@ async function publishVerifiedBundle(
     await rename(temporary, destination);
     return result;
   } catch (error) {
-    await execFileAsync(
-      "git",
-      ["-C", verifiedSource.repositoryRoot, "worktree", "remove", "--force", snapshotRepository],
-      { encoding: "utf8", env: gitEnvironment },
-    ).catch(() => undefined);
     await rm(snapshotContainer, { recursive: true, force: true });
     await rm(temporary, { recursive: true, force: true });
     throw error;
