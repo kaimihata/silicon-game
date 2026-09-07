@@ -304,6 +304,30 @@ describe("bundle", () => {
     await fixture.remove();
   });
 
+  test("exports from the verified snapshot when a live source file changes and is restored", async () => {
+    const fixture = await createGitExportFixture();
+    const out = join(WORK, "snapshot-export");
+    await rm(out, { recursive: true, force: true });
+    await mkdir(WORK, { recursive: true });
+    const exporting = fixture.exportBundle(out).then(
+      () => ({ ok: true as const, error: undefined }),
+      (error: unknown) => ({ ok: false as const, error }),
+    );
+    const temporaryPrefix = ".snapshot-export.tmp-";
+    for (let attempt = 0; attempt < 1_000; attempt += 1) {
+      if ((await readdir(WORK)).some((entry) => entry.startsWith(temporaryPrefix))) break;
+      await new Promise((resolveWait) => setTimeout(resolveWait, 1));
+    }
+    const source = join(fixture.specificationRoot, "handoff/target-import.md");
+    const original = await readFile(source, "utf8");
+    await writeFile(source, `${original}\nuncommitted transient content\n`);
+    await writeFile(source, original);
+    const result = await exporting;
+    expect(result).toEqual({ ok: true, error: undefined });
+    expect(await readFile(join(out, "README.specification-import.md"), "utf8")).toBe(original);
+    await fixture.remove();
+  });
+
   test("requires an explicit full target base SHA", async () => {
     await expect(generatePacket("main")).rejects.toThrow("--base-sha");
   });
@@ -405,10 +429,16 @@ describe("bundle", () => {
       count: process.env.GIT_CONFIG_COUNT,
       key: process.env.GIT_CONFIG_KEY_0,
       value: process.env.GIT_CONFIG_VALUE_0,
+      gitDir: process.env.GIT_DIR,
+      gitWorkTree: process.env.GIT_WORK_TREE,
+      sslNoVerify: process.env.GIT_SSL_NO_VERIFY,
     };
     process.env.GIT_CONFIG_COUNT = "1";
     process.env.GIT_CONFIG_KEY_0 = `url.${join(fixture.remote, "attacker")}.insteadOf`;
     process.env.GIT_CONFIG_VALUE_0 = fixture.remote;
+    process.env.GIT_DIR = join(fixture.repository, ".git", "missing");
+    process.env.GIT_WORK_TREE = join(fixture.repository, "missing");
+    process.env.GIT_SSL_NO_VERIFY = "1";
     try {
       await expect(
         verifyRepositorySource(fixture.head, fixture.sourceRef, fixture.repository, {
@@ -422,6 +452,9 @@ describe("bundle", () => {
         ["GIT_CONFIG_COUNT", original.count],
         ["GIT_CONFIG_KEY_0", original.key],
         ["GIT_CONFIG_VALUE_0", original.value],
+        ["GIT_DIR", original.gitDir],
+        ["GIT_WORK_TREE", original.gitWorkTree],
+        ["GIT_SSL_NO_VERIFY", original.sslNoVerify],
       ] as const) {
         if (value === undefined) delete process.env[key];
         else process.env[key] = value;

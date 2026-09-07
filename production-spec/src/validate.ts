@@ -37,8 +37,8 @@ function collectStrings(value: unknown): string[] {
   return [];
 }
 
-export async function loadManifest(): Promise<Manifest> {
-  return readYaml<Manifest>(join(ROOT, "bundle.yaml"));
+export async function loadManifest(root = ROOT): Promise<Manifest> {
+  return readYaml<Manifest>(join(root, "bundle.yaml"));
 }
 
 export function assertReadyForExport(manifest: Manifest): void {
@@ -47,18 +47,22 @@ export function assertReadyForExport(manifest: Manifest): void {
   }
 }
 
-export async function loadArtifacts(manifest: Manifest): Promise<Map<string, any>> {
+export async function loadArtifacts(manifest: Manifest, root = ROOT): Promise<Map<string, any>> {
   const map = new Map<string, any>();
-  for (const artifact of manifest.artifacts) map.set(artifact.path, await readYaml(join(ROOT, artifact.path)));
+  for (const artifact of manifest.artifacts) map.set(artifact.path, await readYaml(join(root, artifact.path)));
   return map;
 }
 
-export async function specificationDigest(manifest: Manifest, data: Map<string, any>): Promise<string> {
+export async function specificationDigest(
+  manifest: Manifest,
+  data: Map<string, any>,
+  root = ROOT,
+): Promise<string> {
   const entries = manifest.artifacts
     .filter((artifact) => !["policy", "packet_config"].includes(artifact.kind))
     .map((artifact) => [targetPathForArtifact(artifact), data.get(artifact.path)]);
   const schemaEntries = await Promise.all(
-    (await listFiles(join(ROOT, "schemas"), ".json")).map(async (path) => [
+    (await listFiles(join(root, "schemas"), ".json")).map(async (path) => [
       targetSchemaPath(path),
       JSON.parse(await readFile(path, "utf8")),
     ])
@@ -99,18 +103,18 @@ export function buildRequirementFragmentIndex(specs: any[], requirements: any[],
   });
 }
 
-export async function validateBundle(): Promise<ValidationResult> {
+export async function validateBundle(root = ROOT): Promise<ValidationResult> {
   const issues: Issue[] = [];
   let manifest: Manifest;
   try {
-    manifest = await loadManifest();
+    manifest = await loadManifest(root);
   } catch (error) {
     return { valid: false, issues: [{ path: "bundle.yaml", message: String(error) }] };
   }
   const ajv = new Ajv2020({ allErrors: true, strict: false, allowUnionTypes: true });
   addFormats(ajv);
-  const manifestSchema = JSON.parse(await readFile(join(ROOT, "schemas/bundle-manifest.schema.json"), "utf8"));
-  if (!ajv.validate(manifestSchema, await readYaml(join(ROOT, "bundle.yaml")))) {
+  const manifestSchema = JSON.parse(await readFile(join(root, "schemas/bundle-manifest.schema.json"), "utf8"));
+  if (!ajv.validate(manifestSchema, await readYaml(join(root, "bundle.yaml")))) {
     issues.push(...(ajv.errors ?? []).map((error) => ({
       path: `bundle.yaml${error.instancePath}`,
       message: error.message ?? "schema error",
@@ -123,7 +127,7 @@ export async function validateBundle(): Promise<ValidationResult> {
     "environments", "registries", "verification", "policy", "packet", "target-bootstrap",
   ];
   const actual = (await Promise.all(authoredRoots.map(async (directory) =>
-    (await listFiles(join(ROOT, directory), ".yaml")).map((path) => relative(ROOT, path))
+    (await listFiles(join(root, directory), ".yaml")).map((path) => relative(root, path))
   ))).flat().sort();
   const declared = manifest.artifacts.map((artifact) => artifact.path).sort();
   for (const path of actual.filter((path) => !declared.includes(path))) {
@@ -137,11 +141,11 @@ export async function validateBundle(): Promise<ValidationResult> {
   const validators = new Map<string, ReturnType<typeof ajv.compile>>();
   for (const artifact of manifest.artifacts) {
     try {
-      const parsed = await readYaml(join(ROOT, artifact.path));
+      const parsed = await readYaml(join(root, artifact.path));
       data.set(artifact.path, parsed);
       let validate = validators.get(artifact.schema);
       if (!validate) {
-        validate = ajv.compile(JSON.parse(await readFile(join(ROOT, artifact.schema), "utf8")));
+        validate = ajv.compile(JSON.parse(await readFile(join(root, artifact.schema), "utf8")));
         validators.set(artifact.schema, validate);
       }
       if (!validate(parsed)) {
@@ -174,7 +178,7 @@ export async function validateBundle(): Promise<ValidationResult> {
   const fragments = buildRequirementFragmentIndex(specs, requirements, issues);
   const fragmentDocument = { schema_version: 1, status: "ready", entries: fragments };
   const fragmentSchema = JSON.parse(
-    await readFile(join(ROOT, "schemas/requirement-fragment-index.schema.json"), "utf8")
+    await readFile(join(root, "schemas/requirement-fragment-index.schema.json"), "utf8")
   );
   if (!ajv.validate(fragmentSchema, fragmentDocument)) {
     issues.push(...(ajv.errors ?? []).map((error) => ({
@@ -185,7 +189,7 @@ export async function validateBundle(): Promise<ValidationResult> {
   if (fragments.length !== requirements.length) {
     issues.push({ path: "traceability/requirement-fragments", message: "generated fragment index is incomplete" });
   }
-  const bundle = await readYaml<any>(join(ROOT, "bundle.yaml"));
+  const bundle = await readYaml<any>(join(root, "bundle.yaml"));
   if (bundle.status === "ready") {
     for (const [path, artifact] of data) {
       if (artifact.status !== "ready") {
@@ -217,7 +221,9 @@ export async function validateBundle(): Promise<ValidationResult> {
   }
   const targetFiles = new Set([
     ...manifest.artifacts.map(targetPathForArtifact),
-    ...(await listFiles(join(ROOT, "schemas"), ".json")).map(targetSchemaPath),
+    ...(await listFiles(join(root, "schemas"), ".json")).map((path) =>
+      targetSchemaPath(join(ROOT, relative(root, path)))
+    ),
     "code-factory/schemas/direction-packet-v1.schema.json",
     "content/runtime/catalog.json",
     "content/runtime/catalog.provenance.json",
@@ -443,18 +449,18 @@ export async function validateBundle(): Promise<ValidationResult> {
 
   const policy = data.get("policy/first-run.yaml");
   const schemaData = Object.fromEntries(await Promise.all(
-    (await listFiles(join(ROOT, "schemas"), ".json")).map(async (path) => [
-      relative(ROOT, path),
+    (await listFiles(join(root, "schemas"), ".json")).map(async (path) => [
+      relative(root, path),
       JSON.parse(await readFile(path, "utf8")),
     ])
   ));
-  const packetSchema = JSON.parse(await readFile(join(ROOT, "packet/vendor/direction-packet-v1.schema.json"), "utf8"));
+  const packetSchema = JSON.parse(await readFile(join(root, "packet/vendor/direction-packet-v1.schema.json"), "utf8"));
   return {
     valid: issues.length === 0,
     issues,
     ...(issues.length ? {} : {
       bundleDigest: digest({
-        manifest: await readYaml(join(ROOT, "bundle.yaml")),
+        manifest: await readYaml(join(root, "bundle.yaml")),
         artifacts: Object.fromEntries([...data.entries()]),
         schemas: schemaData,
         packet_schema: packetSchema,

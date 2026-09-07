@@ -431,23 +431,18 @@ function makeCheckChunks(checkRegistry: any, requirements: any[]): any[][] {
   return chunks;
 }
 
-async function sourceDocuments(paths: string[]): Promise<any[]> {
-  return Promise.all(paths.map((path) => readYaml(resolve(ROOT, path))));
-}
-
-async function sourceYaml(path: string): Promise<any> {
-  return readYaml(resolve(ROOT, path));
-}
-
-async function sourceJson(path: string): Promise<any> {
-  return JSON.parse(await readFile(resolve(ROOT, path), "utf8"));
-}
-
 export async function generateFactoryBundle(
   exportRoot: string,
   sourceBundle: any,
-  specificationRevision: string
+  specificationRevision: string,
+  sourceRoot = ROOT,
 ): Promise<{bundle: GameSpecBundleV1; digest: string; bytes: number}> {
+  const sourceDocuments = (paths: string[]): Promise<any[]> =>
+    Promise.all(paths.map((path) => readYaml(resolve(sourceRoot, path))));
+  const sourceYaml = (path: string): Promise<any> =>
+    readYaml(resolve(sourceRoot, path));
+  const sourceJson = async (path: string): Promise<any> =>
+    JSON.parse(await readFile(resolve(sourceRoot, path), "utf8"));
   const requirementArtifacts = sourceBundle.artifacts.filter(
     (artifact: any) => artifact.kind === "requirements"
   );
@@ -569,7 +564,7 @@ export async function generateFactoryBundle(
         schema_version: 1,
         kind: "target_bootstrap",
         manifest: await sourceYaml("target-bootstrap/manifest.yaml"),
-        license: await readFile(resolve(ROOT, "target-bootstrap/LICENSE"), "utf8")
+        license: await readFile(resolve(sourceRoot, "target-bootstrap/LICENSE"), "utf8")
       },
       [],
       []
@@ -718,7 +713,7 @@ export async function generateFactoryBundle(
     files,
     evidence_adapters: buildEvidenceAdapters(evidenceRegistry)
   };
-  await validateFactoryBundleManifest(bundle);
+  await validateFactoryBundleManifest(bundle, sourceRoot);
   selectFactoryBundleFiles(bundle);
   for (const requirement of requirements) {
     selectFactoryBundleFiles(bundle, [requirement.id]);
@@ -736,8 +731,13 @@ export async function generateFactoryBundle(
   return {bundle, digest: `sha256:${sha256(source)}`, bytes};
 }
 
-export async function validateFactoryBundleManifest(bundle: unknown): Promise<void> {
-  const schema = await sourceJson("schemas/game-spec-bundle-v1.schema.json");
+export async function validateFactoryBundleManifest(
+  bundle: unknown,
+  sourceRoot = ROOT,
+): Promise<void> {
+  const schema = JSON.parse(
+    await readFile(resolve(sourceRoot, "schemas/game-spec-bundle-v1.schema.json"), "utf8"),
+  );
   const ajv = new Ajv2020({allErrors: true, strict: true});
   addFormats(ajv);
   const validate = ajv.compile(schema);

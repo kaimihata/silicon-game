@@ -50,6 +50,7 @@ export type ExportResult = {
 };
 
 type VerifiedRepositorySource = {
+  repositoryRoot: string;
   sourceRepository: string;
   sourceSha: string;
 };
@@ -65,7 +66,11 @@ async function fileDigest(path: string): Promise<string> {
 }
 
 export async function compileContent(out: string): Promise<void> {
-  const catalog = await readYaml(join(ROOT, "content/catalog.yaml"));
+  return compileContentFromSource(out, ROOT);
+}
+
+async function compileContentFromSource(out: string, sourceRoot: string): Promise<void> {
+  const catalog = await readYaml(join(sourceRoot, "content/catalog.yaml"));
   await writeText(join(out, "runtime/catalog.json"), `${canonicalJson(catalog)}\n`);
   await writeText(join(out, "runtime/catalog.provenance.json"), `${canonicalJson({
     schema_version: 1,
@@ -86,13 +91,20 @@ function remoteProofEnvironment(): NodeJS.ProcessEnv {
   const environment = { ...process.env };
   for (const key of Object.keys(environment)) {
     if (
-      key === "GIT_CONFIG_PARAMETERS" ||
-      key === "GIT_DIR" ||
-      key === "GIT_WORK_TREE" ||
-      key === "GIT_COMMON_DIR" ||
-      key === "GIT_OBJECT_DIRECTORY" ||
-      key === "GIT_ALTERNATE_OBJECT_DIRECTORIES" ||
-      /^GIT_CONFIG_(?:COUNT|KEY_\d+|VALUE_\d+|SYSTEM|GLOBAL|NOSYSTEM)$/.test(key)
+      key.startsWith("GIT_") ||
+      [
+        "HTTP_PROXY",
+        "HTTPS_PROXY",
+        "ALL_PROXY",
+        "NO_PROXY",
+        "http_proxy",
+        "https_proxy",
+        "all_proxy",
+        "no_proxy",
+        "SSL_CERT_FILE",
+        "SSL_CERT_DIR",
+        "CURL_CA_BUNDLE",
+      ].includes(key)
     ) {
       delete environment[key];
     }
@@ -113,8 +125,10 @@ export async function verifyRepositorySource(
   if (!HEAD_REF_PATTERN.test(sourceRef) || sourceRef.includes("..") || sourceRef.includes("//")) {
     throw new Error("--source-ref must be one explicit trusted refs/heads/* ref");
   }
+  const gitEnvironment = remoteProofEnvironment();
   const { stdout: headOutput } = await execFileAsync("git", ["-C", repositoryRoot, "rev-parse", "HEAD"], {
     encoding: "utf8",
+    env: gitEnvironment,
   });
   const head = headOutput.trim();
   if (sourceSha !== head) {
@@ -123,7 +137,7 @@ export async function verifyRepositorySource(
   const { stdout: shallowOutput } = await execFileAsync(
     "git",
     ["-C", repositoryRoot, "rev-parse", "--is-shallow-repository"],
-    { encoding: "utf8" },
+    { encoding: "utf8", env: gitEnvironment },
   );
   if (shallowOutput.trim() !== "false") {
     throw new Error("source repository must be a complete non-shallow clone for remote proof");
@@ -131,7 +145,7 @@ export async function verifyRepositorySource(
   const { stdout: originOutput } = await execFileAsync(
     "git",
     ["-C", repositoryRoot, "config", "--get-all", `remote.${policy.remoteName}.url`],
-    { encoding: "utf8" },
+    { encoding: "utf8", env: gitEnvironment },
   );
   const remoteUrls = originOutput.trim().split("\n").filter(Boolean);
   if (
@@ -145,7 +159,7 @@ export async function verifyRepositorySource(
   const { stdout: statusOutput } = await execFileAsync(
     "git",
     ["-C", repositoryRoot, "status", "--porcelain=v1", "--untracked-files=all"],
-    { encoding: "utf8" },
+    { encoding: "utf8", env: gitEnvironment },
   );
   if (statusOutput.trim()) {
     throw new Error("source repository is not clean relative to the supplied checked-out HEAD");
@@ -174,7 +188,7 @@ export async function verifyRepositorySource(
       {
         cwd: tmpdir(),
         encoding: "utf8",
-        env: remoteProofEnvironment(),
+        env: gitEnvironment,
       },
     ));
   } catch {
@@ -197,6 +211,7 @@ export async function verifyRepositorySource(
     );
   }
   return Object.freeze({
+    repositoryRoot,
     sourceRepository: policy.sourceRepository,
     sourceSha,
   });
@@ -271,12 +286,13 @@ async function validateCompleteExport(
 async function writeBundle(
   root: string,
   verifiedSource: VerifiedRepositorySource,
+  sourceRoot: string,
 ): Promise<ExportResult> {
-  const validation = await validateBundle();
+  const validation = await validateBundle(sourceRoot);
   if (!validation.valid) throw new Error(`Bundle is invalid:\n${validation.issues.map((issue) => `${issue.path}: ${issue.message}`).join("\n")}`);
-  const manifest = await loadManifest();
+  const manifest = await loadManifest(sourceRoot);
   assertReadyForExport(manifest);
-  const data = await loadArtifacts(manifest);
+  const data = await loadArtifacts(manifest, sourceRoot);
   const exportedArtifacts: ExportedArtifact[] = [];
   for (const artifact of manifest.artifacts) {
     const target = targetPathForArtifact(artifact);
@@ -291,7 +307,7 @@ async function writeBundle(
       await writeText(join(root, target), stringify(config, { lineWidth: 0 }));
     } else {
       await mkdir(dirname(join(root, target)), { recursive: true });
-      await cp(join(ROOT, artifact.path), join(root, target));
+      await cp(join(sourceRoot, artifact.path), join(root, target));
     }
     exportedArtifacts.push({
       source_path: artifact.path,
@@ -299,12 +315,13 @@ async function writeBundle(
       content_digest: await fileDigest(join(root, target)),
     });
   }
-  for (const source of await listFiles(join(ROOT, "schemas"), ".json")) {
-    const target = targetSchemaPath(source);
+  for (const source of await listFiles(join(sourceRoot, "schemas"), ".json")) {
+    const relativeSource = relative(sourceRoot, source);
+    const target = targetSchemaPath(join(ROOT, relativeSource));
     await mkdir(dirname(join(root, target)), { recursive: true });
     await cp(source, join(root, target));
     exportedArtifacts.push({
-      source_path: relative(ROOT, source),
+      source_path: relativeSource,
       target_path: target,
       content_digest: await fileDigest(join(root, target)),
     });
@@ -312,13 +329,13 @@ async function writeBundle(
   const packetSchemaSource = "packet/vendor/direction-packet-v1.schema.json";
   const packetSchemaTarget = "code-factory/schemas/direction-packet-v1.schema.json";
   await mkdir(dirname(join(root, packetSchemaTarget)), { recursive: true });
-  await cp(join(ROOT, packetSchemaSource), join(root, packetSchemaTarget));
+  await cp(join(sourceRoot, packetSchemaSource), join(root, packetSchemaTarget));
   exportedArtifacts.push({
     source_path: packetSchemaSource,
     target_path: packetSchemaTarget,
     content_digest: await fileDigest(join(root, packetSchemaTarget)),
   });
-  await compileContent(join(root, "content"));
+  await compileContentFromSource(join(root, "content"), sourceRoot);
   for (const target of ["content/runtime/catalog.json", "content/runtime/catalog.provenance.json"]) {
     exportedArtifacts.push({
       source_path: "content/catalog.yaml",
@@ -343,23 +360,28 @@ async function writeBundle(
     target_path: traceabilityTarget,
     content_digest: await fileDigest(join(root, traceabilityTarget)),
   });
-  const specificationRevision = await specificationDigest(manifest, data);
+  const specificationRevision = await specificationDigest(manifest, data, sourceRoot);
   const policyRevision = digest(data.get("policy/first-run.yaml"));
   const importReadmeTarget = "README.specification-import.md";
-  await writeText(join(root, importReadmeTarget), await readFile(join(ROOT, "handoff/target-import.md"), "utf8"));
+  await writeText(join(root, importReadmeTarget), await readFile(join(sourceRoot, "handoff/target-import.md"), "utf8"));
   exportedArtifacts.push({
     source_path: "handoff/target-import.md",
     target_path: importReadmeTarget,
     content_digest: await fileDigest(join(root, importReadmeTarget)),
   });
   const licenseTarget = "LICENSE";
-  await cp(join(ROOT, "target-bootstrap/LICENSE"), join(root, licenseTarget));
+  await cp(join(sourceRoot, "target-bootstrap/LICENSE"), join(root, licenseTarget));
   exportedArtifacts.push({
     source_path: "target-bootstrap/LICENSE",
     target_path: licenseTarget,
     content_digest: await fileDigest(join(root, licenseTarget)),
   });
-  const factoryBundle = await generateFactoryBundle(root, manifest, specificationRevision);
+  const factoryBundle = await generateFactoryBundle(
+    root,
+    manifest,
+    specificationRevision,
+    sourceRoot,
+  );
   for (const file of factoryBundle.bundle.files) {
     exportedArtifacts.push({
       source_path: "generated:factory-bundle",
@@ -416,8 +438,52 @@ async function publishVerifiedBundle(
   await assertAbsentOrEmptyDirectory(destination);
   await mkdir(dirname(destination), { recursive: true });
   const temporary = await mkdtemp(join(dirname(destination), `.${basename(destination)}.tmp-`));
+  const snapshotContainer = await mkdtemp(join(tmpdir(), "chip-city-source-snapshot-"));
+  const snapshotRepository = join(snapshotContainer, "repository");
+  const gitEnvironment = remoteProofEnvironment();
   try {
-    const result = await writeBundle(temporary, verifiedSource);
+    await execFileAsync(
+      "git",
+      [
+        "-C",
+        verifiedSource.repositoryRoot,
+        "worktree",
+        "add",
+        "--quiet",
+        "--detach",
+        snapshotRepository,
+        verifiedSource.sourceSha,
+      ],
+      { encoding: "utf8", env: gitEnvironment },
+    );
+    const snapshotHead = (
+      await execFileAsync("git", ["-C", snapshotRepository, "rev-parse", "HEAD"], {
+        encoding: "utf8",
+        env: gitEnvironment,
+      })
+    ).stdout.trim();
+    if (snapshotHead !== verifiedSource.sourceSha) {
+      throw new Error("immutable source snapshot does not match the verified source SHA");
+    }
+    const result = await writeBundle(
+      temporary,
+      verifiedSource,
+      join(snapshotRepository, "production-spec"),
+    );
+    const snapshotStatus = (
+      await execFileAsync(
+        "git",
+        ["-C", snapshotRepository, "status", "--porcelain=v1", "--untracked-files=all"],
+        { encoding: "utf8", env: gitEnvironment },
+      )
+    ).stdout.trim();
+    if (snapshotStatus) throw new Error("immutable source snapshot changed during export");
+    await execFileAsync(
+      "git",
+      ["-C", verifiedSource.repositoryRoot, "worktree", "remove", "--force", snapshotRepository],
+      { encoding: "utf8", env: gitEnvironment },
+    );
+    await rm(snapshotContainer, { recursive: true, force: true });
     await reverify();
     await assertAbsentOrEmptyDirectory(destination);
     try {
@@ -428,6 +494,12 @@ async function publishVerifiedBundle(
     await rename(temporary, destination);
     return result;
   } catch (error) {
+    await execFileAsync(
+      "git",
+      ["-C", verifiedSource.repositoryRoot, "worktree", "remove", "--force", snapshotRepository],
+      { encoding: "utf8", env: gitEnvironment },
+    ).catch(() => undefined);
+    await rm(snapshotContainer, { recursive: true, force: true });
     await rm(temporary, { recursive: true, force: true });
     throw error;
   }
