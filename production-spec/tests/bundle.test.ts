@@ -247,8 +247,12 @@ describe("bundle", () => {
   test("cleans its temporary sibling when atomic publication fails", async () => {
     const fixture = await createGitExportFixture();
     const out = join(WORK, "raced-export");
+    await rm(out, { recursive: true, force: true });
     await mkdir(out, { recursive: true });
-    const exporting = fixture.exportBundle(out);
+    const exporting = fixture.exportBundle(out).then(
+      () => ({ ok: true as const, error: undefined }),
+      (error: unknown) => ({ ok: false as const, error }),
+    );
     const temporaryPrefix = ".raced-export.tmp-";
     let sawTemporary = false;
     for (let attempt = 0; attempt < 1_000; attempt += 1) {
@@ -260,7 +264,9 @@ describe("bundle", () => {
     }
     expect(sawTemporary).toBe(true);
     await writeFile(join(out, "stale-authority.json"), "{}");
-    await expect(exporting).rejects.toMatchObject({
+    const result = await exporting;
+    expect(result.ok).toBe(false);
+    expect(result.error).toMatchObject({
       stderr: expect.stringContaining("stale authority files"),
     });
     expect((await readdir(WORK)).some((entry) => entry.startsWith(temporaryPrefix))).toBe(false);
@@ -270,7 +276,12 @@ describe("bundle", () => {
   test("rejects a source repository mutation before atomic publication", async () => {
     const fixture = await createGitExportFixture();
     const out = join(WORK, "source-raced-export");
-    const exporting = fixture.exportBundle(out);
+    await rm(out, { recursive: true, force: true });
+    await mkdir(WORK, { recursive: true });
+    const exporting = fixture.exportBundle(out).then(
+      () => ({ ok: true as const, error: undefined }),
+      (error: unknown) => ({ ok: false as const, error }),
+    );
     const temporaryPrefix = ".source-raced-export.tmp-";
     let sawTemporary = false;
     for (let attempt = 0; attempt < 1_000; attempt += 1) {
@@ -283,7 +294,9 @@ describe("bundle", () => {
     expect(sawTemporary).toBe(true);
     const readme = join(fixture.specificationRoot, "README.md");
     await writeFile(readme, `${await readFile(readme, "utf8")}\nconcurrent mutation\n`);
-    await expect(exporting).rejects.toMatchObject({
+    const result = await exporting;
+    expect(result.ok).toBe(false);
+    expect(result.error).toMatchObject({
       stderr: expect.stringContaining("source repository is not clean"),
     });
     await expect(readdir(out)).rejects.toMatchObject({ code: "ENOENT" });
