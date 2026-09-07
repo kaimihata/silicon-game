@@ -11,7 +11,7 @@ import {
   rm,
   rmdir,
 } from "node:fs/promises";
-import { basename, dirname, join, relative, resolve, sep } from "node:path";
+import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { tmpdir } from "node:os";
 import { promisify } from "node:util";
 import { stringify } from "yaml";
@@ -82,6 +82,27 @@ function normalizeRemoteUrl(url: string): string {
     .replace(/\.git$/, "");
 }
 
+function remoteProofEnvironment(): NodeJS.ProcessEnv {
+  const environment = { ...process.env };
+  for (const key of Object.keys(environment)) {
+    if (
+      key === "GIT_CONFIG_PARAMETERS" ||
+      key === "GIT_DIR" ||
+      key === "GIT_WORK_TREE" ||
+      key === "GIT_COMMON_DIR" ||
+      key === "GIT_OBJECT_DIRECTORY" ||
+      key === "GIT_ALTERNATE_OBJECT_DIRECTORIES" ||
+      /^GIT_CONFIG_(?:COUNT|KEY_\d+|VALUE_\d+|SYSTEM|GLOBAL|NOSYSTEM)$/.test(key)
+    ) {
+      delete environment[key];
+    }
+  }
+  environment.GIT_CONFIG_GLOBAL = process.platform === "win32" ? "NUL" : "/dev/null";
+  environment.GIT_CONFIG_NOSYSTEM = "1";
+  environment.GIT_TERMINAL_PROMPT = "0";
+  return environment;
+}
+
 export async function verifyRepositorySource(
   sourceSha: string,
   sourceRef: string,
@@ -130,6 +151,8 @@ export async function verifyRepositorySource(
     throw new Error("source repository is not clean relative to the supplied checked-out HEAD");
   }
   let advertisedOutput: string;
+  const allowsLocalRemote =
+    policy.remoteUrl.startsWith("file://") || isAbsolute(policy.remoteUrl);
   try {
     ({ stdout: advertisedOutput } = await execFileAsync(
       "git",
@@ -139,7 +162,7 @@ export async function verifyRepositorySource(
         "-c",
         "protocol.https.allow=always",
         "-c",
-        "protocol.file.allow=always",
+        `protocol.file.allow=${allowsLocalRemote ? "always" : "never"}`,
         "-c",
         "http.followRedirects=false",
         "ls-remote",
@@ -151,11 +174,7 @@ export async function verifyRepositorySource(
       {
         cwd: tmpdir(),
         encoding: "utf8",
-        env: {
-          ...process.env,
-          GIT_CONFIG_GLOBAL: process.platform === "win32" ? "NUL" : "/dev/null",
-          GIT_CONFIG_NOSYSTEM: "1",
-        },
+        env: remoteProofEnvironment(),
       },
     ));
   } catch {

@@ -399,6 +399,37 @@ describe("bundle", () => {
     await complete.remove();
   });
 
+  test("ignores ambient Git configuration that attempts to redirect remote proof", async () => {
+    const fixture = await createGitExportFixture();
+    const original = {
+      count: process.env.GIT_CONFIG_COUNT,
+      key: process.env.GIT_CONFIG_KEY_0,
+      value: process.env.GIT_CONFIG_VALUE_0,
+    };
+    process.env.GIT_CONFIG_COUNT = "1";
+    process.env.GIT_CONFIG_KEY_0 = `url.${join(fixture.remote, "attacker")}.insteadOf`;
+    process.env.GIT_CONFIG_VALUE_0 = fixture.remote;
+    try {
+      await expect(
+        verifyRepositorySource(fixture.head, fixture.sourceRef, fixture.repository, {
+          remoteName: "origin",
+          remoteUrl: fixture.remote,
+          sourceRepository: "fixture/chip-city",
+        }),
+      ).resolves.toMatchObject({ sourceSha: fixture.head });
+    } finally {
+      for (const [key, value] of [
+        ["GIT_CONFIG_COUNT", original.count],
+        ["GIT_CONFIG_KEY_0", original.key],
+        ["GIT_CONFIG_VALUE_0", original.value],
+      ] as const) {
+        if (value === undefined) delete process.env[key];
+        else process.env[key] = value;
+      }
+      await fixture.remove();
+    }
+  });
+
   test("CLI export has no arbitrary source-SHA bypass", async () => {
     const cli = join(ROOT, "node_modules/.bin/tsx");
     await expect(execFileAsync(cli, [
