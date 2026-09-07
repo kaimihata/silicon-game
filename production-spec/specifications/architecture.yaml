@@ -49,7 +49,7 @@ rules:
   - id: target-license
     statement: The target game repository source is licensed under MIT; third-party dependencies and assets retain their own recorded approved licenses and notices.
     level: normative
-    acceptance_notes: The initial target commit contains MIT license text and a generated third-party notice inventory.
+    acceptance_notes: The target repository retains MIT license text and a generated third-party notice inventory.
 decisions:
   - id: unity-production
     choice: Adopt Unity URP at the exact specified LTS editor.

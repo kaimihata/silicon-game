@@ -9,6 +9,7 @@ const execFileAsync = promisify(execFile);
 
 export type GitExportFixture = {
   head: string;
+  specificationRoot: string;
   exportBundle: (out: string) => Promise<void>;
   remove: () => Promise<void>;
 };
@@ -43,6 +44,7 @@ export async function createGitExportFixture(): Promise<GitExportFixture> {
   )).stdout.trim();
   return {
     head,
+    specificationRoot,
     exportBundle: async (out: string) => {
       await execFileAsync(
         join(specificationRoot, "node_modules/.bin/tsx"),

@@ -24,7 +24,7 @@ A human bundle-review disposition validates against `schemas/bundle-review-dispo
 - `registries/` — Direction Packet v1-compatible local registries.
 - `policy/first-run.yaml` — proposed bounded first-epoch policy.
 - `packet/` — pinned current Direction Packet v1 schema and generator config.
-- `target-bootstrap/` — validated initial-target manifest and exact MIT license source.
+- `target-bootstrap/` — validated target-bootstrap manifest and exact MIT license source.
 - `handoff/` — no-execution factory prerequisites, runbook, and import contract.
 - `skill-draft/` — uninstalled operator-skill source and evaluation prompts.
 - `src/`, `tests/` — isolated Node.js 22 and TypeScript tooling.

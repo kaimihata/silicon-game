@@ -98,7 +98,7 @@ export async function generatePacket(baseSha: string): Promise<any> {
       })),
       excluded: config.excluded,
       assumptions: [
-        { id: "assumption-empty-target", statement: "The first target base is an initialized empty Unity repository containing this exported bundle and provenance.", disposition: "fixed_for_epoch" },
+        { id: "assumption-existing-target", statement: "The target base is the existing Unity 6000.3.23f1 URP repository with landed runner contracts; its explicit base SHA must be freshly observed and validated rather than inferred from the recorded integration snapshot.", disposition: "validate_during_epoch" },
         { id: "assumption-private-target", statement: "The target remains private to the owner and required service identities.", disposition: "fixed_for_epoch" },
         { id: "assumption-factory-preflight", statement: "Before submission, the deployed factory must verify that the supplied exact target SHA is the observed develop head, workflow checks passed for that SHA, and target provenance plus every exported file, specification, and policy digest match this source-valid local generation; any unexpected head movement invalidates authority pending full revalidation.", disposition: "validate_during_epoch" },
       ],
@@ -140,7 +140,7 @@ export async function generatePacket(baseSha: string): Promise<any> {
       ],
       provenance: [
         { id: "constraint-asset-provenance", statement: "All dependencies and assets have allowed license, pinned source, justification, scan, and provenance.", enforcement: "reviewer_policy" },
-        { id: "constraint-source-provenance", statement: "The initial target commit records source repository, source SHA, bundle digest, and policy digest.", enforcement: "required_check" },
+        { id: "constraint-source-provenance", statement: "The target base records the imported source repository, source SHA, bundle digest, and policy digest.", enforcement: "required_check" },
       ],
       dependencies: {
         new_dependencies: "allowed",

@@ -267,6 +267,30 @@ describe("bundle", () => {
     await fixture.remove();
   });
 
+  test("rejects a source repository mutation before atomic publication", async () => {
+    const fixture = await createGitExportFixture();
+    const out = join(WORK, "source-raced-export");
+    const exporting = fixture.exportBundle(out);
+    const temporaryPrefix = ".source-raced-export.tmp-";
+    let sawTemporary = false;
+    for (let attempt = 0; attempt < 1_000; attempt += 1) {
+      if ((await readdir(WORK)).some((entry) => entry.startsWith(temporaryPrefix))) {
+        sawTemporary = true;
+        break;
+      }
+      await new Promise((resolveWait) => setTimeout(resolveWait, 1));
+    }
+    expect(sawTemporary).toBe(true);
+    const readme = join(fixture.specificationRoot, "README.md");
+    await writeFile(readme, `${await readFile(readme, "utf8")}\nconcurrent mutation\n`);
+    await expect(exporting).rejects.toMatchObject({
+      stderr: expect.stringContaining("source repository is not clean"),
+    });
+    await expect(readdir(out)).rejects.toMatchObject({ code: "ENOENT" });
+    expect((await readdir(WORK)).some((entry) => entry.startsWith(temporaryPrefix))).toBe(false);
+    await fixture.remove();
+  });
+
   test("requires an explicit full target base SHA", async () => {
     await expect(generatePacket("main")).rejects.toThrow("--base-sha");
   });

@@ -2,7 +2,7 @@
 
 `direction-packet.config.yaml` is a complete draft generator input with no fabricated repository revision. `vendor/direction-packet-v1.schema.json` is pinned from `kaimihata/silicon-code-factory@742b825e9b9ecf90fb638aae40da91527baa7c57`.
 
-Generate only after the exported specification is present in an initialized target commit:
+Generate only after the exported specification is present in an existing target commit whose full SHA was freshly observed:
 
 ```bash
 npm run generate:packet -- \

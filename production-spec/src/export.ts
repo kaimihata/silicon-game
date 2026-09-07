@@ -291,6 +291,7 @@ export async function exportBundle(out: string, sourceSha: string): Promise<Expo
   const temporary = await mkdtemp(join(dirname(destination), `.${basename(destination)}.tmp-`));
   try {
     const result = await writeBundle(temporary, sourceSha);
+    await verifySourceRepository(sourceSha);
     await assertAbsentOrEmptyDirectory(destination);
     try {
       await rmdir(destination);
