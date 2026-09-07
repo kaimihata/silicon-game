@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { mkdtemp, rm, symlink } from "node:fs/promises";
+import { lstat, mkdir, mkdtemp, readdir, rm, symlink } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { promisify } from "node:util";
@@ -28,7 +28,14 @@ export async function createGitExportFixture(): Promise<GitExportFixture> {
     { encoding: "utf8" },
   );
   const specificationRoot = join(repository, "production-spec");
-  await symlink(join(ROOT, "node_modules"), join(specificationRoot, "node_modules"), "dir");
+  const sourceModules = join(ROOT, "node_modules");
+  const fixtureModules = join(specificationRoot, "node_modules");
+  await mkdir(fixtureModules);
+  for (const entry of await readdir(sourceModules)) {
+    const source = join(sourceModules, entry);
+    const type = (await lstat(source)).isDirectory() ? "dir" : "file";
+    await symlink(source, join(fixtureModules, entry), type);
+  }
   const head = (await execFileAsync(
     "git",
     ["-C", repository, "rev-parse", "HEAD"],
