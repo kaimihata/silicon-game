@@ -33,7 +33,6 @@ import {
 } from "./validate.js";
 
 const SHA_PATTERN = /^[0-9a-f]{40}$/;
-const HEAD_REF_PATTERN = /^refs\/heads\/[A-Za-z0-9](?:[A-Za-z0-9._/-]*[A-Za-z0-9])?$/;
 const SOURCE_REPOSITORY = "kaimihata/silicon-game";
 const SOURCE_REMOTE_URL = `https://github.com/${SOURCE_REPOSITORY}.git`;
 const execFileAsync = promisify(execFile);
@@ -122,10 +121,18 @@ export async function verifyRepositorySource(
   policy: RepositoryProofPolicy,
 ): Promise<VerifiedRepositorySource> {
   if (!SHA_PATTERN.test(sourceSha)) throw new Error("--source-sha must be an explicit lowercase 40-hex commit SHA");
-  if (!HEAD_REF_PATTERN.test(sourceRef) || sourceRef.includes("..") || sourceRef.includes("//")) {
+  const gitEnvironment = remoteProofEnvironment();
+  if (!sourceRef.startsWith("refs/heads/")) {
     throw new Error("--source-ref must be one explicit trusted refs/heads/* ref");
   }
-  const gitEnvironment = remoteProofEnvironment();
+  try {
+    await execFileAsync("git", ["check-ref-format", sourceRef], {
+      encoding: "utf8",
+      env: gitEnvironment,
+    });
+  } catch {
+    throw new Error("--source-ref must be one explicit trusted refs/heads/* ref");
+  }
   const { stdout: headOutput } = await execFileAsync("git", ["-C", repositoryRoot, "rev-parse", "HEAD"], {
     encoding: "utf8",
     env: gitEnvironment,
@@ -167,6 +174,7 @@ export async function verifyRepositorySource(
   let advertisedOutput: string;
   const allowsLocalRemote =
     policy.remoteUrl.startsWith("file://") || isAbsolute(policy.remoteUrl);
+  const remoteProofDirectory = await mkdtemp(join(tmpdir(), "chip-city-remote-proof-"));
   try {
     ({ stdout: advertisedOutput } = await execFileAsync(
       "git",
@@ -186,13 +194,19 @@ export async function verifyRepositorySource(
         sourceRef,
       ],
       {
-        cwd: tmpdir(),
+        cwd: remoteProofDirectory,
         encoding: "utf8",
-        env: gitEnvironment,
+        env: {
+          ...gitEnvironment,
+          GIT_CEILING_DIRECTORIES: remoteProofDirectory,
+          GIT_DIR: join(remoteProofDirectory, "isolated.git"),
+        },
       },
     ));
   } catch {
     throw new Error(`authoritative remote proof is unavailable for ${sourceRef}`);
+  } finally {
+    await rm(remoteProofDirectory, { recursive: true, force: true });
   }
   const advertisements = advertisedOutput.trim().split("\n").filter(Boolean).map((line) => {
     const [sha, ref, ...extra] = line.split(/\s+/);
@@ -261,6 +275,7 @@ async function listExportFiles(directory: string, root = directory): Promise<str
 async function validateCompleteExport(
   root: string,
   exportedArtifacts: ExportedArtifact[],
+  sourceRoot: string,
 ): Promise<void> {
   const targetPaths = exportedArtifacts.map((artifact) => artifact.target_path);
   if (new Set(targetPaths).size !== targetPaths.length) {
@@ -280,7 +295,7 @@ async function validateCompleteExport(
       throw new Error(`Export digest mismatch after generation: ${artifact.target_path}`);
     }
   }
-  await validateFactoryBundleDirectory(root);
+  await validateFactoryBundleDirectory(root, undefined, sourceRoot);
 }
 
 async function writeBundle(
@@ -422,7 +437,7 @@ async function writeBundle(
       first.target_path.localeCompare(second.target_path)
     ),
   })}\n`);
-  await validateCompleteExport(root, exportedArtifacts);
+  await validateCompleteExport(root, exportedArtifacts, sourceRoot);
   return {
     plannerBundleDigest: factoryBundle.digest,
     specificationRevision,

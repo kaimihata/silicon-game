@@ -727,7 +727,7 @@ export async function generateFactoryBundle(
     throw new Error(`bundle.json is ${bytes} bytes; maximum is ${FACTORY_BUNDLE_MAX_BYTES}`);
   }
   await writeText(resolve(exportRoot, FACTORY_BUNDLE_PATH), source);
-  await validateFactoryBundleDirectory(exportRoot, bundle);
+  await validateFactoryBundleDirectory(exportRoot, bundle, sourceRoot);
   return {bundle, digest: `sha256:${sha256(source)}`, bytes};
 }
 
@@ -777,7 +777,8 @@ export async function validateFactoryBundleManifest(
 
 export async function validateFactoryBundleDirectory(
   exportRoot: string,
-  bundle?: GameSpecBundleV1
+  bundle?: GameSpecBundleV1,
+  sourceRoot = ROOT,
 ): Promise<GameSpecBundleV1> {
   const bundlePath = resolve(exportRoot, FACTORY_BUNDLE_PATH);
   const bundleBytes = await readFile(bundlePath);
@@ -792,7 +793,7 @@ export async function validateFactoryBundleDirectory(
   if (bundle && canonicalJson(bundle) !== canonical) {
     throw new Error("Written bundle.json differs from generated manifest");
   }
-  await validateFactoryBundleManifest(parsed);
+  await validateFactoryBundleManifest(parsed, sourceRoot);
   for (const file of parsed.files) {
     const bytes = await readFile(resolve(exportRoot, file.path));
     if (bytes.byteLength !== file.bytes) {

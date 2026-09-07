@@ -364,6 +364,29 @@ describe("bundle", () => {
     await fixture.remove();
   });
 
+  test("accepts valid Git branch ref characters for reviewed source refs", async () => {
+    const fixture = await createGitExportFixture();
+    const policy = {
+      remoteName: "origin",
+      remoteUrl: fixture.remote,
+      sourceRepository: "fixture/chip-city",
+    };
+    for (const sourceRef of [
+      "refs/heads/feature+proof",
+      "refs/heads/review@v2",
+      "refs/heads/release,proof",
+    ]) {
+      await execFileAsync(
+        "git",
+        ["--git-dir", fixture.remote, "update-ref", sourceRef, fixture.head],
+      );
+      await expect(
+        verifyRepositorySource(fixture.head, sourceRef, fixture.repository, policy),
+      ).resolves.toMatchObject({ sourceSha: fixture.head });
+    }
+    await fixture.remove();
+  });
+
   test("rejects unadvertised commits, wrong refs, shallow clones, and missing proof", async () => {
     const fixture = await createGitExportFixture();
     const policy = {
@@ -459,6 +482,44 @@ describe("bundle", () => {
         if (value === undefined) delete process.env[key];
         else process.env[key] = value;
       }
+      await fixture.remove();
+    }
+  });
+
+  test("does not discover repository-local redirects through an ambient temporary directory", async () => {
+    const fixture = await createGitExportFixture();
+    const ambientRepository = join(WORK, "ambient-repository");
+    const attackerRemote = join(WORK, "attacker.git");
+    await mkdir(WORK, { recursive: true });
+    await execFileAsync("git", ["clone", "--quiet", "--bare", fixture.remote, attackerRemote]);
+    await execFileAsync(
+      "git",
+      ["--git-dir", fixture.remote, "update-ref", "-d", fixture.sourceRef],
+    );
+    await execFileAsync("git", ["init", "--quiet", ambientRepository]);
+    await execFileAsync(
+      "git",
+      [
+        "-C",
+        ambientRepository,
+        "config",
+        `url.${attackerRemote}.insteadOf`,
+        fixture.remote,
+      ],
+    );
+    const originalTmpdir = process.env.TMPDIR;
+    process.env.TMPDIR = ambientRepository;
+    try {
+      await expect(
+        verifyRepositorySource(fixture.head, fixture.sourceRef, fixture.repository, {
+          remoteName: "origin",
+          remoteUrl: fixture.remote,
+          sourceRepository: "fixture/chip-city",
+        }),
+      ).rejects.toThrow("remote proof is unavailable");
+    } finally {
+      if (originalTmpdir === undefined) delete process.env.TMPDIR;
+      else process.env.TMPDIR = originalTmpdir;
       await fixture.remove();
     }
   });
