@@ -2,6 +2,7 @@ import { execFile } from "node:child_process";
 import { chmod, mkdir, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { promisify } from "node:util";
+import { deflateSync } from "node:zlib";
 import { afterEach, describe, expect, test } from "vitest";
 import Ajv2020 from "ajv/dist/2020.js";
 import addFormats from "ajv-formats";
@@ -345,17 +346,22 @@ describe("bundle", () => {
   test("materializes source blobs without repository checkout hooks or filters", async () => {
     const fixture = await createGitExportFixture();
     const out = join(WORK, "plumbing-export");
-    const marker = join(WORK, "post-checkout-ran");
+    const checkoutMarker = join(WORK, "post-checkout-ran");
+    const fsmonitorMarker = join(WORK, "fsmonitor-ran");
     const hook = join(fixture.repository, ".git/hooks/post-checkout");
+    const fsmonitor = join(fixture.repository, ".git/hooks/hostile-fsmonitor");
     const attributes = join(fixture.repository, ".git/attack-attributes");
     await mkdir(WORK, { recursive: true });
-    await writeFile(hook, `#!/bin/sh\nprintf executed > "${marker}"\n`);
+    await writeFile(hook, `#!/bin/sh\nprintf executed > "${checkoutMarker}"\n`);
     await chmod(hook, 0o755);
+    await writeFile(fsmonitor, `#!/bin/sh\nprintf executed > "${fsmonitorMarker}"\n`);
+    await chmod(fsmonitor, 0o755);
     await writeFile(
       attributes,
       "production-spec/handoff/target-import.md filter=attack\n",
     );
     await fixture.git("config", "core.attributesFile", attributes);
+    await fixture.git("config", "core.fsmonitor", fsmonitor);
     await fixture.git("config", "filter.attack.smudge", "printf 'tampered\\n'");
     const original = await readFile(
       join(fixture.specificationRoot, "handoff/target-import.md"),
@@ -374,9 +380,50 @@ describe("bundle", () => {
       },
     );
 
-    await expect(readFile(marker, "utf8")).rejects.toMatchObject({ code: "ENOENT" });
+    await expect(readFile(checkoutMarker, "utf8")).rejects.toMatchObject({ code: "ENOENT" });
+    await expect(readFile(fsmonitorMarker, "utf8")).rejects.toMatchObject({ code: "ENOENT" });
     expect(await readFile(join(out, "README.specification-import.md"), "utf8"))
       .toBe(original);
+    await fixture.remove();
+  });
+
+  test("rejects a poisoned local object database even for an advertised commit", async () => {
+    const fixture = await createGitExportFixture();
+    const blobSha = await fixture.git(
+      "rev-parse",
+      `${fixture.head}:production-spec/handoff/target-import.md`,
+    );
+    const poisoned = Buffer.from("poisoned authored bytes\n");
+    const objectPath = join(
+      fixture.repository,
+      ".git/objects",
+      blobSha.slice(0, 2),
+      blobSha.slice(2),
+    );
+    await mkdir(join(fixture.repository, ".git/objects", blobSha.slice(0, 2)), {
+      recursive: true,
+    });
+    await writeFile(
+      objectPath,
+      deflateSync(Buffer.concat([
+        Buffer.from(`blob ${poisoned.byteLength}\0`),
+        poisoned,
+      ])),
+    );
+
+    await expect(
+      exportBundleFromRepository(
+        join(WORK, "poisoned-object-export"),
+        fixture.head,
+        fixture.sourceRef,
+        fixture.repository,
+        {
+          remoteName: "origin",
+          remoteUrl: fixture.remote,
+          sourceRepository: "fixture/chip-city",
+        },
+      ),
+    ).rejects.toThrow(/object mismatch|bad object|hash mismatch/i);
     await fixture.remove();
   });
 

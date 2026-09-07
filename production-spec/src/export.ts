@@ -168,7 +168,16 @@ export async function verifyRepositorySource(
   }
   const { stdout: statusOutput } = await execFileAsync(
     "git",
-    ["-C", repositoryRoot, "status", "--porcelain=v1", "--untracked-files=all"],
+    [
+      "-c",
+      "core.fsmonitor=false",
+      "-C",
+      repositoryRoot,
+      "status",
+      "--porcelain=v1",
+      "--untracked-files=all",
+      "--ignore-submodules=all",
+    ],
     { encoding: "utf8", env: gitEnvironment },
   );
   if (statusOutput.trim()) {
@@ -302,16 +311,59 @@ async function validateCompleteExport(
 }
 
 type SourceTreeEntry = {
+  mode: string;
   objectSha: string;
+  objectType: "blob" | "tree";
   sourcePath: string;
-  targetPath: string;
+  targetPath?: string;
 };
+
+async function readVerifiedGitObject(
+  repositoryRoot: string,
+  objectSha: string,
+  objectType: "blob" | "commit" | "tree",
+  gitEnvironment: NodeJS.ProcessEnv,
+): Promise<Buffer> {
+  const { stdout } = await execFileAsync(
+    "git",
+    ["-C", repositoryRoot, "cat-file", objectType, objectSha],
+    {
+      encoding: "buffer",
+      env: gitEnvironment,
+      maxBuffer: 16 * 1024 * 1024,
+    },
+  );
+  const bytes = Buffer.isBuffer(stdout) ? stdout : Buffer.from(stdout);
+  const actualObjectSha = createHash("sha1")
+    .update(`${objectType} ${bytes.byteLength}\0`)
+    .update(bytes)
+    .digest("hex");
+  if (actualObjectSha !== objectSha) {
+    throw new Error(`immutable source snapshot ${objectType} object mismatch: ${objectSha}`);
+  }
+  return bytes;
+}
 
 async function materializeVerifiedSourceTree(
   verifiedSource: VerifiedRepositorySource,
   destination: string,
   gitEnvironment: NodeJS.ProcessEnv,
 ): Promise<void> {
+  const commit = await readVerifiedGitObject(
+    verifiedSource.repositoryRoot,
+    verifiedSource.sourceSha,
+    "commit",
+    gitEnvironment,
+  );
+  const treeMatch = /^tree ([0-9a-f]{40})$/m.exec(commit.toString("utf8"));
+  if (!treeMatch) throw new Error("verified source commit does not identify one root tree");
+  const rootTreeSha = treeMatch[1]!;
+  await readVerifiedGitObject(
+    verifiedSource.repositoryRoot,
+    rootTreeSha,
+    "tree",
+    gitEnvironment,
+  );
   const { stdout } = await execFileAsync(
     "git",
     [
@@ -319,9 +371,10 @@ async function materializeVerifiedSourceTree(
       verifiedSource.repositoryRoot,
       "ls-tree",
       "-r",
+      "-t",
       "-z",
       "--full-tree",
-      verifiedSource.sourceSha,
+      rootTreeSha,
       "--",
       "production-spec",
     ],
@@ -339,11 +392,15 @@ async function materializeVerifiedSourceTree(
     const objectSha = match[3]!;
     const sourcePath = match[4]!;
     if (
-      type !== "blob" ||
-      (mode !== "100644" && mode !== "100755") ||
-      !sourcePath!.startsWith("production-spec/")
+      (type !== "blob" && type !== "tree") ||
+      (type === "blob" && mode !== "100644" && mode !== "100755") ||
+      (type === "tree" && mode !== "040000") ||
+      (sourcePath !== "production-spec" && !sourcePath.startsWith("production-spec/"))
     ) {
       throw new Error(`immutable source snapshot contains an unsupported entry: ${sourcePath}`);
+    }
+    if (type === "tree") {
+      return { mode, objectSha, objectType: type, sourcePath };
     }
     const relativePath = sourcePath.slice("production-spec/".length);
     const segments = relativePath.split("/");
@@ -355,36 +412,28 @@ async function materializeVerifiedSourceTree(
     if (!targetRelative || targetRelative.startsWith(`..${sep}`) || isAbsolute(targetRelative)) {
       throw new Error(`immutable source snapshot path escapes its destination: ${sourcePath}`);
     }
-    return { objectSha, sourcePath, targetPath };
+    return { mode, objectSha, objectType: type, sourcePath, targetPath };
   });
   if (!entries.length) throw new Error("verified source commit has no production-spec tree");
-  if (new Set(entries.map((entry) => entry.targetPath)).size !== entries.length) {
+  const blobs = entries.filter(
+    (entry): entry is SourceTreeEntry & { objectType: "blob"; targetPath: string } =>
+      entry.objectType === "blob",
+  );
+  if (!blobs.length) throw new Error("verified production-spec tree contains no files");
+  if (new Set(blobs.map((entry) => entry.targetPath)).size !== blobs.length) {
     throw new Error("immutable source snapshot contains duplicate target paths");
   }
   for (let offset = 0; offset < entries.length; offset += 12) {
     await Promise.all(entries.slice(offset, offset + 12).map(async (entry) => {
-      const { stdout: blob } = await execFileAsync(
-        "git",
-        [
-          "-C",
-          verifiedSource.repositoryRoot,
-          "cat-file",
-          "blob",
-          entry.objectSha,
-        ],
-        {
-          encoding: "buffer",
-          env: gitEnvironment,
-          maxBuffer: 16 * 1024 * 1024,
-        },
+      const bytes = await readVerifiedGitObject(
+        verifiedSource.repositoryRoot,
+        entry.objectSha,
+        entry.objectType,
+        gitEnvironment,
       );
-      const bytes = Buffer.isBuffer(blob) ? blob : Buffer.from(blob);
-      const actualObjectSha = createHash("sha1")
-        .update(`blob ${bytes.byteLength}\0`)
-        .update(bytes)
-        .digest("hex");
-      if (actualObjectSha !== entry.objectSha) {
-        throw new Error(`immutable source snapshot object mismatch: ${entry.sourcePath}`);
+      if (entry.objectType === "tree") return;
+      if (!entry.targetPath) {
+        throw new Error(`immutable source snapshot blob has no target path: ${entry.sourcePath}`);
       }
       await mkdir(dirname(entry.targetPath), { recursive: true });
       await writeFile(entry.targetPath, bytes);
