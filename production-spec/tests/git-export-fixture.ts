@@ -28,6 +28,18 @@ export async function createGitExportFixture(): Promise<GitExportFixture> {
     ["clone", "--quiet", "--bare", "--no-local", sourceRepository, remote],
     { encoding: "utf8" },
   );
+  const sourceHead = (await execFileAsync(
+    "git",
+    ["-C", sourceRepository, "rev-parse", "HEAD"],
+    { encoding: "utf8" },
+  )).stdout.trim();
+  const sourceRef = "refs/heads/test-reviewed";
+  await execFileAsync("git", ["--git-dir", remote, "update-ref", sourceRef, sourceHead], {
+    encoding: "utf8",
+  });
+  await execFileAsync("git", ["--git-dir", remote, "symbolic-ref", "HEAD", sourceRef], {
+    encoding: "utf8",
+  });
   await execFileAsync(
     "git",
     ["clone", "--quiet", "--no-local", remote, repository],
@@ -47,12 +59,6 @@ export async function createGitExportFixture(): Promise<GitExportFixture> {
     ["-C", repository, "rev-parse", "HEAD"],
     { encoding: "utf8" },
   )).stdout.trim();
-  const branch = (await execFileAsync(
-    "git",
-    ["-C", repository, "symbolic-ref", "--short", "HEAD"],
-    { encoding: "utf8" },
-  )).stdout.trim();
-  const sourceRef = `refs/heads/${branch}`;
   const git = async (...args: string[]) =>
     (await execFileAsync("git", ["-C", repository, ...args], { encoding: "utf8" })).stdout.trim();
   return {

@@ -48,7 +48,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await rm(WORK, {recursive: true, force: true});
-  await sourceFixture.remove();
+  await sourceFixture?.remove();
 });
 
 describe("factory game-spec bundle v1", () => {
