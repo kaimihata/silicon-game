@@ -12,7 +12,7 @@ import {
   manufacturingPlanDigest,
   validateManufacturingPlan,
 } from "../src/derive.js";
-import { compileContent, verifySourceRepository } from "../src/export.js";
+import { compileContent, verifyRepositorySource } from "../src/export.js";
 import { ROOT } from "../src/io.js";
 import { generatePacket, validatePacket } from "../src/packet.js";
 import { assertReadyForExport, validateBundle, validateCatalogReferences } from "../src/validate.js";
@@ -313,26 +313,90 @@ describe("bundle", () => {
       .toThrow("Only a ready author-complete bundle");
   });
 
-  test("normal source verification rejects mismatched and dirty source revisions", async () => {
-    const repository = join(WORK, "source-repository");
-    await mkdir(join(repository, "production-spec"), { recursive: true });
-    await writeFile(join(repository, "production-spec", "authority.yaml"), "status: draft\n");
-    const git = async (...args: string[]) =>
-      execFileAsync("git", ["-C", repository, ...args], { encoding: "utf8" });
-    await git("init", "--quiet");
-    await git("config", "user.name", "Production Spec Test");
-    await git("config", "user.email", "production-spec@example.invalid");
-    await git("remote", "add", "origin", "https://github.com/kaimihata/silicon-game.git");
-    await git("add", "production-spec/authority.yaml");
-    await git("commit", "--quiet", "-m", "fixture");
-    const head = (await git("rev-parse", "HEAD")).stdout.trim();
-    await expect(verifySourceRepository("a".repeat(40), repository)).rejects.toThrow("does not match checked-out HEAD");
-    await expect(verifySourceRepository(head, repository)).resolves.toBeUndefined();
-    await writeFile(join(repository, "production-spec", "authority.yaml"), "status: changed\n");
-    await expect(verifySourceRepository(head, repository)).rejects.toThrow("not clean");
-    await git("checkout", "--quiet", "--", "production-spec/authority.yaml");
-    await git("remote", "set-url", "origin", "https://github.com/example/not-authoritative.git");
-    await expect(verifySourceRepository(head, repository)).rejects.toThrow("not the authoritative");
+  test("proves source revisions against one advertised authoritative branch", async () => {
+    const fixture = await createGitExportFixture();
+    const policy = {
+      remoteName: "origin",
+      remoteUrl: fixture.remote,
+      sourceRepository: "fixture/chip-city",
+    };
+    await expect(
+      verifyRepositorySource(fixture.head, fixture.sourceRef, fixture.repository, policy),
+    ).resolves.toMatchObject({ sourceSha: fixture.head });
+    await expect(
+      verifyRepositorySource("a".repeat(40), fixture.sourceRef, fixture.repository, policy),
+    ).rejects.toThrow("does not match checked-out HEAD");
+
+    await writeFile(join(fixture.specificationRoot, "authority.yaml"), "status: changed\n");
+    await expect(
+      verifyRepositorySource(fixture.head, fixture.sourceRef, fixture.repository, policy),
+    ).rejects.toThrow("not clean");
+    await rm(join(fixture.specificationRoot, "authority.yaml"));
+
+    await fixture.git("remote", "set-url", "origin", "https://github.com/example/spoof.git");
+    await expect(
+      verifyRepositorySource(fixture.head, fixture.sourceRef, fixture.repository, policy),
+    ).rejects.toThrow("single authoritative");
+    await fixture.remove();
+  });
+
+  test("rejects unadvertised commits, wrong refs, shallow clones, and missing proof", async () => {
+    const fixture = await createGitExportFixture();
+    const policy = {
+      remoteName: "origin",
+      remoteUrl: fixture.remote,
+      sourceRepository: "fixture/chip-city",
+    };
+    await fixture.git("config", "user.name", "Production Spec Test");
+    await fixture.git("config", "user.email", "production-spec@example.invalid");
+    await writeFile(join(fixture.specificationRoot, "local-only.txt"), "unadvertised\n");
+    await fixture.git("add", "production-spec/local-only.txt");
+    await fixture.git("commit", "--quiet", "-m", "unadvertised local commit");
+    const localHead = await fixture.git("rev-parse", "HEAD");
+    await expect(
+      verifyRepositorySource(localHead, fixture.sourceRef, fixture.repository, policy),
+    ).rejects.toThrow("not the advertised tip");
+    await expect(
+      verifyRepositorySource(localHead, "refs/pull/2/head", fixture.repository, policy),
+    ).rejects.toThrow("refs/heads");
+    await expect(
+      verifyRepositorySource(localHead, "refs/remotes/fork/topic", fixture.repository, policy),
+    ).rejects.toThrow("refs/heads");
+
+    await fixture.git("remote", "set-url", "origin", join(fixture.remote, "missing"));
+    await expect(
+      verifyRepositorySource(localHead, fixture.sourceRef, fixture.repository, {
+        ...policy,
+        remoteUrl: join(fixture.remote, "missing"),
+      }),
+    ).rejects.toThrow("remote proof is unavailable");
+    await fixture.remove();
+
+    const shallowContainer = join(WORK, "shallow");
+    const shallowRepository = join(shallowContainer, "repository");
+    await mkdir(shallowContainer, { recursive: true });
+    const complete = await createGitExportFixture();
+    await execFileAsync("git", [
+      "clone",
+      "--quiet",
+      "--depth",
+      "1",
+      `file://${complete.remote}`,
+      shallowRepository,
+    ]);
+    const shallowHead = (await execFileAsync(
+      "git",
+      ["-C", shallowRepository, "rev-parse", "HEAD"],
+      { encoding: "utf8" },
+    )).stdout.trim();
+    await expect(
+      verifyRepositorySource(shallowHead, complete.sourceRef, shallowRepository, {
+        remoteName: "origin",
+        remoteUrl: `file://${complete.remote}`,
+        sourceRepository: "fixture/chip-city",
+      }),
+    ).rejects.toThrow("non-shallow");
+    await complete.remove();
   });
 
   test("CLI export has no arbitrary source-SHA bypass", async () => {
@@ -344,6 +408,8 @@ describe("bundle", () => {
       join(WORK, "cli-export"),
       "--source-sha",
       "a".repeat(40),
+      "--source-ref",
+      "refs/heads/kaimihata-production-spec-authority",
     ], { cwd: ROOT, encoding: "utf8" })).rejects.toMatchObject({
       stderr: expect.stringContaining("does not match checked-out HEAD"),
     });

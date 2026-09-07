@@ -9,23 +9,28 @@ const execFileAsync = promisify(execFile);
 
 export type GitExportFixture = {
   head: string;
+  repository: string;
+  remote: string;
+  sourceRef: string;
   specificationRoot: string;
+  git: (...args: string[]) => Promise<string>;
   exportBundle: (out: string) => Promise<void>;
   remove: () => Promise<void>;
 };
 
 export async function createGitExportFixture(): Promise<GitExportFixture> {
   const container = await mkdtemp(join(tmpdir(), "chip-city-production-spec-"));
+  const remote = join(container, "authoritative.git");
   const repository = join(container, "repository");
   const sourceRepository = resolve(ROOT, "..");
   await execFileAsync(
     "git",
-    ["clone", "--quiet", "--no-hardlinks", sourceRepository, repository],
+    ["clone", "--quiet", "--bare", "--no-local", sourceRepository, remote],
     { encoding: "utf8" },
   );
   await execFileAsync(
     "git",
-    ["-C", repository, "remote", "set-url", "origin", "https://github.com/kaimihata/silicon-game.git"],
+    ["clone", "--quiet", "--no-local", remote, repository],
     { encoding: "utf8" },
   );
   const specificationRoot = join(repository, "production-spec");
@@ -42,13 +47,37 @@ export async function createGitExportFixture(): Promise<GitExportFixture> {
     ["-C", repository, "rev-parse", "HEAD"],
     { encoding: "utf8" },
   )).stdout.trim();
+  const branch = (await execFileAsync(
+    "git",
+    ["-C", repository, "symbolic-ref", "--short", "HEAD"],
+    { encoding: "utf8" },
+  )).stdout.trim();
+  const sourceRef = `refs/heads/${branch}`;
+  const git = async (...args: string[]) =>
+    (await execFileAsync("git", ["-C", repository, ...args], { encoding: "utf8" })).stdout.trim();
   return {
     head,
+    repository,
+    remote,
+    sourceRef,
     specificationRoot,
+    git,
     exportBundle: async (out: string) => {
       await execFileAsync(
         join(specificationRoot, "node_modules/.bin/tsx"),
-        ["src/cli.ts", "export", "--out", out, "--source-sha", head],
+        [
+          "tests/export-test-cli.ts",
+          "--out",
+          out,
+          "--source-sha",
+          head,
+          "--source-ref",
+          sourceRef,
+          "--repository-root",
+          repository,
+          "--remote-url",
+          remote,
+        ],
         { cwd: specificationRoot, encoding: "utf8" },
       );
     },

@@ -12,6 +12,7 @@ import {
   rmdir,
 } from "node:fs/promises";
 import { basename, dirname, join, relative, resolve, sep } from "node:path";
+import { tmpdir } from "node:os";
 import { promisify } from "node:util";
 import { stringify } from "yaml";
 import { canonicalJson, digest } from "./canonical.js";
@@ -32,7 +33,9 @@ import {
 } from "./validate.js";
 
 const SHA_PATTERN = /^[0-9a-f]{40}$/;
+const HEAD_REF_PATTERN = /^refs\/heads\/[A-Za-z0-9](?:[A-Za-z0-9._/-]*[A-Za-z0-9])?$/;
 const SOURCE_REPOSITORY = "kaimihata/silicon-game";
+const SOURCE_REMOTE_URL = `https://github.com/${SOURCE_REPOSITORY}.git`;
 const execFileAsync = promisify(execFile);
 
 type ExportedArtifact = {
@@ -44,6 +47,17 @@ type ExportedArtifact = {
 export type ExportResult = {
   plannerBundleDigest: string;
   specificationRevision: string;
+};
+
+type VerifiedRepositorySource = {
+  sourceRepository: string;
+  sourceSha: string;
+};
+
+export type RepositoryProofPolicy = {
+  remoteName: string;
+  remoteUrl: string;
+  sourceRepository: string;
 };
 
 async function fileDigest(path: string): Promise<string> {
@@ -62,8 +76,22 @@ export async function compileContent(out: string): Promise<void> {
   })}\n`);
 }
 
-export async function verifySourceRepository(sourceSha: string, repositoryRoot = resolve(ROOT, "..")): Promise<void> {
+function normalizeRemoteUrl(url: string): string {
+  return url.trim()
+    .replace(/^git@github\.com:/, "https://github.com/")
+    .replace(/\.git$/, "");
+}
+
+export async function verifyRepositorySource(
+  sourceSha: string,
+  sourceRef: string,
+  repositoryRoot: string,
+  policy: RepositoryProofPolicy,
+): Promise<VerifiedRepositorySource> {
   if (!SHA_PATTERN.test(sourceSha)) throw new Error("--source-sha must be an explicit lowercase 40-hex commit SHA");
+  if (!HEAD_REF_PATTERN.test(sourceRef) || sourceRef.includes("..") || sourceRef.includes("//")) {
+    throw new Error("--source-ref must be one explicit trusted refs/heads/* ref");
+  }
   const { stdout: headOutput } = await execFileAsync("git", ["-C", repositoryRoot, "rev-parse", "HEAD"], {
     encoding: "utf8",
   });
@@ -71,16 +99,27 @@ export async function verifySourceRepository(sourceSha: string, repositoryRoot =
   if (sourceSha !== head) {
     throw new Error(`--source-sha ${sourceSha} does not match checked-out HEAD ${head}`);
   }
-  const { stdout: originOutput } = await execFileAsync(
+  const { stdout: shallowOutput } = await execFileAsync(
     "git",
-    ["-C", repositoryRoot, "remote", "get-url", "origin"],
+    ["-C", repositoryRoot, "rev-parse", "--is-shallow-repository"],
     { encoding: "utf8" },
   );
-  const origin = originOutput.trim()
-    .replace(/^git@github\.com:/, "https://github.com/")
-    .replace(/\.git$/, "");
-  if (origin !== `https://github.com/${SOURCE_REPOSITORY}`) {
-    throw new Error(`origin ${originOutput.trim()} is not the authoritative ${SOURCE_REPOSITORY} repository`);
+  if (shallowOutput.trim() !== "false") {
+    throw new Error("source repository must be a complete non-shallow clone for remote proof");
+  }
+  const { stdout: originOutput } = await execFileAsync(
+    "git",
+    ["-C", repositoryRoot, "config", "--get-all", `remote.${policy.remoteName}.url`],
+    { encoding: "utf8" },
+  );
+  const remoteUrls = originOutput.trim().split("\n").filter(Boolean);
+  if (
+    remoteUrls.length !== 1 ||
+    normalizeRemoteUrl(remoteUrls[0]!) !== normalizeRemoteUrl(policy.remoteUrl)
+  ) {
+    throw new Error(
+      `${policy.remoteName} does not identify the single authoritative ${policy.sourceRepository} repository`,
+    );
   }
   const { stdout: statusOutput } = await execFileAsync(
     "git",
@@ -90,6 +129,70 @@ export async function verifySourceRepository(sourceSha: string, repositoryRoot =
   if (statusOutput.trim()) {
     throw new Error("source repository is not clean relative to the supplied checked-out HEAD");
   }
+  let advertisedOutput: string;
+  try {
+    ({ stdout: advertisedOutput } = await execFileAsync(
+      "git",
+      [
+        "-c",
+        "protocol.allow=never",
+        "-c",
+        "protocol.https.allow=always",
+        "-c",
+        "protocol.file.allow=always",
+        "-c",
+        "http.followRedirects=false",
+        "ls-remote",
+        "--exit-code",
+        "--refs",
+        policy.remoteUrl,
+        sourceRef,
+      ],
+      {
+        cwd: tmpdir(),
+        encoding: "utf8",
+        env: {
+          ...process.env,
+          GIT_CONFIG_GLOBAL: process.platform === "win32" ? "NUL" : "/dev/null",
+          GIT_CONFIG_NOSYSTEM: "1",
+        },
+      },
+    ));
+  } catch {
+    throw new Error(`authoritative remote proof is unavailable for ${sourceRef}`);
+  }
+  const advertisements = advertisedOutput.trim().split("\n").filter(Boolean).map((line) => {
+    const [sha, ref, ...extra] = line.split(/\s+/);
+    return { sha, ref, extra };
+  });
+  if (
+    advertisements.length !== 1 ||
+    advertisements[0]!.extra.length !== 0 ||
+    advertisements[0]!.ref !== sourceRef
+  ) {
+    throw new Error(`authoritative remote proof is ambiguous for ${sourceRef}`);
+  }
+  if (advertisements[0]!.sha !== sourceSha) {
+    throw new Error(
+      `--source-sha ${sourceSha} is not the advertised tip of trusted ref ${sourceRef}`,
+    );
+  }
+  return Object.freeze({
+    sourceRepository: policy.sourceRepository,
+    sourceSha,
+  });
+}
+
+export async function verifySourceRepository(
+  sourceSha: string,
+  sourceRef: string,
+  repositoryRoot = resolve(ROOT, ".."),
+): Promise<VerifiedRepositorySource> {
+  return verifyRepositorySource(sourceSha, sourceRef, repositoryRoot, {
+    remoteName: "origin",
+    remoteUrl: SOURCE_REMOTE_URL,
+    sourceRepository: SOURCE_REPOSITORY,
+  });
 }
 
 async function assertAbsentOrEmptyDirectory(path: string): Promise<void> {
@@ -146,7 +249,10 @@ async function validateCompleteExport(
   await validateFactoryBundleDirectory(root);
 }
 
-async function writeBundle(root: string, sourceSha: string): Promise<ExportResult> {
+async function writeBundle(
+  root: string,
+  verifiedSource: VerifiedRepositorySource,
+): Promise<ExportResult> {
   const validation = await validateBundle();
   if (!validation.valid) throw new Error(`Bundle is invalid:\n${validation.issues.map((issue) => `${issue.path}: ${issue.message}`).join("\n")}`);
   const manifest = await loadManifest();
@@ -251,8 +357,8 @@ async function writeBundle(root: string, sourceSha: string): Promise<ExportResul
     schema_version: 1,
     status: "ready",
     authority_state: "author_complete_not_executable",
-    source_repository: SOURCE_REPOSITORY,
-    source_revision: sourceSha,
+    source_repository: verifiedSource.sourceRepository,
+    source_revision: verifiedSource.sourceSha,
     bundle_id: "chip-city-production-foundation",
     bundle_version: "0.1.0",
     bundle_digest: validation.bundleDigest,
@@ -282,16 +388,18 @@ async function writeBundle(root: string, sourceSha: string): Promise<ExportResul
   };
 }
 
-export async function exportBundle(out: string, sourceSha: string): Promise<ExportResult> {
-  if (!SHA_PATTERN.test(sourceSha)) throw new Error("--source-sha must be an explicit lowercase 40-hex commit SHA");
-  await verifySourceRepository(sourceSha);
+async function publishVerifiedBundle(
+  out: string,
+  verifiedSource: VerifiedRepositorySource,
+  reverify: () => Promise<VerifiedRepositorySource>,
+): Promise<ExportResult> {
   const destination = resolve(out);
   await assertAbsentOrEmptyDirectory(destination);
   await mkdir(dirname(destination), { recursive: true });
   const temporary = await mkdtemp(join(dirname(destination), `.${basename(destination)}.tmp-`));
   try {
-    const result = await writeBundle(temporary, sourceSha);
-    await verifySourceRepository(sourceSha);
+    const result = await writeBundle(temporary, verifiedSource);
+    await reverify();
     await assertAbsentOrEmptyDirectory(destination);
     try {
       await rmdir(destination);
@@ -304,4 +412,38 @@ export async function exportBundle(out: string, sourceSha: string): Promise<Expo
     await rm(temporary, { recursive: true, force: true });
     throw error;
   }
+}
+
+export async function exportBundleFromRepository(
+  out: string,
+  sourceSha: string,
+  sourceRef: string,
+  repositoryRoot: string,
+  policy: RepositoryProofPolicy,
+): Promise<ExportResult> {
+  if (!SHA_PATTERN.test(sourceSha)) throw new Error("--source-sha must be an explicit lowercase 40-hex commit SHA");
+  const verifiedSource = await verifyRepositorySource(
+    sourceSha,
+    sourceRef,
+    repositoryRoot,
+    policy,
+  );
+  return publishVerifiedBundle(
+    out,
+    verifiedSource,
+    () => verifyRepositorySource(sourceSha, sourceRef, repositoryRoot, policy),
+  );
+}
+
+export async function exportBundle(
+  out: string,
+  sourceSha: string,
+  sourceRef: string,
+): Promise<ExportResult> {
+  const verifiedSource = await verifySourceRepository(sourceSha, sourceRef);
+  return publishVerifiedBundle(
+    out,
+    verifiedSource,
+    () => verifySourceRepository(sourceSha, sourceRef),
+  );
 }

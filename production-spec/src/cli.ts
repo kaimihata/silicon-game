@@ -35,8 +35,11 @@ async function main(): Promise<void> {
   if (command === "export") {
     const out = option("--out");
     const sourceSha = option("--source-sha");
-    if (!out || !sourceSha) throw new Error("export requires --out <directory> --source-sha <40-hex>");
-    const result = await exportBundle(resolve(out), sourceSha);
+    const sourceRef = option("--source-ref");
+    if (!out || !sourceSha || !sourceRef) {
+      throw new Error("export requires --out <directory> --source-sha <40-hex> --source-ref <refs/heads/reviewed-ref>");
+    }
+    const result = await exportBundle(resolve(out), sourceSha, sourceRef);
     console.log(`Exported source-bundle-valid ready import from clean checked-out HEAD to ${out}; planner bundle ${result.plannerBundleDigest}; separate digest-bound human packet approval remains mandatory`);
     return;
   }
@@ -62,7 +65,7 @@ async function main(): Promise<void> {
     await cleanGeneratedOutput(option("--out"));
     return;
   }
-  throw new Error("Usage: validate | compile --out DIR | export --out DIR --source-sha SHA | generate-packet --out FILE --base-sha SHA | validate-packet --file FILE");
+  throw new Error("Usage: validate | compile --out DIR | export --out DIR --source-sha SHA --source-ref REF | generate-packet --out FILE --base-sha SHA | validate-packet --file FILE");
 }
 
 main().catch((error) => {
