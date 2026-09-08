@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import { execFile } from "node:child_process";
+import { accessSync, constants, realpathSync } from "node:fs";
 import {
   cp,
   lstat,
@@ -12,7 +13,16 @@ import {
   rmdir,
   writeFile,
 } from "node:fs/promises";
-import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
+import {
+  basename,
+  delimiter,
+  dirname,
+  isAbsolute,
+  join,
+  relative,
+  resolve,
+  sep,
+} from "node:path";
 import { tmpdir } from "node:os";
 import { promisify } from "node:util";
 import { stringify } from "yaml";
@@ -87,7 +97,33 @@ function normalizeRemoteUrl(url: string): string {
     .replace(/\.git$/, "");
 }
 
+function trustedGitExecPath(): string | undefined {
+  const inherited = process.env.GIT_EXEC_PATH;
+  if (!inherited || !isAbsolute(inherited)) return undefined;
+  const executableNames = process.platform === "win32" ? ["git.exe", "git.cmd", "git"] : ["git"];
+  for (const directory of (process.env.PATH ?? "").split(delimiter).filter(Boolean)) {
+    for (const name of executableNames) {
+      let executable: string;
+      try {
+        executable = realpathSync(resolve(directory, name));
+        accessSync(executable, constants.X_OK);
+      } catch {
+        continue;
+      }
+      try {
+        const expected = realpathSync(resolve(dirname(executable), "..", "libexec", "git-core"));
+        const supplied = realpathSync(inherited);
+        return supplied === expected ? expected : undefined;
+      } catch {
+        return undefined;
+      }
+    }
+  }
+  return undefined;
+}
+
 function remoteProofEnvironment(): NodeJS.ProcessEnv {
+  const gitExecPath = trustedGitExecPath();
   const environment = { ...process.env };
   for (const key of Object.keys(environment)) {
     if (
@@ -114,6 +150,7 @@ function remoteProofEnvironment(): NodeJS.ProcessEnv {
   environment.GIT_TERMINAL_PROMPT = "0";
   environment.GIT_NO_LAZY_FETCH = "1";
   environment.GIT_NO_REPLACE_OBJECTS = "1";
+  if (gitExecPath) environment.GIT_EXEC_PATH = gitExecPath;
   return environment;
 }
 
