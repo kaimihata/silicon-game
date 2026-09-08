@@ -1,5 +1,5 @@
-import { readFile } from "node:fs/promises";
-import { join, relative } from "node:path";
+import { lstat, readFile } from "node:fs/promises";
+import { join, relative, resolve, sep } from "node:path";
 import Ajv2020 from "ajv/dist/2020.js";
 import addFormats from "ajv-formats";
 import { digest } from "./canonical.js";
@@ -129,6 +129,11 @@ export async function validateBundle(root = ROOT): Promise<ValidationResult> {
   const actual = (await Promise.all(authoredRoots.map(async (directory) =>
     (await listFiles(join(root, directory), ".yaml")).map((path) => relative(root, path))
   ))).flat().sort();
+  const actualSet = new Set(actual);
+  const schemaPaths = new Set(
+    (await listFiles(join(root, "schemas"), ".json"))
+      .map((path) => relative(root, path).split(sep).join("/")),
+  );
   const declared = manifest.artifacts.map((artifact) => artifact.path).sort();
   for (const path of actual.filter((path) => !declared.includes(path))) {
     issues.push({ path, message: "authored YAML is missing from manifest" });
@@ -141,11 +146,20 @@ export async function validateBundle(root = ROOT): Promise<ValidationResult> {
   const validators = new Map<string, ReturnType<typeof ajv.compile>>();
   for (const artifact of manifest.artifacts) {
     try {
+      if (!actualSet.has(artifact.path)) continue;
+      if (!schemaPaths.has(artifact.schema)) {
+        throw new Error(`schema is not a declared regular file beneath schemas/: ${artifact.schema}`);
+      }
+      const schemaPath = resolve(root, artifact.schema);
+      const schemaMetadata = await lstat(schemaPath);
+      if (!schemaMetadata.isFile() || schemaMetadata.isSymbolicLink()) {
+        throw new Error(`schema is not a regular file: ${artifact.schema}`);
+      }
       const parsed = await readYaml(join(root, artifact.path));
       data.set(artifact.path, parsed);
       let validate = validators.get(artifact.schema);
       if (!validate) {
-        validate = ajv.compile(JSON.parse(await readFile(join(root, artifact.schema), "utf8")));
+        validate = ajv.compile(JSON.parse(await readFile(schemaPath, "utf8")));
         validators.set(artifact.schema, validate);
       }
       if (!validate(parsed)) {

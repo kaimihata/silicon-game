@@ -22,7 +22,7 @@
         "properties": {
           "path": {"type": "string", "pattern": "^[^/].+\\.yaml$"},
           "kind": {"enum": ["specification", "catalog", "fixture", "requirements", "scenario", "environment", "registry", "verification_plan", "policy", "packet_config", "target_bootstrap"]},
-          "schema": {"type": "string", "pattern": "^schemas/.+\\.schema\\.json$"}
+          "schema": {"type": "string", "pattern": "^schemas/[A-Za-z0-9][A-Za-z0-9._-]*\\.schema\\.json$"}
         }
       }
     }

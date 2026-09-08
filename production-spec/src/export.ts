@@ -424,7 +424,7 @@ async function materializeVerifiedSourceTree(
     throw new Error("immutable source snapshot contains duplicate target paths");
   }
   for (let offset = 0; offset < entries.length; offset += 12) {
-    await Promise.all(entries.slice(offset, offset + 12).map(async (entry) => {
+    const results = await Promise.allSettled(entries.slice(offset, offset + 12).map(async (entry) => {
       const bytes = await readVerifiedGitObject(
         verifiedSource.repositoryRoot,
         entry.objectSha,
@@ -438,6 +438,10 @@ async function materializeVerifiedSourceTree(
       await mkdir(dirname(entry.targetPath), { recursive: true });
       await writeFile(entry.targetPath, bytes);
     }));
+    const failure = results.find(
+      (result): result is PromiseRejectedResult => result.status === "rejected",
+    );
+    if (failure) throw failure.reason;
   }
 }
 
@@ -621,8 +625,20 @@ async function publishVerifiedBundle(
     await rename(temporary, destination);
     return result;
   } catch (error) {
-    await rm(snapshotContainer, { recursive: true, force: true });
-    await rm(temporary, { recursive: true, force: true });
+    const cleanupErrors: unknown[] = [];
+    for (const path of [snapshotContainer, temporary]) {
+      try {
+        await rm(path, { recursive: true, force: true });
+      } catch (cleanupError) {
+        cleanupErrors.push(cleanupError);
+      }
+    }
+    if (cleanupErrors.length) {
+      throw new AggregateError(
+        [error, ...cleanupErrors],
+        `Export failed: ${error instanceof Error ? error.message : String(error)}; cleanup also failed`,
+      );
+    }
     throw error;
   }
 }

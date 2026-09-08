@@ -47,6 +47,34 @@ describe("bundle", () => {
     expect(issues.some((issue) => issue.message.includes("missing-part"))).toBe(true);
   });
 
+  test("rejects artifact schemas outside the canonical schemas tree", async () => {
+    const fixture = await createGitExportFixture();
+    const bundlePath = join(fixture.specificationRoot, "bundle.yaml");
+    const bundle = await readFile(bundlePath, "utf8");
+    await writeFile(
+      bundlePath,
+      bundle.replace(
+        "schema: schemas/specification.schema.json",
+        "schema: schemas/../../outside.schema.json",
+      ),
+    );
+    await writeFile(
+      join(fixture.repository, "outside.schema.json"),
+      JSON.stringify({}),
+    );
+
+    const result = await validateBundle(fixture.specificationRoot);
+
+    expect(result.valid).toBe(false);
+    expect(result.issues).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        path: "specifications/context.yaml",
+        message: expect.stringContaining("beneath schemas/"),
+      }),
+    ]));
+    await fixture.remove();
+  });
+
   test("canonical digest is independent of object key order", () => {
     const first = { z: [3, 2, 1], a: { y: true, x: "chip" } };
     const second = { a: { x: "chip", y: true }, z: [3, 2, 1] };
