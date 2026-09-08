@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { chmod, mkdir, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
+import { chmod, cp, mkdir, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { promisify } from "node:util";
 import { deflateSync } from "node:zlib";
@@ -72,6 +72,26 @@ describe("bundle", () => {
         message: expect.stringContaining("beneath schemas/"),
       }),
     ]));
+    await fixture.remove();
+  });
+
+  test("rejects a symlinked schemas directory", async () => {
+    const fixture = await createGitExportFixture();
+    const schemas = join(fixture.specificationRoot, "schemas");
+    const externalSchemas = join(fixture.repository, "external-schemas");
+    await cp(schemas, externalSchemas, { recursive: true });
+    await rm(schemas, { recursive: true });
+    await symlink(externalSchemas, schemas, "dir");
+
+    const result = await validateBundle(fixture.specificationRoot);
+
+    expect(result.valid).toBe(false);
+    expect(result.issues).toEqual([
+      expect.objectContaining({
+        path: "bundle.yaml or schemas",
+        message: expect.stringContaining("real directory"),
+      }),
+    ]);
     await fixture.remove();
   });
 

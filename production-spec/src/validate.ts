@@ -1,4 +1,4 @@
-import { lstat, readFile } from "node:fs/promises";
+import { lstat, readFile, readdir } from "node:fs/promises";
 import { join, relative, resolve, sep } from "node:path";
 import Ajv2020 from "ajv/dist/2020.js";
 import addFormats from "ajv-formats";
@@ -37,6 +37,24 @@ function collectStrings(value: unknown): string[] {
   return [];
 }
 
+function repositoryRelative(root: string, path: string): string {
+  return relative(root, path).split(sep).join("/");
+}
+
+async function listSchemaFiles(root: string): Promise<string[]> {
+  const schemaRoot = resolve(root, "schemas");
+  const rootMetadata = await lstat(schemaRoot);
+  if (!rootMetadata.isDirectory() || rootMetadata.isSymbolicLink()) {
+    throw new Error("schemas must be a real directory within the specification root");
+  }
+  const entries = await readdir(schemaRoot, { withFileTypes: true });
+  const invalid = entries.find(
+    (entry) => entry.isSymbolicLink() || (!entry.isFile() && !entry.isDirectory()),
+  );
+  if (invalid) throw new Error(`schemas contains a non-regular entry: ${invalid.name}`);
+  return listFiles(schemaRoot, ".json");
+}
+
 export async function loadManifest(root = ROOT): Promise<Manifest> {
   return readYaml<Manifest>(join(root, "bundle.yaml"));
 }
@@ -62,7 +80,7 @@ export async function specificationDigest(
     .filter((artifact) => !["policy", "packet_config"].includes(artifact.kind))
     .map((artifact) => [targetPathForArtifact(artifact), data.get(artifact.path)]);
   const schemaEntries = await Promise.all(
-    (await listFiles(join(root, "schemas"), ".json")).map(async (path) => [
+    (await listSchemaFiles(root)).map(async (path) => [
       targetSchemaPath(path),
       JSON.parse(await readFile(path, "utf8")),
     ])
@@ -106,10 +124,12 @@ export function buildRequirementFragmentIndex(specs: any[], requirements: any[],
 export async function validateBundle(root = ROOT): Promise<ValidationResult> {
   const issues: Issue[] = [];
   let manifest: Manifest;
+  let schemaFiles: string[];
   try {
     manifest = await loadManifest(root);
+    schemaFiles = await listSchemaFiles(root);
   } catch (error) {
-    return { valid: false, issues: [{ path: "bundle.yaml", message: String(error) }] };
+    return { valid: false, issues: [{ path: "bundle.yaml or schemas", message: String(error) }] };
   }
   const ajv = new Ajv2020({ allErrors: true, strict: false, allowUnionTypes: true });
   addFormats(ajv);
@@ -127,12 +147,11 @@ export async function validateBundle(root = ROOT): Promise<ValidationResult> {
     "environments", "registries", "verification", "policy", "packet", "target-bootstrap",
   ];
   const actual = (await Promise.all(authoredRoots.map(async (directory) =>
-    (await listFiles(join(root, directory), ".yaml")).map((path) => relative(root, path))
+    (await listFiles(join(root, directory), ".yaml")).map((path) => repositoryRelative(root, path))
   ))).flat().sort();
   const actualSet = new Set(actual);
   const schemaPaths = new Set(
-    (await listFiles(join(root, "schemas"), ".json"))
-      .map((path) => relative(root, path).split(sep).join("/")),
+    schemaFiles.map((path) => repositoryRelative(root, path)),
   );
   const declared = manifest.artifacts.map((artifact) => artifact.path).sort();
   for (const path of actual.filter((path) => !declared.includes(path))) {
@@ -235,8 +254,8 @@ export async function validateBundle(root = ROOT): Promise<ValidationResult> {
   }
   const targetFiles = new Set([
     ...manifest.artifacts.map(targetPathForArtifact),
-    ...(await listFiles(join(root, "schemas"), ".json")).map((path) =>
-      targetSchemaPath(join(ROOT, relative(root, path)))
+    ...schemaFiles.map((path) =>
+      targetSchemaPath(join(ROOT, repositoryRelative(root, path)))
     ),
     "code-factory/schemas/direction-packet-v1.schema.json",
     "content/runtime/catalog.json",
@@ -463,8 +482,8 @@ export async function validateBundle(root = ROOT): Promise<ValidationResult> {
 
   const policy = data.get("policy/first-run.yaml");
   const schemaData = Object.fromEntries(await Promise.all(
-    (await listFiles(join(root, "schemas"), ".json")).map(async (path) => [
-      relative(root, path),
+    schemaFiles.map(async (path) => [
+      repositoryRelative(root, path),
       JSON.parse(await readFile(path, "utf8")),
     ])
   ));
