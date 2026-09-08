@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://chip-city.dev/production-spec/reference-factory.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "id", "version", "status", "reference_only", "fixed_entities", "player_built_machines", "belt_cell_count"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "id": {"const": "complete-reference-factory"},
+    "version": {"type": "integer", "minimum": 1},
+    "status": {"enum": ["draft", "ready"]},
+    "reference_only": {"const": true},
+    "fixed_entities": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/quantity"}},
+    "player_built_machines": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/quantity"}},
+    "belt_cell_count": {"type": "integer", "minimum": 1}
+  },
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$", "maxLength": 128},
+    "quantity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["machine_id", "quantity"],
+      "properties": {
+        "machine_id": {"$ref": "#/$defs/id"},
+        "quantity": {"type": "integer", "minimum": 1}
+      }
+    }
+  }
+}

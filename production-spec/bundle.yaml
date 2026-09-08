@@ -1,0 +1,52 @@
+schema_version: 1
+bundle_id: chip-city-production-foundation
+version: 0.1.0
+status: ready
+source_repository: kaimihata/silicon-game
+factory_repository: kaimihata/silicon-code-factory
+target_repository: kaimihata/silicon-game-v1
+artifacts:
+  - {path: specifications/context.yaml, kind: specification, schema: schemas/specification.schema.json}
+  - {path: specifications/architecture.yaml, kind: specification, schema: schemas/specification.schema.json}
+  - {path: specifications/simulation.yaml, kind: specification, schema: schemas/specification.schema.json}
+  - {path: specifications/content-catalog.yaml, kind: specification, schema: schemas/specification.schema.json}
+  - {path: specifications/chip-design.yaml, kind: specification, schema: schemas/specification.schema.json}
+  - {path: specifications/contracts-procurement.yaml, kind: specification, schema: schemas/specification.schema.json}
+  - {path: specifications/factory-logistics.yaml, kind: specification, schema: schemas/specification.schema.json}
+  - {path: specifications/persistence.yaml, kind: specification, schema: schemas/specification.schema.json}
+  - {path: specifications/player-protocol.yaml, kind: specification, schema: schemas/specification.schema.json}
+  - {path: specifications/player-api.yaml, kind: specification, schema: schemas/specification.schema.json}
+  - {path: specifications/interaction-accessibility.yaml, kind: specification, schema: schemas/specification.schema.json}
+  - {path: specifications/visual-identity.yaml, kind: specification, schema: schemas/specification.schema.json}
+  - {path: specifications/onboarding.yaml, kind: specification, schema: schemas/specification.schema.json}
+  - {path: content/catalog.yaml, kind: catalog, schema: schemas/catalog.schema.json}
+  - {path: fixtures/reference/default-qualifying-design.yaml, kind: fixture, schema: schemas/reference-design.schema.json}
+  - {path: fixtures/reference/default-manufacturing-plan.yaml, kind: fixture, schema: schemas/manufacturing-plan.schema.json}
+  - {path: fixtures/reference/player-protocol-v1-contract.yaml, kind: fixture, schema: schemas/protocol-contract-fixture.schema.json}
+  - {path: fixtures/reference/complete-reference-factory.yaml, kind: fixture, schema: schemas/reference-factory.schema.json}
+  - {path: fixtures/reference/default-compiled-recipes.yaml, kind: fixture, schema: schemas/compiled-recipes.schema.json}
+  - {path: requirements/foundation.yaml, kind: requirements, schema: schemas/requirements.schema.json}
+  - {path: requirements/vertical-slice.yaml, kind: requirements, schema: schemas/requirements.schema.json}
+  - {path: scenarios/sandbox-accepted-chip.yaml, kind: scenario, schema: schemas/scenario.schema.json}
+  - {path: scenarios/onboarding-complete.yaml, kind: scenario, schema: schemas/scenario.schema.json}
+  - {path: scenarios/scanner-bottleneck.yaml, kind: scenario, schema: schemas/scenario.schema.json}
+  - {path: scenarios/designer-accessibility.yaml, kind: scenario, schema: schemas/scenario.schema.json}
+  - {path: scenarios/layout-accessibility.yaml, kind: scenario, schema: schemas/scenario.schema.json}
+  - {path: scenarios/bounded-black-box.yaml, kind: scenario, schema: schemas/scenario.schema.json}
+  - {path: scenarios/save-recovery.yaml, kind: scenario, schema: schemas/scenario.schema.json}
+  - {path: environments/headless.yaml, kind: environment, schema: schemas/environment.schema.json}
+  - {path: environments/windows-reference.yaml, kind: environment, schema: schemas/environment.schema.json}
+  - {path: environments/macos-compatibility.yaml, kind: environment, schema: schemas/environment.schema.json}
+  - {path: registries/actors.yaml, kind: registry, schema: schemas/registry.schema.json}
+  - {path: registries/specifications.yaml, kind: registry, schema: schemas/registry.schema.json}
+  - {path: registries/suites.yaml, kind: registry, schema: schemas/registry.schema.json}
+  - {path: registries/scenarios.yaml, kind: registry, schema: schemas/registry.schema.json}
+  - {path: registries/evidence.yaml, kind: registry, schema: schemas/registry.schema.json}
+  - {path: registries/environments.yaml, kind: registry, schema: schemas/registry.schema.json}
+  - {path: registries/services.yaml, kind: registry, schema: schemas/registry.schema.json}
+  - {path: registries/metrics.yaml, kind: registry, schema: schemas/metric-registry.schema.json}
+  - {path: registries/checks.yaml, kind: registry, schema: schemas/verification-check-registry.schema.json}
+  - {path: verification/plan.yaml, kind: verification_plan, schema: schemas/verification-plan.schema.json}
+  - {path: policy/first-run.yaml, kind: policy, schema: schemas/policy.schema.json}
+  - {path: packet/direction-packet.config.yaml, kind: packet_config, schema: schemas/packet-config.schema.json}
+  - {path: target-bootstrap/manifest.yaml, kind: target_bootstrap, schema: schemas/target-bootstrap.schema.json}

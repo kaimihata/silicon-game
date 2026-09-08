@@ -1,0 +1,18 @@
+schema_version: 1
+id: complete-reference-factory
+version: 1
+status: ready
+reference_only: true
+fixed_entities:
+  - {machine_id: rcv-100, quantity: 8}
+  - {machine_id: shp-100, quantity: 1}
+  - {machine_id: scr-100, quantity: 1}
+player_built_machines:
+  - {machine_id: asm-100, quantity: 1}
+  - {machine_id: bnd-100, quantity: 1}
+  - {machine_id: ins-100, quantity: 2}
+  - {machine_id: tst-100, quantity: 1}
+  - {machine_id: pkg-100, quantity: 1}
+  - {machine_id: log-110-split, quantity: 1}
+  - {machine_id: log-110-merge, quantity: 1}
+belt_cell_count: 45

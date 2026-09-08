@@ -1,0 +1,59 @@
+schema_version: 1
+id: first-run-policy
+version: 1
+status: ready
+repositories: [kaimihata/silicon-game, kaimihata/silicon-code-factory, kaimihata/silicon-game-v1]
+branch_policy:
+  - Target repository is private; push access is limited to the owner and explicitly selected least-privilege service identities.
+  - The current repository plan provides no true branch protection. Reviewed bounded pull requests integrate through develop only after workflow checks pass for that exact head SHA.
+  - Direction Packet base_revision pins one exact 40-hex develop commit; immutable specification and packet digest approvals authorize only their bound bytes and base.
+  - Direct push by an identity with selected push access can bypass workflow checks and is an accepted residual risk. Any unexpected develop movement immediately invalidates candidate, packet, checkpoint, and promotion authority until the new exact head is fully revalidated and reapproved where its bound digest changed.
+  - The first epoch is one linear candidate run; internal bounded concurrency may not create competing implementations.
+  - After personal human checkpoint approval, the factory may emit only a digest-bound promotion request; a human merges the exact verified develop revision to main and creates the requested immutable tag outside factory authority.
+  - Autonomous merge authority is unavailable until the separately reviewed factory prerequisite upgrade is deployed and verified.
+authority:
+  - Humans protect specifications, product intent, factory policy, spending expansion, secrets, permissions, destructive operations, and final promotion.
+  - The factory may choose behavior-equivalent implementation details and must record them.
+  - Noncritical gaps use isolated reversible provisional decisions with gap, choice, consequence, and hardening proposal; critical ambiguity stops affected critical work.
+  - Game CI changes may proceed after independent least-privilege review when they add no secret, permission, deployment, or paid-service scope.
+checkpoint_lifecycle:
+  automated_gate: All automated Milestone 2 requirements pass through workflow checks at one exact develop commit
+  candidate_generation: Generate one candidate checkpoint over the exact develop commit and evidence, packet, specification, and policy digests
+  personal_playtest: The named human personally playtests the generated candidate checkpoint
+  approval_binding: The named human approval event authorizes only the exact candidate checkpoint digest
+  promotion: The factory emits a digest-bound promotion request; a human merges the bound develop commit to main and creates the requested immutable tag outside factory authority
+  stale_rejection: Reject changed or unexpectedly moved develop head, commit, ancestry, evidence, packet, specification, policy, checkpoint, or approval digests; invalidate authority until exact-head revalidation completes
+epoch:
+  wall_time_days: 30
+  agent_tasks: 100
+  external_cost_cents: 500000
+  contingency_percent: 15
+  retries_per_task: 2
+  retries_per_unchanged_failure: 1
+  authors: 3
+  reviewers: 2
+  integrators: 1
+  rendered_playtests: 1
+models:
+  - All model-backed roles default to GPT-5.6 Sol with medium reasoning unless an approved task or policy explicitly overrides it.
+notifications:
+  - Send a progress digest every 24 hours.
+  - Notify immediately for hard stop, critical-path decision, unhealthy integration branch, budget warning, or checkpoint ready.
+stops:
+  - Halt the epoch globally on security, authority, audit, provenance, or integrity failure.
+  - Halt when any epoch budget reaches 100 percent.
+  - Halt affected critical work when ambiguity changes product intent.
+  - Halt the epoch when the critical path remains blocked for 24 hours.
+  - Pause factory integration immediately when develop workflow checks fail or its head moves outside the recorded integration operation.
+licenses:
+  software_allowlist: [MIT, BSD-2-Clause, BSD-3-Clause, Apache-2.0, ISC, CC0-1.0, Unity-Companion]
+  asset_allowlist: [factory-original, CC0-1.0, CC-BY-4.0, Unity-Asset-Store-Standard-EULA-owned]
+  provenance_required: true
+  new_paid_services: human_approval_required
+artifact_policy:
+  transport: direct_to_blob
+  maximum_bytes: 5368709120
+  retention_days: 30
+  factory_record: digest_and_metadata_only
+retention_days: 30
+critical_path_placeholders: []

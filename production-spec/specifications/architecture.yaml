@@ -1,0 +1,57 @@
+schema_version: 1
+id: technical-architecture
+version: 1
+status: ready
+title: Production technical architecture
+summary: Defines engine, platform, layering, content, testing, build, and dependency boundaries.
+milestones: [technical-sandbox, playable-vertical-slice]
+sources:
+  - {path: docs/code-factory/architecture.md, role: authority}
+  - {path: docs/code-factory/player-protocol.md, role: authority}
+parameters:
+  - {id: unity-editor, value: 6000.3.23f1}
+  - {id: render-pipeline, value: urp}
+  - {id: windows-target, value: windows-x86_64}
+  - {id: macos-target, value: macos-universal}
+rules:
+  - id: exact-editor
+    statement: The project pins Unity 6.3 LTS editor 6000.3.23f1 and the Universal Render Pipeline in versioned project metadata.
+    level: normative
+    acceptance_notes: CI checks exact editor metadata and performs batch-mode import and build.
+  - id: pure-domain
+    statement: Authoritative rules live in pure C# deterministic assemblies that reference neither UnityEngine nor rendering, input, scene, or wall-clock APIs.
+    level: normative
+    acceptance_notes: Assembly-definition and dependency tests fail on a forbidden Unity reference.
+  - id: adapter-boundary
+    statement: Unity input, presentation, semantic HTTP, replay, and persistence adapters invoke one typed command boundary and observe the same public domain projections.
+    level: normative
+    acceptance_notes: Contract tests compare accepted and rejected outcomes across human, semantic, and replay adapters.
+  - id: external-content
+    statement: Runtime content originates in external safe YAML validated against pinned schemas and compiled deterministically to canonical JSON; runtime does not interpret YAML.
+    level: normative
+    acceptance_notes: Content build is reproducible and the player build reads only generated JSON.
+  - id: ui-delegated
+    statement: The Unity UI framework is an implementation choice only if interaction, accessibility, automated test, scaling, and performance contracts pass.
+    level: normative
+    acceptance_notes: The implementation decision log records the selected framework and evidence.
+  - id: build-targets
+    statement: Produce unsigned Windows x86-64 and macOS Universal builds with clear native launch instructions and source revision.
+    level: normative
+    acceptance_notes: Both artifacts launch natively; Windows carries full gameplay and performance evidence.
+  - id: dependency-policy
+    statement: Every dependency is pinned, maintained, license-allowed, scanned, justified, and introduces no new secret or paid service without human approval.
+    level: normative
+    acceptance_notes: A generated dependency inventory contains versions, purpose, license, source, and scan result.
+  - id: local-only
+    statement: Gameplay, saves, telemetry, and the semantic interface operate locally without external analytics, crash reporting, or required network service.
+    level: normative
+    acceptance_notes: Network inspection during a full run detects no outbound gameplay traffic.
+  - id: target-license
+    statement: The target game repository source is licensed under MIT; third-party dependencies and assets retain their own recorded approved licenses and notices.
+    level: normative
+    acceptance_notes: The target repository retains MIT license text and a generated third-party notice inventory.
+decisions:
+  - id: unity-production
+    choice: Adopt Unity URP at the exact specified LTS editor.
+    rationale: This is an explicit production decision rather than a continuation of browser technology.
+    supersedes: [engine choice deferred in code-factory architecture]

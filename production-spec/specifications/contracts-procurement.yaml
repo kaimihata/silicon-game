@@ -1,0 +1,65 @@
+schema_version: 1
+id: contracts-procurement
+version: 1
+status: ready
+title: Contracts, sourcing, procurement, and inventory
+summary: Defines contract lifecycle, design assignment, offer tiers, purchase recommendations, receiving, delivery accounting, and fulfillment.
+milestones: [technical-sandbox, playable-vertical-slice]
+sources:
+  - {path: docs/game-design.md, role: authority}
+  - {path: docs/first-user-interaction.md, role: authority}
+  - {path: content/catalog.js, role: provisional_values}
+parameters:
+  - {id: onboarding-accepted-quantity, value: 1000, unit: accepted units}
+  - {id: onboarding-minimum-quality, value: value}
+  - {id: safety-buffer, value: 1.05, unit: multiplier, provisional: true}
+rules:
+  - id: contract-states
+    statement: Contract lifecycle is available, accepted, design assigned, producing, fulfilled; transitions are command-validated and Accepted cannot be abandoned in Milestone 2.
+    level: normative
+    acceptance_notes: State-machine tests reject every invalid transition and preserve delivered progress.
+  - id: assignment
+    statement: A contract assigns an eligible immutable published design revision and one immutable manufacturing-plan digest. Reusable design authority contains minimum quality only and never selected offers or lots. Reassignment may change future production without changing delivered progress, existing WIP identity, or reservations; incompatible finished units remain unassigned inventory unless explicitly reassigned by command.
+    level: normative
+    acceptance_notes: Reassignment accepts only newly eligible finished units and leaves old WIP identity unchanged.
+  - id: quality-tiers
+    statement: Quality tiers are Value, Standard, and Premium; each offer exposes price, incoming defect probability, inspection effect, and test effect, with no functional-performance modifier.
+    level: normative
+    acceptance_notes: Offer comparison exposes every effect and equal model specifications yield equal functional metrics.
+  - id: minimum-quality
+    statement: Published designs set a minimum tier for every BOM item. Before allocation, procurement may select compatible offers at or above it; production authority is then an immutable manufacturing plan binding design revision, accepted-unit target, exact supplier offer snapshots, lot IDs, allocated quantities, integer micro-USD unit costs, integer defect ppm, offer digests, and its own canonical content digest. Any changed allocation creates a new plan identity.
+    level: normative
+    acceptance_notes: Below-minimum offers cannot be purchased for that recommendation while valid alternatives remain selectable.
+  - id: explicit-order
+    statement: Procurement orders explicit integer quantities, charges immediately, has no lead time, and allows additional orders while simulation runs.
+    level: normative
+    acceptance_notes: Commands reject negative or fractional quantities and inventory appears immediately in off-floor receiving inventory.
+  - id: recommendation
+    statement: For each BOM item recommendation equals max of zero and ceil of expected attempts for remaining accepted quantity times 1.05 times item quantity minus compatible owned off-floor, buffered, WIP-reserved, and finished inventory.
+    level: normative
+    acceptance_notes: Golden tests cover initial purchase, partial progress, alternate quality, existing stock, and rounding.
+  - id: purchase-all
+    statement: Procurement displays BOM per attempt, expected yield, recommendation and editable quantity for each item, and atomically submits Purchase All for the current design and contract context.
+    level: normative
+    acceptance_notes: Purchase All either validates and purchases every row or changes nothing.
+  - id: lot-metadata
+    statement: Purchased inventory remains off floor until fed by an assigned finite-rate receiving bay and preserves specification, model, supplier, quality tier, lot, integer micro-USD unit cost, defect ppm, offer digest, manufacturing-plan digest, and source metadata. Mixed-lot consumption follows deterministic-simulation/workload-compile and no substitution is implicit.
+    level: normative
+    acceptance_notes: Metadata survives purchase, bay feed, belt transport, machine buffers, WIP accumulation, collection, scrap, and shipping reports.
+  - id: unused-inventory
+    statement: Unused compatible inputs remain in off-floor inventory indefinitely and cannot be resold in Milestone 2.
+    level: normative
+    acceptance_notes: No sell action is exposed and save/load preserves remaining lots.
+  - id: shipping-revenue
+    statement: Every finished unit can be reserved by at most one accepted contract and carries design-revision and manufacturing-plan identities. Shipping considers eligible nonfulfilled contracts by ascending explicit integer shipping_priority, then accepted_at_tick, then contract_id; it atomically reserves the unit for the first contract with remaining unreserved demand. Delivery consumes only that reservation, pays once, and releases it. Explicit reserve, release, or reassignment commands require expected_command_revision, preserve delivered progress, reject delivered or ineligible units, and emit reservation events. After a contract's accepted quantity is delivered, its remaining reservations release in ascending product-unit ID and extra units remain physical for later eligible contracts.
+    level: normative
+    acceptance_notes: Exactly 1,000 deliveries fulfill and pay; the next item remains blocked without disappearing.
+  - id: loss-explanation
+    statement: Fulfillment occurs even with negative cash and the report separates revenue, purchases, operating cost, reject and scrap loss, reusable capital, and resulting contribution.
+    level: normative
+    acceptance_notes: A loss-making run produces a fulfilled state and a reconciled plain-language report.
+decisions:
+  - id: no-starting-stock
+    choice: Begin with no purchased material inventory; the player explicitly procures it.
+    rationale: Procurement is part of the first complete onboarding loop.
+    supersedes: [browser preloaded 1200 attempts of inventory]

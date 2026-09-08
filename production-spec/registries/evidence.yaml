@@ -1,0 +1,21 @@
+schema_version: 1
+id: evidence
+version: 1
+status: ready
+kind: evidence
+entries:
+  - {id: replay, path: evidence/replays/}
+  - {id: decision-trace, path: evidence/decision-traces/}
+  - {id: domain-results, path: evidence/tests/domain/}
+  - {id: content-provenance, path: evidence/content/}
+  - {id: semantic-report, path: evidence/playtests/semantic/}
+  - {id: screenshots, path: evidence/captures/screenshots/}
+  - {id: video, path: evidence/captures/video/}
+  - {id: accounting-report, path: evidence/reports/accounting/}
+  - {id: requirement-coverage, path: evidence/reports/coverage/}
+  - {id: black-box-recording, path: evidence/playtests/black-box/}
+  - {id: accessibility-snapshot, path: evidence/accessibility/}
+  - {id: performance-report, path: evidence/performance/}
+  - {id: input-trace, path: evidence/input/}
+  - {id: persistence-results, path: evidence/tests/persistence/}
+  - {id: audit-log, path: evidence/audit/}

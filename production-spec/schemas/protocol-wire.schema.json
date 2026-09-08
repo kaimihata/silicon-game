@@ -1,0 +1,274 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://chip-city.dev/production-spec/protocol-wire.schema.json",
+  "title": "Chip City player protocol v1 wire contract",
+  "oneOf": [
+    {"$ref": "#/$defs/command_request"},
+    {"$ref": "#/$defs/command_response"},
+    {"$ref": "#/$defs/observation_cursor"}
+  ],
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._:-]*$", "maxLength": 160},
+    "digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "revision": {"type": "integer", "minimum": 0},
+    "coordinate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["x", "y"],
+      "properties": {"x": {"type": "integer", "minimum": 0}, "y": {"type": "integer", "minimum": 0}}
+    },
+    "base_command": {
+      "type": "object",
+      "required": ["protocol_version", "command_id", "actor_id", "agent_test_profile_id", "expected_command_revision", "action", "arguments"],
+      "properties": {
+        "protocol_version": {"const": 1},
+        "command_id": {"$ref": "#/$defs/id"},
+        "actor_id": {"$ref": "#/$defs/id"},
+        "agent_test_profile_id": {"$ref": "#/$defs/id"},
+        "expected_command_revision": {"$ref": "#/$defs/revision"},
+        "confirmation_token": {"type": "string", "minLength": 16, "maxLength": 512}
+      }
+    },
+    "empty_arguments": {"type": "object", "additionalProperties": false},
+    "contract_id": {
+      "type": "object", "additionalProperties": false, "required": ["contract_id"],
+      "properties": {"contract_id": {"$ref": "#/$defs/id"}}
+    },
+    "design_id": {
+      "type": "object", "additionalProperties": false, "required": ["design_id"],
+      "properties": {"design_id": {"$ref": "#/$defs/id"}}
+    },
+    "unit_contract": {
+      "type": "object", "additionalProperties": false, "required": ["product_unit_id", "contract_id"],
+      "properties": {"product_unit_id": {"$ref": "#/$defs/id"}, "contract_id": {"$ref": "#/$defs/id"}}
+    },
+    "command_request": {
+      "oneOf": [
+        {"$ref": "#/$defs/set_speed"}, {"$ref": "#/$defs/empty_action"},
+        {"$ref": "#/$defs/contract_action"}, {"$ref": "#/$defs/create_linked_design"}, {"$ref": "#/$defs/assign_design_revision"},
+        {"$ref": "#/$defs/assign_manufacturing_plan"}, {"$ref": "#/$defs/set_shipping_priority"},
+        {"$ref": "#/$defs/unit_contract_action"}, {"$ref": "#/$defs/release_finished_inventory"},
+        {"$ref": "#/$defs/reassign_finished_inventory"}, {"$ref": "#/$defs/create_standalone_design"},
+        {"$ref": "#/$defs/associate_design"}, {"$ref": "#/$defs/rename_design"}, {"$ref": "#/$defs/add_component"},
+        {"$ref": "#/$defs/component_position_action"}, {"$ref": "#/$defs/rotate_component"}, {"$ref": "#/$defs/design_instance_action"},
+        {"$ref": "#/$defs/add_connection"}, {"$ref": "#/$defs/remove_connection"}, {"$ref": "#/$defs/set_minimum_quality"},
+        {"$ref": "#/$defs/design_action"}, {"$ref": "#/$defs/purchase_items"},
+        {"$ref": "#/$defs/place_entity"}, {"$ref": "#/$defs/rotate_entity"}, {"$ref": "#/$defs/entity_action"},
+        {"$ref": "#/$defs/build_belt_path"}, {"$ref": "#/$defs/set_machine_recipe"},
+        {"$ref": "#/$defs/set_receiving_assignment"}, {"$ref": "#/$defs/set_selected_contract"}
+      ]
+    },
+    "set_speed": {
+      "allOf": [{"$ref": "#/$defs/base_command"}, {"type": "object", "additionalProperties": false,
+        "properties": {"protocol_version": {}, "command_id": {}, "actor_id": {}, "agent_test_profile_id": {}, "expected_command_revision": {}, "confirmation_token": {}, "action": {"const": "set_speed"},
+          "arguments": {"type": "object", "additionalProperties": false, "required": ["speed"], "properties": {"speed": {"enum": [0, 1, 2, 4]}}}}}]
+    },
+    "save_now": {"$ref": "#/$defs/empty_action"},
+    "disconnect_agent": {"$ref": "#/$defs/empty_action"},
+    "undo_design": {"$ref": "#/$defs/design_action"},
+    "redo_design": {"$ref": "#/$defs/design_action"},
+    "publish_design": {"$ref": "#/$defs/design_action"},
+    "archive_design": {"$ref": "#/$defs/design_action"},
+    "delete_design": {"$ref": "#/$defs/design_action"},
+    "empty_action": {
+      "allOf": [{"$ref": "#/$defs/base_command"}, {"type": "object", "additionalProperties": false,
+        "properties": {"protocol_version": {}, "command_id": {}, "actor_id": {}, "agent_test_profile_id": {}, "expected_command_revision": {}, "confirmation_token": {},
+          "action": {"enum": ["save_now", "disconnect_agent"]}, "arguments": {"$ref": "#/$defs/empty_arguments"}}}]
+    },
+    "design_action": {
+      "allOf": [{"$ref": "#/$defs/base_command"}, {"type": "object", "additionalProperties": false,
+        "properties": {"protocol_version": {}, "command_id": {}, "actor_id": {}, "agent_test_profile_id": {}, "expected_command_revision": {}, "confirmation_token": {},
+          "action": {"enum": ["undo_design", "redo_design", "publish_design", "archive_design", "delete_design"]}, "arguments": {"$ref": "#/$defs/design_id"}}}]
+    },
+    "accept_contract": {"$ref": "#/$defs/contract_action"},
+    "contract_action": {
+      "allOf": [{"$ref": "#/$defs/base_command"}, {"type": "object", "additionalProperties": false,
+        "properties": {"protocol_version": {}, "command_id": {}, "actor_id": {}, "agent_test_profile_id": {}, "expected_command_revision": {}, "confirmation_token": {},
+          "action": {"const": "accept_contract"}, "arguments": {"$ref": "#/$defs/contract_id"}}}]
+    },
+    "create_linked_design": {
+      "allOf": [{"$ref": "#/$defs/base_command"}, {"type": "object", "additionalProperties": false,
+        "properties": {"protocol_version": {}, "command_id": {}, "actor_id": {}, "agent_test_profile_id": {}, "expected_command_revision": {}, "confirmation_token": {}, "action": {"const": "create_linked_design"},
+          "arguments": {"type": "object", "additionalProperties": false, "required": ["contract_id", "name"], "properties": {"contract_id": {"$ref": "#/$defs/id"}, "name": {"type": "string", "minLength": 1, "maxLength": 80}}}}}]
+    },
+    "assign_design_revision": {
+      "allOf": [{"$ref": "#/$defs/base_command"}, {"type": "object", "additionalProperties": false,
+        "properties": {"protocol_version": {}, "command_id": {}, "actor_id": {}, "agent_test_profile_id": {}, "expected_command_revision": {}, "confirmation_token": {}, "action": {"const": "assign_design_revision"},
+          "arguments": {"type": "object", "additionalProperties": false, "required": ["contract_id", "design_revision_id"], "properties": {"contract_id": {"$ref": "#/$defs/id"}, "design_revision_id": {"$ref": "#/$defs/id"}}}}}]
+    },
+    "assign_manufacturing_plan": {
+      "allOf": [{"$ref": "#/$defs/base_command"}, {"type": "object", "additionalProperties": false,
+        "properties": {"protocol_version": {}, "command_id": {}, "actor_id": {}, "agent_test_profile_id": {}, "expected_command_revision": {}, "confirmation_token": {}, "action": {"const": "assign_manufacturing_plan"},
+          "arguments": {"type": "object", "additionalProperties": false, "required": ["contract_id", "manufacturing_plan_digest"], "properties": {"contract_id": {"$ref": "#/$defs/id"}, "manufacturing_plan_digest": {"$ref": "#/$defs/digest"}}}}}]
+    },
+    "set_shipping_priority": {
+      "allOf": [{"$ref": "#/$defs/base_command"}, {"type": "object", "additionalProperties": false,
+        "properties": {"protocol_version": {}, "command_id": {}, "actor_id": {}, "agent_test_profile_id": {}, "expected_command_revision": {}, "confirmation_token": {}, "action": {"const": "set_shipping_priority"},
+          "arguments": {"type": "object", "additionalProperties": false, "required": ["contract_id", "priority"], "properties": {"contract_id": {"$ref": "#/$defs/id"}, "priority": {"type": "integer", "minimum": 0}}}}}]
+    },
+    "reserve_finished_inventory": {"$ref": "#/$defs/unit_contract_action"},
+    "unit_contract_action": {
+      "allOf": [{"$ref": "#/$defs/base_command"}, {"type": "object", "additionalProperties": false,
+        "properties": {"protocol_version": {}, "command_id": {}, "actor_id": {}, "agent_test_profile_id": {}, "expected_command_revision": {}, "confirmation_token": {}, "action": {"const": "reserve_finished_inventory"}, "arguments": {"$ref": "#/$defs/unit_contract"}}}]
+    },
+    "release_finished_inventory": {
+      "allOf": [{"$ref": "#/$defs/base_command"}, {"type": "object", "additionalProperties": false,
+        "properties": {"protocol_version": {}, "command_id": {}, "actor_id": {}, "agent_test_profile_id": {}, "expected_command_revision": {}, "confirmation_token": {}, "action": {"const": "release_finished_inventory"},
+          "arguments": {"type": "object", "additionalProperties": false, "required": ["product_unit_id"], "properties": {"product_unit_id": {"$ref": "#/$defs/id"}}}}}]
+    },
+    "reassign_finished_inventory": {
+      "allOf": [{"$ref": "#/$defs/base_command"}, {"type": "object", "additionalProperties": false,
+        "properties": {"protocol_version": {}, "command_id": {}, "actor_id": {}, "agent_test_profile_id": {}, "expected_command_revision": {}, "confirmation_token": {}, "action": {"const": "reassign_finished_inventory"},
+          "arguments": {"type": "object", "additionalProperties": false, "required": ["product_unit_id", "from_contract_id", "to_contract_id"], "properties": {"product_unit_id": {"$ref": "#/$defs/id"}, "from_contract_id": {"$ref": "#/$defs/id"}, "to_contract_id": {"$ref": "#/$defs/id"}}}}}]
+    },
+    "create_standalone_design": {
+      "allOf": [{"$ref": "#/$defs/base_command"}, {"type": "object", "additionalProperties": false,
+        "properties": {"protocol_version": {}, "command_id": {}, "actor_id": {}, "agent_test_profile_id": {}, "expected_command_revision": {}, "confirmation_token": {}, "action": {"const": "create_standalone_design"},
+          "arguments": {"type": "object", "additionalProperties": false, "required": ["name"], "properties": {"name": {"type": "string", "minLength": 1, "maxLength": 80}}}}}]
+    },
+    "associate_design": {
+      "allOf": [{"$ref": "#/$defs/base_command"}, {"type": "object", "additionalProperties": false,
+        "properties": {"protocol_version": {}, "command_id": {}, "actor_id": {}, "agent_test_profile_id": {}, "expected_command_revision": {}, "confirmation_token": {}, "action": {"const": "associate_design"},
+          "arguments": {"type": "object", "additionalProperties": false, "required": ["design_id", "contract_id"], "properties": {"design_id": {"$ref": "#/$defs/id"}, "contract_id": {"$ref": "#/$defs/id"}}}}}]
+    },
+    "rename_design": {
+      "allOf": [{"$ref": "#/$defs/base_command"}, {"type": "object", "additionalProperties": false,
+        "properties": {"protocol_version": {}, "command_id": {}, "actor_id": {}, "agent_test_profile_id": {}, "expected_command_revision": {}, "confirmation_token": {}, "action": {"const": "rename_design"},
+          "arguments": {"type": "object", "additionalProperties": false, "required": ["design_id", "name"], "properties": {"design_id": {"$ref": "#/$defs/id"}, "name": {"type": "string", "minLength": 1, "maxLength": 80}}}}}]
+    },
+    "add_component": {
+      "allOf": [{"$ref": "#/$defs/base_command"}, {"type": "object", "additionalProperties": false,
+        "properties": {"protocol_version": {}, "command_id": {}, "actor_id": {}, "agent_test_profile_id": {}, "expected_command_revision": {}, "confirmation_token": {}, "action": {"const": "add_component"},
+          "arguments": {"type": "object", "additionalProperties": false, "required": ["design_id", "instance_id", "item_id", "position", "rotation"], "properties": {"design_id": {"$ref": "#/$defs/id"}, "instance_id": {"$ref": "#/$defs/id"}, "item_id": {"$ref": "#/$defs/id"}, "position": {"$ref": "#/$defs/coordinate"}, "rotation": {"enum": [0, 90, 180, 270]}}}}}]
+    },
+    "move_component": {"$ref": "#/$defs/component_position_action"},
+    "component_position_action": {
+      "allOf": [{"$ref": "#/$defs/base_command"}, {"type": "object", "additionalProperties": false,
+        "properties": {"protocol_version": {}, "command_id": {}, "actor_id": {}, "agent_test_profile_id": {}, "expected_command_revision": {}, "confirmation_token": {}, "action": {"const": "move_component"},
+          "arguments": {"type": "object", "additionalProperties": false, "required": ["design_id", "instance_id", "position"], "properties": {"design_id": {"$ref": "#/$defs/id"}, "instance_id": {"$ref": "#/$defs/id"}, "position": {"$ref": "#/$defs/coordinate"}}}}}]
+    },
+    "rotate_component": {
+      "allOf": [{"$ref": "#/$defs/base_command"}, {"type": "object", "additionalProperties": false,
+        "properties": {"protocol_version": {}, "command_id": {}, "actor_id": {}, "agent_test_profile_id": {}, "expected_command_revision": {}, "confirmation_token": {}, "action": {"const": "rotate_component"},
+          "arguments": {"type": "object", "additionalProperties": false, "required": ["design_id", "instance_id", "rotation"], "properties": {"design_id": {"$ref": "#/$defs/id"}, "instance_id": {"$ref": "#/$defs/id"}, "rotation": {"enum": [0, 90, 180, 270]}}}}}]
+    },
+    "remove_component": {"$ref": "#/$defs/design_instance_action"},
+    "design_instance_action": {
+      "allOf": [{"$ref": "#/$defs/base_command"}, {"type": "object", "additionalProperties": false,
+        "properties": {"protocol_version": {}, "command_id": {}, "actor_id": {}, "agent_test_profile_id": {}, "expected_command_revision": {}, "confirmation_token": {}, "action": {"const": "remove_component"},
+          "arguments": {"type": "object", "additionalProperties": false, "required": ["design_id", "instance_id"], "properties": {"design_id": {"$ref": "#/$defs/id"}, "instance_id": {"$ref": "#/$defs/id"}}}}}]
+    },
+    "add_connection": {
+      "allOf": [{"$ref": "#/$defs/base_command"}, {"type": "object", "additionalProperties": false,
+        "properties": {"protocol_version": {}, "command_id": {}, "actor_id": {}, "agent_test_profile_id": {}, "expected_command_revision": {}, "confirmation_token": {}, "action": {"const": "add_connection"},
+          "arguments": {"type": "object", "additionalProperties": false, "required": ["design_id", "connection_id", "technology_id", "from_instance_id", "to_instance_id", "route"], "properties": {
+            "design_id": {"$ref": "#/$defs/id"}, "connection_id": {"$ref": "#/$defs/id"}, "technology_id": {"$ref": "#/$defs/id"}, "from_instance_id": {"$ref": "#/$defs/id"}, "to_instance_id": {"$ref": "#/$defs/id"},
+            "route": {"type": "array", "minItems": 2, "items": {"$ref": "#/$defs/coordinate"}}}}}}]
+    },
+    "remove_connection": {
+      "allOf": [{"$ref": "#/$defs/base_command"}, {"type": "object", "additionalProperties": false,
+        "properties": {"protocol_version": {}, "command_id": {}, "actor_id": {}, "agent_test_profile_id": {}, "expected_command_revision": {}, "confirmation_token": {}, "action": {"const": "remove_connection"},
+          "arguments": {"type": "object", "additionalProperties": false, "required": ["design_id", "connection_id"], "properties": {"design_id": {"$ref": "#/$defs/id"}, "connection_id": {"$ref": "#/$defs/id"}}}}}]
+    },
+    "set_minimum_quality": {
+      "allOf": [{"$ref": "#/$defs/base_command"}, {"type": "object", "additionalProperties": false,
+        "properties": {"protocol_version": {}, "command_id": {}, "actor_id": {}, "agent_test_profile_id": {}, "expected_command_revision": {}, "confirmation_token": {}, "action": {"const": "set_minimum_quality"},
+          "arguments": {"type": "object", "additionalProperties": false, "required": ["design_id", "item_id", "quality"], "properties": {"design_id": {"$ref": "#/$defs/id"}, "item_id": {"$ref": "#/$defs/id"}, "quality": {"enum": ["value", "standard", "premium"]}}}}}]
+    },
+    "purchase_items": {
+      "allOf": [{"$ref": "#/$defs/base_command"}, {"type": "object", "additionalProperties": false,
+        "properties": {"protocol_version": {}, "command_id": {}, "actor_id": {}, "agent_test_profile_id": {}, "expected_command_revision": {}, "confirmation_token": {}, "action": {"const": "purchase_items"},
+          "arguments": {"type": "object", "additionalProperties": false, "required": ["items"], "properties": {"items": {"type": "array", "minItems": 1, "items": {"type": "object", "additionalProperties": false, "required": ["offer_id", "quantity"], "properties": {"offer_id": {"$ref": "#/$defs/id"}, "quantity": {"type": "integer", "minimum": 1}}}}}}}}]
+    },
+    "place_entity": {
+      "allOf": [{"$ref": "#/$defs/base_command"}, {"type": "object", "additionalProperties": false,
+        "properties": {"protocol_version": {}, "command_id": {}, "actor_id": {}, "agent_test_profile_id": {}, "expected_command_revision": {}, "confirmation_token": {}, "action": {"const": "place_entity"},
+          "arguments": {"type": "object", "additionalProperties": false, "required": ["entity_id", "catalog_id", "position", "rotation"], "properties": {"entity_id": {"$ref": "#/$defs/id"}, "catalog_id": {"$ref": "#/$defs/id"}, "position": {"$ref": "#/$defs/coordinate"}, "rotation": {"enum": [0, 90, 180, 270]}}}}}]
+    },
+    "rotate_entity": {
+      "allOf": [{"$ref": "#/$defs/base_command"}, {"type": "object", "additionalProperties": false,
+        "properties": {"protocol_version": {}, "command_id": {}, "actor_id": {}, "agent_test_profile_id": {}, "expected_command_revision": {}, "confirmation_token": {}, "action": {"const": "rotate_entity"},
+          "arguments": {"type": "object", "additionalProperties": false, "required": ["entity_id", "rotation"], "properties": {"entity_id": {"$ref": "#/$defs/id"}, "rotation": {"enum": [0, 90, 180, 270]}}}}}]
+    },
+    "remove_entity": {"$ref": "#/$defs/entity_action"},
+    "begin_collection": {"$ref": "#/$defs/entity_action"},
+    "end_collection": {"$ref": "#/$defs/entity_action"},
+    "entity_action": {
+      "allOf": [{"$ref": "#/$defs/base_command"}, {"type": "object", "additionalProperties": false,
+        "properties": {"protocol_version": {}, "command_id": {}, "actor_id": {}, "agent_test_profile_id": {}, "expected_command_revision": {}, "confirmation_token": {},
+          "action": {"enum": ["remove_entity", "begin_collection", "end_collection"]},
+          "arguments": {"type": "object", "additionalProperties": false, "required": ["entity_id"], "properties": {"entity_id": {"$ref": "#/$defs/id"}}}}}]
+    },
+    "build_belt_path": {
+      "allOf": [{"$ref": "#/$defs/base_command"}, {"type": "object", "additionalProperties": false,
+        "properties": {"protocol_version": {}, "command_id": {}, "actor_id": {}, "agent_test_profile_id": {}, "expected_command_revision": {}, "confirmation_token": {}, "action": {"const": "build_belt_path"},
+          "arguments": {"type": "object", "additionalProperties": false, "required": ["belt_id", "path"], "properties": {"belt_id": {"$ref": "#/$defs/id"}, "path": {"type": "array", "minItems": 2, "items": {"$ref": "#/$defs/coordinate"}}}}}}]
+    },
+    "set_machine_recipe": {
+      "allOf": [{"$ref": "#/$defs/base_command"}, {"type": "object", "additionalProperties": false,
+        "properties": {"protocol_version": {}, "command_id": {}, "actor_id": {}, "agent_test_profile_id": {}, "expected_command_revision": {}, "confirmation_token": {}, "action": {"const": "set_machine_recipe"},
+          "arguments": {"type": "object", "additionalProperties": false, "required": ["entity_id", "recipe_id"], "properties": {"entity_id": {"$ref": "#/$defs/id"}, "recipe_id": {"$ref": "#/$defs/id"}}}}}]
+    },
+    "set_receiving_assignment": {
+      "allOf": [{"$ref": "#/$defs/base_command"}, {"type": "object", "additionalProperties": false,
+        "properties": {"protocol_version": {}, "command_id": {}, "actor_id": {}, "agent_test_profile_id": {}, "expected_command_revision": {}, "confirmation_token": {}, "action": {"const": "set_receiving_assignment"},
+          "arguments": {"type": "object", "additionalProperties": false, "required": ["entity_id", "lot_id"], "properties": {"entity_id": {"$ref": "#/$defs/id"}, "lot_id": {"$ref": "#/$defs/id"}}}}}]
+    },
+    "set_selected_contract": {
+      "allOf": [{"$ref": "#/$defs/base_command"}, {"type": "object", "additionalProperties": false,
+        "properties": {"protocol_version": {}, "command_id": {}, "actor_id": {}, "agent_test_profile_id": {}, "expected_command_revision": {}, "confirmation_token": {}, "action": {"const": "set_selected_contract"},
+          "arguments": {"type": "object", "additionalProperties": false, "required": ["entity_id", "contract_id"], "properties": {"entity_id": {"$ref": "#/$defs/id"}, "contract_id": {"$ref": "#/$defs/id"}}}}}]
+    },
+    "effect": {
+      "oneOf": [
+        {"$ref": "#/$defs/entity_effect"}, {"$ref": "#/$defs/resource_effect"},
+        {"$ref": "#/$defs/state_effect"}, {"$ref": "#/$defs/reservation_effect"}
+      ]
+    },
+    "entity_effect": {
+      "type": "object", "additionalProperties": false, "required": ["type", "entity_id"],
+      "properties": {"type": {"enum": ["entity_created", "entity_updated", "entity_removed"]}, "entity_id": {"$ref": "#/$defs/id"}}
+    },
+    "resource_effect": {
+      "type": "object", "additionalProperties": false, "required": ["type", "resource_id", "delta_microunits"],
+      "properties": {"type": {"enum": ["inventory_changed", "cash_changed"]}, "resource_id": {"$ref": "#/$defs/id"}, "delta_microunits": {"type": "integer"}}
+    },
+    "state_effect": {
+      "type": "object", "additionalProperties": false, "required": ["type", "subject_id"],
+      "properties": {"type": {"enum": ["contract_changed", "design_changed", "simulation_changed", "save_completed", "control_changed", "profile_changed"]}, "subject_id": {"$ref": "#/$defs/id"}}
+    },
+    "reservation_effect": {
+      "type": "object", "additionalProperties": false, "required": ["type", "product_unit_id", "contract_id"],
+      "properties": {"type": {"enum": ["shipment_reserved", "shipment_released", "shipment_reassigned"]}, "product_unit_id": {"$ref": "#/$defs/id"}, "contract_id": {"$ref": "#/$defs/id"}}
+    },
+    "event": {
+      "type": "object", "additionalProperties": false,
+      "required": ["event_sequence", "simulation_tick", "type", "subject_id"],
+      "properties": {
+        "event_sequence": {"$ref": "#/$defs/revision"}, "simulation_tick": {"$ref": "#/$defs/revision"},
+        "type": {"enum": ["command_accepted", "command_rejected", "tick_advanced", "machine_cycle_started", "machine_cycle_completed", "item_moved", "unit_rejected", "unit_completed", "shipment_reserved", "shipment_released", "shipment_reassigned", "shipment_delivered", "contract_fulfilled"]},
+        "subject_id": {"$ref": "#/$defs/id"}, "related_id": {"$ref": "#/$defs/id"}
+      }
+    },
+    "error": {
+      "type": "object", "additionalProperties": false, "required": ["code", "localization_key", "related_entities", "locations"],
+      "properties": {
+        "code": {"enum": ["AUTH_REQUIRED", "AGENT_DISABLED", "PROFILE_FORBIDDEN", "STALE_REVISION", "DUPLICATE_COMMAND_MISMATCH", "RATE_LIMITED", "INVALID_ARGUMENT", "ACTION_UNAVAILABLE", "NOT_FOUND", "INSUFFICIENT_FUNDS", "INVALID_PLACEMENT", "INVALID_ROUTE", "INCOMPATIBLE_ITEM", "BUFFER_BLOCKED", "RECIPE_AMBIGUOUS", "DESIGN_INVALID", "DESIGN_REFERENCED", "CONTRACT_STATE_INVALID", "CONFIRMATION_REQUIRED", "CONFIRMATION_STALE", "EVENT_CURSOR_EXPIRED", "INTERNAL_ERROR"]},
+        "localization_key": {"$ref": "#/$defs/id"}, "related_entities": {"type": "array", "items": {"$ref": "#/$defs/id"}},
+        "locations": {"type": "array", "items": {"$ref": "#/$defs/coordinate"}}, "confirmation_token": {"type": "string", "minLength": 16}
+      }
+    },
+    "command_response": {
+      "oneOf": [
+        {"type": "object", "additionalProperties": false, "required": ["protocol_version", "command_id", "accepted", "command_revision", "simulation_tick", "latest_event_sequence", "effects", "events", "state_hash"],
+          "properties": {"protocol_version": {"const": 1}, "command_id": {"$ref": "#/$defs/id"}, "accepted": {"const": true}, "command_revision": {"$ref": "#/$defs/revision"}, "simulation_tick": {"$ref": "#/$defs/revision"}, "latest_event_sequence": {"$ref": "#/$defs/revision"}, "effects": {"type": "array", "items": {"$ref": "#/$defs/effect"}}, "events": {"type": "array", "items": {"$ref": "#/$defs/event"}}, "state_hash": {"$ref": "#/$defs/digest"}}},
+        {"type": "object", "additionalProperties": false, "required": ["protocol_version", "command_id", "accepted", "command_revision", "simulation_tick", "latest_event_sequence", "error"],
+          "properties": {"protocol_version": {"const": 1}, "command_id": {"$ref": "#/$defs/id"}, "accepted": {"const": false}, "command_revision": {"$ref": "#/$defs/revision"}, "simulation_tick": {"$ref": "#/$defs/revision"}, "latest_event_sequence": {"$ref": "#/$defs/revision"}, "error": {"$ref": "#/$defs/error"}}}
+      ]
+    },
+    "observation_cursor": {
+      "type": "object", "additionalProperties": false, "required": ["since_command_revision", "after_event_sequence"],
+      "properties": {"since_command_revision": {"$ref": "#/$defs/revision"}, "after_event_sequence": {"$ref": "#/$defs/revision"}}
+    }
+  }
+}

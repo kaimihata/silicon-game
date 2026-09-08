@@ -1,0 +1,42 @@
+schema_version: 1
+id: default-qualifying-design
+version: 1
+status: ready
+reference_only: true
+published: true
+design_id: basic-display-controller
+revision: 1
+product_base_id: product-display-100
+board_selection: {item_id: sub-110}
+components:
+  - {instance_id: compute-1, item_id: cp-110, position: {x: 1, y: 1}, rotation: 0}
+  - {instance_id: memory-1, item_id: md-110, position: {x: 3, y: 1}, rotation: 0}
+  - {instance_id: display-io-1, item_id: io-110, position: {x: 5, y: 1}, rotation: 0}
+  - {instance_id: power-1, item_id: pm-110, position: {x: 0, y: 4}, rotation: 0}
+  - {instance_id: thermal-1, item_id: th-110, position: {x: 1, y: 3}, rotation: 0}
+connections:
+  - connection_id: compute-memory
+    technology_id: dl-110
+    from_instance_id: compute-1
+    to_instance_id: memory-1
+    route: [{x: 2, y: 1}, {x: 3, y: 1}]
+  - connection_id: memory-display
+    technology_id: dl-110
+    from_instance_id: memory-1
+    to_instance_id: display-io-1
+    route: [{x: 3, y: 1}, {x: 4, y: 1}, {x: 5, y: 1}]
+  - connection_id: compute-display
+    technology_id: dl-110
+    from_instance_id: compute-1
+    to_instance_id: display-io-1
+    route: [{x: 2, y: 1}, {x: 2, y: 0}, {x: 3, y: 0}, {x: 4, y: 0}, {x: 5, y: 0}, {x: 5, y: 1}]
+packaging_material: {item_id: pkg-mat-100, quantity: 1}
+minimum_quality:
+  - {item_id: cp-110, quality: value}
+  - {item_id: md-110, quality: value}
+  - {item_id: io-110, quality: value}
+  - {item_id: pm-110, quality: value}
+  - {item_id: th-110, quality: value}
+  - {item_id: sub-110, quality: value}
+  - {item_id: dl-110, quality: value}
+  - {item_id: pkg-mat-100, quality: value}

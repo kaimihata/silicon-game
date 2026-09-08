@@ -1,0 +1,19 @@
+schema_version: 1
+id: suites
+version: 1
+status: ready
+kind: suites
+entries:
+  - {id: specification, path: verification/plan.yaml}
+  - {id: build, path: verification/plan.yaml}
+  - {id: domain, path: verification/plan.yaml}
+  - {id: protocol, path: verification/plan.yaml}
+  - {id: persistence, path: verification/plan.yaml}
+  - {id: rendered-integration, path: verification/plan.yaml}
+  - {id: semantic-playtest, path: verification/plan.yaml}
+  - {id: black-box-playtest, path: verification/plan.yaml}
+  - {id: accessibility, path: verification/plan.yaml}
+  - {id: asset-provenance, path: verification/plan.yaml}
+  - {id: balance, path: verification/plan.yaml}
+  - {id: performance, path: verification/plan.yaml}
+  - {id: checkpoint, path: verification/plan.yaml}

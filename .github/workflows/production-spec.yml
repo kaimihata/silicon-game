@@ -1,0 +1,106 @@
+name: Production specification
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      TRUSTED_REPOSITORY: kaimihata/silicon-game
+      EVENT_NAME: ${{ github.event_name }}
+      EVENT_REPOSITORY: ${{ github.repository }}
+      WORKFLOW_REF: ${{ github.workflow_ref }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      PR_BASE_REF: ${{ github.event.pull_request.base.ref }}
+      PR_BASE_REPOSITORY: ${{ github.event.pull_request.base.repo.full_name }}
+      PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
+      PR_HEAD_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name }}
+      SOURCE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+      SOURCE_REF: ${{ github.event_name == 'pull_request' && format('refs/heads/{0}', github.event.pull_request.head.ref) || github.ref }}
+    steps:
+      - name: Verify trusted workflow context
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$EVENT_REPOSITORY" = "$TRUSTED_REPOSITORY"
+          case "$EVENT_NAME" in
+            pull_request)
+              test "$PR_BASE_REPOSITORY" = "$TRUSTED_REPOSITORY"
+              test "$PR_HEAD_REPOSITORY" = "$TRUSTED_REPOSITORY"
+              test "$PR_BASE_REF" = "master"
+              test "$WORKFLOW_REF" = "$TRUSTED_REPOSITORY/.github/workflows/production-spec.yml@refs/pull/$PR_NUMBER/merge"
+              ;;
+            push)
+              test "$SOURCE_REF" = "refs/heads/master"
+              test "$WORKFLOW_REF" = "$TRUSTED_REPOSITORY/.github/workflows/production-spec.yml@refs/heads/master"
+              ;;
+            *)
+              exit 1
+              ;;
+          esac
+
+      - name: Check out source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify exact reviewed source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          test "$(git rev-parse --is-shallow-repository)" = "false"
+          origin_url="$(git config --get remote.origin.url)"
+          test "${origin_url%.git}" = "https://github.com/$TRUSTED_REPOSITORY"
+          if git config --local --get-regexp '^(http\..*\.extraheader|credential\.)'; then
+            echo "checkout credentials persisted unexpectedly" >&2
+            exit 1
+          fi
+          test "$(git ls-remote --exit-code --refs origin "$SOURCE_REF")" = "$SOURCE_SHA	$SOURCE_REF"
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            production-spec/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm ci --prefix production-spec
+
+      - name: Build and test production specification
+        run: |
+          npm run build --prefix production-spec
+          npm test --prefix production-spec
+          npm run validate --prefix production-spec
+
+      - name: Verify deterministic export and packet
+        shell: bash
+        run: |
+          cd production-spec
+          npm run clean -- --out generated
+          npm run compile -- --out generated/ci-compiled
+          npm run export -- --out generated/ci-export --source-sha "$SOURCE_SHA" --source-ref "$SOURCE_REF"
+          cmp generated/ci-export/bundle.json fixtures/generated/game-spec-bundle-v1.json
+          structural_target_sha="1111111111111111111111111111111111111111"
+          npm run generate:packet -- --out generated/ci-packet.yaml --base-sha "$structural_target_sha"
+          npm run validate:packet -- --file generated/ci-packet.yaml
+
+      - name: Build and test browser prototype
+        run: |
+          npm test
+          npm run build

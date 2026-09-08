@@ -1,0 +1,21 @@
+schema_version: 1
+id: default-manufacturing-plan
+version: 1
+status: ready
+reference_only: true
+immutable: true
+design_revision_id: basic-display-controller-r1
+source_offer_catalog_digest: "sha256:3d02d7703c59c60980be61a511ed19104f858853f9346dba8644b51d2ab71527"
+attempt_capacity: 1125
+allocation_order: For each item_id in lexical order and product attempt_sequence in ascending order, consume allocations by allocation_index, then lot_id lexical order; never substitute another lot after plan creation.
+lot_allocations:
+  - {allocation_index: 0, item_id: cp-110, lot_id: lot-cp-001, offer_id: northstar-cp-110-standard, supplier: Northstar Compute, quality: standard, allocated_units: 1125, unit_cost_microusd: 16000000, defect_probability_ppm: 4000, offer_digest: "sha256:242712b0b9a2bee4dc4afe8edd5d612b7e3d42ec6339b6777776fb92690709c8"}
+  - {allocation_index: 0, item_id: md-110, lot_id: lot-md-001, offer_id: primememory-md-110-premium, supplier: PrimeMemory, quality: premium, allocated_units: 1125, unit_cost_microusd: 11000000, defect_probability_ppm: 3000, offer_digest: "sha256:b4acb36d0516f59701325ab3717a866cce1436ffaff7ebeb5c9f2256ab98832e"}
+  - {allocation_index: 0, item_id: io-110, lot_id: lot-io-001, offer_id: signalworks-io-110-standard, supplier: SignalWorks, quality: standard, allocated_units: 1125, unit_cost_microusd: 5000000, defect_probability_ppm: 4000, offer_digest: "sha256:8126d54f0e0e3eeaf823bbe652f219c2b904b720de7cb0e4025b32315e543a02"}
+  - {allocation_index: 0, item_id: pm-110, lot_id: lot-pm-001, offer_id: steadypower-pm-110-standard, supplier: SteadyPower, quality: standard, allocated_units: 1125, unit_cost_microusd: 4000000, defect_probability_ppm: 3000, offer_digest: "sha256:2a107b7ac81809403822913c118531b98ab890d47d6aa94d2a861384f54a14b1"}
+  - {allocation_index: 0, item_id: th-110, lot_id: lot-th-001, offer_id: thermaform-th-110-standard, supplier: ThermaForm, quality: standard, allocated_units: 1125, unit_cost_microusd: 4000000, defect_probability_ppm: 2000, offer_digest: "sha256:093b1f056614009312d5fa1b6ef05f466dd35da2fcf5f5a1d1edb20e245e2828"}
+  - {allocation_index: 0, item_id: sub-110, lot_id: lot-sub-001, offer_id: packagebase-sub-110-standard, supplier: PackageBase, quality: standard, allocated_units: 1125, unit_cost_microusd: 6000000, defect_probability_ppm: 6000, offer_digest: "sha256:f16fd709b2cde3d747c068716912cb6b954236df52c2e437a9717323021e21af"}
+  - {allocation_index: 0, item_id: dl-110, lot_id: lot-dl-001, offer_id: bondline-dl-110-standard, supplier: BondLine, quality: standard, allocated_units: 2250, unit_cost_microusd: 1000000, defect_probability_ppm: 2000, offer_digest: "sha256:65753a14cf99181070552a9fa890bf13569dd19a2d8bc13b91b207ff0997605c"}
+  - {allocation_index: 1, item_id: dl-110, lot_id: lot-dl-002, offer_id: bondline-dl-110-standard, supplier: BondLine, quality: standard, allocated_units: 1125, unit_cost_microusd: 1000000, defect_probability_ppm: 2000, offer_digest: "sha256:65753a14cf99181070552a9fa890bf13569dd19a2d8bc13b91b207ff0997605c"}
+  - {allocation_index: 0, item_id: pkg-mat-100, lot_id: lot-pkg-001, offer_id: packright-pkg-100-standard, supplier: PackRight, quality: standard, allocated_units: 1125, unit_cost_microusd: 2000000, defect_probability_ppm: 1000, offer_digest: "sha256:f27ab17c86644cad4ef01b7a2ce4e7e6b0d682532b1870e4f0ab9cee78c1ee82"}
+content_digest: "sha256:c14d8f0ad24e132c47a66c03c0cfc8a81b35742827e34e2ac979155809e07e84"

@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://chip-city.dev/production-spec/bundle-review-disposition.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_type",
+    "source_repository",
+    "source_revision",
+    "bundle_digest",
+    "specification_revision",
+    "reviewer",
+    "reviewed_at",
+    "disposition",
+    "execution_authority"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "artifact_type": {"const": "bundle_review_disposition"},
+    "source_repository": {"const": "kaimihata/silicon-game"},
+    "source_revision": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "bundle_digest": {"$ref": "#/$defs/digest"},
+    "specification_revision": {"$ref": "#/$defs/digest"},
+    "reviewer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "immutable_user_id", "login"],
+      "properties": {
+        "provider": {"const": "github"},
+        "immutable_user_id": {"type": "integer", "minimum": 1},
+        "login": {"type": "string", "minLength": 1}
+      }
+    },
+    "reviewed_at": {"type": "string", "format": "date-time"},
+    "disposition": {"enum": ["accepted", "changes_requested", "rejected"]},
+    "notes": {"type": "string"},
+    "execution_authority": {"const": false}
+  },
+  "$defs": {
+    "digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+  }
+}

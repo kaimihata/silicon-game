@@ -1,0 +1,61 @@
+schema_version: 1
+id: layout-accessibility
+version: 1
+status: ready
+title: Supported layouts and accessible management
+milestone: playable-vertical-slice
+environment: windows-reference
+requirements:
+  - req.slice.layout
+  - req.slice.accessibility
+seeds:
+  - 6101
+initial_state:
+  fixture_id: layout-accessibility-initial-state
+  label: Active onboarding factory with alerts, moving items, all overlays available, and default accessibility settings.
+  inputs: [starter-catalog, default-qualifying-design, default-manufacturing-plan, complete-reference-factory]
+execution_contract:
+  setup_contract: fixture.setup.layout-accessibility
+  runner_contract: runner.accessibility
+  command: "factory.verify.accessibility --scenario layout-accessibility --fixture layout-accessibility-initial-state --seed {seed} --evidence-dir {evidence_dir}"
+  semantic_api: ordinary_input_only
+  verdict: pass only when setup state assertions pass, every declared scenario assertion evaluates true, budgets are not exceeded, every required evidence artifact validates and its digest is recorded, replay hash mismatch count is zero when replay evidence is required, and the runner exits zero; otherwise fail
+player_knowledge:
+  - Rendered UI
+  - Accessibility semantics
+  - Keyboard mappings
+goals:
+  - assertion_id: assert.layout-accessibility.goal.01
+    metric: unreachable-management-actions
+    operator: equal
+    value: 0
+  - assertion_id: assert.layout-accessibility.goal.02
+    metric: clipped-required-controls
+    operator: equal
+    value: 0
+invariants:
+  - assertion_id: assert.layout-accessibility.invariant.01
+    label: Test 1280x720 1920x1080 and 3840x2160
+  - assertion_id: assert.layout-accessibility.invariant.02
+    label: Preserve global controls in every overlay
+  - assertion_id: assert.layout-accessibility.invariant.03
+    label: Do not require color or motion
+budgets:
+  simulation_minutes: 20
+  player_commands: 500
+required_behaviors:
+  - assertion_id: assert.layout-accessibility.required_behavior.01
+    label: Traverse all management actions by keyboard
+  - assertion_id: assert.layout-accessibility.required_behavior.02
+    label: Remap a key
+  - assertion_id: assert.layout-accessibility.required_behavior.03
+    label: Enable reduced motion
+  - assertion_id: assert.layout-accessibility.required_behavior.04
+    label: Scale text and UI
+  - assertion_id: assert.layout-accessibility.required_behavior.05
+    label: Open each overlay and return to context
+evidence:
+  - black-box-recording
+  - accessibility-snapshot
+  - screenshots
+  - performance-report

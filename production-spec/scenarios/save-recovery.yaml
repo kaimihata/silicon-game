@@ -1,0 +1,57 @@
+schema_version: 1
+id: save-recovery
+version: 1
+status: ready
+title: Save backup and recovery
+milestone: playable-vertical-slice
+environment: windows-reference
+requirements:
+  - req.slice.persistence
+  - req.slice.agent-security
+seeds:
+  - 8101
+initial_state:
+  fixture_id: save-recovery-initial-state
+  label: Human profile with verified primary and backup plus a separately initialized agent-test profile.
+  inputs: [starter-catalog, default-qualifying-design, default-manufacturing-plan]
+execution_contract:
+  setup_contract: fixture.setup.save-recovery
+  runner_contract: runner.persistence
+  command: "factory.verify.persistence --scenario save-recovery --fixture save-recovery-initial-state --seed {seed} --evidence-dir {evidence_dir}"
+  semantic_api: ordinary_input_only
+  verdict: pass only when setup state assertions pass, every declared scenario assertion evaluates true, budgets are not exceeded, every required evidence artifact validates and its digest is recorded, replay hash mismatch count is zero when replay evidence is required, and the runner exits zero; otherwise fail
+player_knowledge:
+  - New Game and Continue UI
+  - Public error messages
+goals:
+  - assertion_id: assert.save-recovery.goal.01
+    metric: recovered-human-saves
+    operator: equal
+    value: 1
+  - assertion_id: assert.save-recovery.goal.02
+    metric: human-save-agent-accesses
+    operator: equal
+    value: 0
+invariants:
+  - assertion_id: assert.save-recovery.invariant.01
+    label: Corrupt primary remains preserved
+  - assertion_id: assert.save-recovery.invariant.02
+    label: Backup hash is verified before load
+  - assertion_id: assert.save-recovery.invariant.03
+    label: No silent reset
+budgets:
+  simulation_minutes: 10
+  player_commands: 100
+required_behaviors:
+  - assertion_id: assert.save-recovery.required_behavior.01
+    label: Fail primary load
+  - assertion_id: assert.save-recovery.required_behavior.02
+    label: Recover backup and report issue
+  - assertion_id: assert.save-recovery.required_behavior.03
+    label: Confirm agent profile cannot enumerate human profile
+  - assertion_id: assert.save-recovery.required_behavior.04
+    label: Confirm New Game preserves one backup
+evidence:
+  - persistence-results
+  - screenshots
+  - audit-log

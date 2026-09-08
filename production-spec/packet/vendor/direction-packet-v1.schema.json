@@ -1,0 +1,960 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.silicon-code-factory.dev/direction-packet-v1.schema.json",
+  "title": "Silicon Code Factory Direction Packet v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "identity",
+    "authority",
+    "source",
+    "intent",
+    "scope",
+    "requirements",
+    "constraints",
+    "milestones",
+    "verification",
+    "authority_policy",
+    "budgets",
+    "checkpoint",
+    "notifications",
+    "stop_conditions",
+    "open_questions"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["packet_id", "revision", "title"],
+      "properties": {
+        "packet_id": { "$ref": "#/$defs/id" },
+        "revision": { "$ref": "#/$defs/positiveInteger" },
+        "title": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["owner", "approvers", "supersedes"],
+      "properties": {
+        "owner": { "$ref": "#/$defs/actorReference" },
+        "approvers": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/githubUserReference" }
+        },
+        "supersedes": {
+          "oneOf": [
+            { "$ref": "#/$defs/packetReference" },
+            { "type": "null" }
+          ]
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repository",
+        "base_ref",
+        "base_revision",
+        "specification_revision",
+        "policy_revision"
+      ],
+      "properties": {
+        "repository": { "$ref": "#/$defs/repository" },
+        "base_ref": { "$ref": "#/$defs/gitRef" },
+        "base_revision": { "$ref": "#/$defs/gitSha" },
+        "specification_revision": { "$ref": "#/$defs/digest" },
+        "policy_revision": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "intent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["outcome", "player_experience", "principles"],
+      "properties": {
+        "outcome": { "$ref": "#/$defs/nonEmptyString" },
+        "player_experience": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/playerExperience" }
+        },
+        "principles": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        }
+      }
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["included", "excluded", "assumptions"],
+      "properties": {
+        "included": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/includedScope" }
+        },
+        "excluded": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        },
+        "assumptions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/assumption" }
+        }
+      }
+    },
+    "requirements": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/requirement" }
+    },
+    "constraints": { "$ref": "#/$defs/constraints" },
+    "milestones": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/milestone" }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "required_suites",
+        "scenarios",
+        "reference_environments",
+        "evidence_retention_days"
+      ],
+      "properties": {
+        "required_suites": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/suiteReference" }
+        },
+        "scenarios": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/scenarioReference" }
+        },
+        "reference_environments": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/environmentReference" }
+        },
+        "evidence_retention_days": { "$ref": "#/$defs/positiveInteger" }
+      }
+    },
+    "authority_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "autonomous_change_classes",
+        "provisional_decisions",
+        "protected_paths",
+        "human_approval_topics"
+      ],
+      "properties": {
+        "autonomous_change_classes": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "enum": ["A", "B"] }
+        },
+        "provisional_decisions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/provisionalDecision" }
+        },
+        "protected_paths": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/pathspec" }
+        },
+        "human_approval_topics": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "product_direction",
+              "public_protocol_semantics",
+              "licensing_exception",
+              "security_exception",
+              "privacy_exception",
+              "budget_expansion",
+              "scope_expansion",
+              "protected_path_change"
+            ]
+          }
+        }
+      }
+    },
+    "budgets": { "$ref": "#/$defs/budgets" },
+    "checkpoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["trigger", "deliverables", "owner"],
+      "properties": {
+        "trigger": { "$ref": "#/$defs/checkpointTrigger" },
+        "deliverables": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "playable_build",
+              "guided_test_route",
+              "requirement_coverage",
+              "semantic_playtest_report",
+              "black_box_recordings",
+              "performance_report",
+              "deferred_scope",
+              "realignment_questions"
+            ]
+          }
+        },
+        "owner": { "$ref": "#/$defs/actorReference" }
+      }
+    },
+    "notifications": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["digest_interval_hours", "immediate"],
+      "properties": {
+        "digest_interval_hours": { "$ref": "#/$defs/positiveInteger" },
+        "immediate": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "hard_stop",
+              "critical_path_decision",
+              "main_branch_unhealthy",
+              "budget_warning",
+              "checkpoint_ready"
+            ]
+          }
+        }
+      }
+    },
+    "stop_conditions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/stopCondition" }
+    },
+    "open_questions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/openQuestion" }
+    },
+    "registries": { "$ref": "#/$defs/registries" }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]*$",
+      "maxLength": 128
+    },
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 10000
+    },
+    "positiveInteger": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "nonNegativeInteger": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "gitSha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "repository": {
+      "type": "string",
+      "pattern": "^[a-z0-9](?:[a-z0-9-]{0,38})/[a-z0-9._-]+$",
+      "maxLength": 140
+    },
+    "gitRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255,
+      "pattern": "^(?!/|.*(?:\\.\\.|//|@\\{|\\\\|[ ~^:?*\\[])).*(?<![/.])$"
+    },
+    "utcTimestamp": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?Z$"
+    },
+    "path": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096,
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*\\\\)(?![a-zA-Z][a-zA-Z0-9+.-]*:).+$"
+    },
+    "pathspec": {
+      "allOf": [
+        { "$ref": "#/$defs/path" },
+        { "not": { "type": "string", "pattern": "^[!:]" } }
+      ]
+    },
+    "jsonPointer": {
+      "type": "string",
+      "pattern": "^(?:/(?:[^~/]|~[01])*)*$"
+    },
+    "actorReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id"],
+      "properties": {
+        "type": { "const": "actor" },
+        "id": { "$ref": "#/$defs/id" }
+      }
+    },
+    "githubUserReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "github_user_id", "github_login"],
+      "properties": {
+        "type": { "const": "github_user" },
+        "github_user_id": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "github_login": {
+          "type": "string",
+          "pattern": "^[a-z0-9](?:[a-z0-9-]{0,37}[a-z0-9])?$",
+          "maxLength": 39
+        }
+      }
+    },
+    "packetReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "packet_id", "revision"],
+      "properties": {
+        "type": { "const": "packet" },
+        "packet_id": { "$ref": "#/$defs/id" },
+        "revision": { "$ref": "#/$defs/positiveInteger" }
+      }
+    },
+    "specificationReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id"],
+      "properties": {
+        "type": { "const": "specification" },
+        "id": { "$ref": "#/$defs/id" },
+        "fragment": { "$ref": "#/$defs/jsonPointer" }
+      }
+    },
+    "requirementReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id"],
+      "properties": {
+        "type": { "const": "requirement" },
+        "id": { "$ref": "#/$defs/id" }
+      }
+    },
+    "milestoneReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id"],
+      "properties": {
+        "type": { "const": "milestone" },
+        "id": { "$ref": "#/$defs/id" }
+      }
+    },
+    "scopeReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id"],
+      "properties": {
+        "type": { "const": "scope" },
+        "id": { "$ref": "#/$defs/id" }
+      }
+    },
+    "suiteReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id"],
+      "properties": {
+        "type": { "const": "suite" },
+        "id": { "$ref": "#/$defs/id" }
+      }
+    },
+    "scenarioReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id"],
+      "properties": {
+        "type": { "const": "scenario" },
+        "id": { "$ref": "#/$defs/id" }
+      }
+    },
+    "environmentReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id"],
+      "properties": {
+        "type": { "const": "environment" },
+        "id": { "$ref": "#/$defs/id" }
+      }
+    },
+    "serviceReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id"],
+      "properties": {
+        "type": { "const": "service" },
+        "id": { "$ref": "#/$defs/id" }
+      }
+    },
+    "metricReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id"],
+      "properties": {
+        "type": { "const": "metric" },
+        "id": { "$ref": "#/$defs/id" }
+      }
+    },
+    "evidenceReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id"],
+      "properties": {
+        "type": { "enum": ["suite", "scenario", "evidence"] },
+        "id": { "$ref": "#/$defs/id" }
+      }
+    },
+    "playerExperience": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "statement", "evidence"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "statement": { "$ref": "#/$defs/nonEmptyString" },
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/evidenceReference" }
+        }
+      }
+    },
+    "includedScope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "statement", "specifications"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "statement": { "$ref": "#/$defs/nonEmptyString" },
+        "specifications": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/specificationReference" }
+        }
+      }
+    },
+    "assumption": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "statement", "disposition"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "statement": { "$ref": "#/$defs/nonEmptyString" },
+        "disposition": {
+          "enum": [
+            "fixed_for_epoch",
+            "provisional_reversible",
+            "validate_during_epoch"
+          ]
+        }
+      }
+    },
+    "requirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "statement", "source", "priority", "acceptance"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "statement": { "$ref": "#/$defs/nonEmptyString" },
+        "source": { "$ref": "#/$defs/specificationReference" },
+        "priority": { "enum": ["must", "should", "could"] },
+        "acceptance": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["check_id", "type"],
+            "properties": {
+              "check_id": { "$ref": "#/$defs/id" },
+              "type": {
+                "enum": [
+                  "schema",
+                  "static_check",
+                  "automated_test",
+                  "property_test",
+                  "integration_test",
+                  "semantic_scenario",
+                  "black_box_scenario",
+                  "performance_measurement",
+                  "asset_validation",
+                  "human_review"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "constraintRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "statement", "enforcement"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "statement": { "$ref": "#/$defs/nonEmptyString" },
+        "enforcement": {
+          "enum": [
+            "required_check",
+            "protected_interface",
+            "code_ownership",
+            "reviewer_policy",
+            "human_review",
+            "advisory"
+          ]
+        }
+      }
+    },
+    "performanceConstraint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["metric", "operator", "value", "unit", "environment"],
+      "properties": {
+        "metric": { "$ref": "#/$defs/metricReference" },
+        "operator": {
+          "enum": [
+            "equal",
+            "not_equal",
+            "less_than",
+            "less_than_or_equal",
+            "greater_than",
+            "greater_than_or_equal"
+          ]
+        },
+        "value": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unit": {
+          "enum": [
+            "milliseconds",
+            "seconds",
+            "bytes",
+            "kilobytes",
+            "megabytes",
+            "frames_per_second",
+            "requests_per_second",
+            "percent",
+            "count"
+          ]
+        },
+        "environment": { "$ref": "#/$defs/environmentReference" }
+      }
+    },
+    "constraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "architecture",
+        "compatibility",
+        "performance",
+        "accessibility",
+        "security",
+        "privacy",
+        "provenance",
+        "dependencies"
+      ],
+      "properties": {
+        "architecture": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/constraintRecord" }
+        },
+        "compatibility": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/constraintRecord" }
+        },
+        "performance": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/performanceConstraint" }
+        },
+        "accessibility": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/constraintRecord" }
+        },
+        "security": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/constraintRecord" }
+        },
+        "privacy": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/constraintRecord" }
+        },
+        "provenance": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/constraintRecord" }
+        },
+        "dependencies": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["new_dependencies", "allowed_services"],
+          "properties": {
+            "new_dependencies": { "enum": ["prohibited", "allowed"] },
+            "allowed_services": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/serviceReference" }
+            }
+          }
+        }
+      }
+    },
+    "milestone": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title",
+        "outcomes",
+        "depends_on",
+        "checkpoint_required"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "title": { "$ref": "#/$defs/nonEmptyString" },
+        "outcomes": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/requirementReference" }
+        },
+        "depends_on": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/milestoneReference" }
+        },
+        "checkpoint_required": { "type": "boolean" }
+      }
+    },
+    "provisionalDecision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "decision_id",
+        "permitted_choice",
+        "affected_scope",
+        "expiration_milestone",
+        "isolation_or_feature_flag_mechanism",
+        "evidence_requested"
+      ],
+      "properties": {
+        "decision_id": { "$ref": "#/$defs/id" },
+        "permitted_choice": { "$ref": "#/$defs/nonEmptyString" },
+        "affected_scope": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/scopeReference" }
+        },
+        "expiration_milestone": { "$ref": "#/$defs/milestoneReference" },
+        "isolation_or_feature_flag_mechanism": { "$ref": "#/$defs/nonEmptyString" },
+        "evidence_requested": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "budgets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["epoch", "retries", "concurrency", "contingency_percent"],
+      "properties": {
+        "epoch": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["wall_time_days", "external_cost_cents", "agent_tasks"],
+          "properties": {
+            "wall_time_days": { "$ref": "#/$defs/positiveInteger" },
+            "external_cost_cents": { "$ref": "#/$defs/nonNegativeInteger" },
+            "agent_tasks": { "$ref": "#/$defs/positiveInteger" }
+          }
+        },
+        "retries": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["per_task", "per_failure_signature"],
+          "properties": {
+            "per_task": { "$ref": "#/$defs/nonNegativeInteger" },
+            "per_failure_signature": { "$ref": "#/$defs/nonNegativeInteger" }
+          }
+        },
+        "concurrency": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["authors", "reviewers", "integrators", "rendered_playtests"],
+          "properties": {
+            "authors": { "$ref": "#/$defs/positiveInteger" },
+            "reviewers": { "$ref": "#/$defs/positiveInteger" },
+            "integrators": { "$ref": "#/$defs/positiveInteger" },
+            "rendered_playtests": { "$ref": "#/$defs/positiveInteger" }
+          }
+        },
+        "contingency_percent": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        }
+      }
+    },
+    "checkpointTrigger": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type"],
+          "properties": {
+            "type": { "const": "all_milestones_complete" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "milestone"],
+          "properties": {
+            "type": { "const": "specific_milestone_complete" },
+            "milestone": { "$ref": "#/$defs/milestoneReference" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "deadline"],
+          "properties": {
+            "type": { "const": "fixed_deadline" },
+            "deadline": { "$ref": "#/$defs/utcTimestamp" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "budget", "percent"],
+          "properties": {
+            "type": { "const": "budget_threshold" },
+            "budget": {
+              "enum": ["wall_time_days", "external_cost_cents", "agent_tasks"]
+            },
+            "percent": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "triggers"],
+          "properties": {
+            "type": { "const": "earliest_of" },
+            "triggers": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 8,
+              "items": { "$ref": "#/$defs/checkpointTrigger" }
+            }
+          }
+        }
+      ]
+    },
+    "stopCondition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "condition", "scope", "disposition"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "condition": {
+          "enum": [
+            "main_branch_unhealthy",
+            "budget_consumed",
+            "decision_outside_packet",
+            "security_incident",
+            "integrity_failure",
+            "critical_path_blocked"
+          ]
+        },
+        "threshold": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["duration_minutes"],
+              "properties": {
+                "duration_minutes": { "$ref": "#/$defs/positiveInteger" }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["percent"],
+              "properties": {
+                "percent": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 100
+                }
+              }
+            }
+          ]
+        },
+        "scope": {
+          "enum": ["task", "affected_branch", "worker_class", "global"]
+        },
+        "disposition": {
+          "enum": [
+            "halt_task",
+            "halt_affected_branch",
+            "halt_worker_class",
+            "halt_epoch",
+            "notify_owner"
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "condition": { "const": "budget_consumed" } },
+            "required": ["condition"]
+          },
+          "then": {
+            "properties": { "threshold": true },
+            "required": ["threshold"]
+          }
+        }
+      ]
+    },
+    "openQuestion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "decision_required",
+        "owner",
+        "blocking_scope",
+        "critical_path",
+        "deadline"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "decision_required": { "$ref": "#/$defs/nonEmptyString" },
+        "owner": { "$ref": "#/$defs/actorReference" },
+        "blocking_scope": {
+          "oneOf": [
+            { "$ref": "#/$defs/scopeReference" },
+            { "$ref": "#/$defs/milestoneReference" }
+          ]
+        },
+        "critical_path": { "type": "boolean" },
+        "deadline": { "$ref": "#/$defs/utcTimestamp" },
+        "available_choices": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        },
+        "consequences": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        }
+      }
+    },
+    "registryEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "path"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "path": { "$ref": "#/$defs/path" }
+      }
+    },
+    "metricRegistryEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "path", "unit"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "path": { "$ref": "#/$defs/path" },
+        "unit": {
+          "enum": [
+            "milliseconds",
+            "seconds",
+            "bytes",
+            "kilobytes",
+            "megabytes",
+            "frames_per_second",
+            "requests_per_second",
+            "percent",
+            "count"
+          ]
+        }
+      }
+    },
+    "registries": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "actors",
+        "specifications",
+        "suites",
+        "scenarios",
+        "evidence",
+        "environments",
+        "services",
+        "metrics"
+      ],
+      "properties": {
+        "actors": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/registryEntry" }
+        },
+        "specifications": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/registryEntry" }
+        },
+        "suites": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/registryEntry" }
+        },
+        "scenarios": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/registryEntry" }
+        },
+        "evidence": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/registryEntry" }
+        },
+        "environments": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/registryEntry" }
+        },
+        "services": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/registryEntry" }
+        },
+        "metrics": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/metricRegistryEntry" }
+        }
+      }
+    }
+  }
+}

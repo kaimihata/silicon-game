@@ -1,0 +1,236 @@
+schema_version: 1
+id: starter-catalog
+version: 1
+status: ready
+families:
+  - {id: compute, label_key: family.compute, icon_key: icon-compute, silhouette: square-core-grid, color_token: family-compute}
+  - {id: memory, label_key: family.memory, icon_key: icon-memory, silhouette: tall-banked-die, color_token: family-memory}
+  - {id: io, label_key: family.io, icon_key: icon-io, silhouette: edge-arrow, color_token: family-io}
+  - {id: power, label_key: family.power, icon_key: icon-power, silhouette: bolt-controller, color_token: family-power}
+  - {id: thermal, label_key: family.thermal, icon_key: icon-thermal, silhouette: finned-spreader, color_token: family-thermal}
+  - {id: substrate, label_key: family.substrate, icon_key: icon-substrate, silhouette: layered-board, color_token: family-substrate}
+  - {id: interconnect, label_key: family.interconnect, icon_key: icon-interconnect, silhouette: linked-nodes, color_token: family-interconnect}
+  - {id: packaging, label_key: family.packaging, icon_key: icon-packaging, silhouette: boxed-package, color_token: family-packaging}
+quality_tiers:
+  - {id: value, rank: 1, label_key: quality.value, inspection_work_multiplier: 1.15, test_work_multiplier: 1.15}
+  - {id: standard, rank: 2, label_key: quality.standard, inspection_work_multiplier: 1, test_work_multiplier: 1}
+  - {id: premium, rank: 3, label_key: quality.premium, inspection_work_multiplier: 0.9, test_work_multiplier: 0.9}
+components:
+  - id: cp-110
+    name_key: component.cp-110
+    family: compute
+    footprint: {width: 2, height: 2}
+    rotatable: false
+    power_watts: 5
+    transport_units: 1
+    work: {placement: 2, bonding: 0, inspection: 2, test: 3, packaging: 0}
+    properties: {cores: 2, clock_ghz: 1.6, architecture_factor: 1, bandwidth_demand_gbps: 8}
+  - id: cp-130
+    name_key: component.cp-130
+    family: compute
+    footprint: {width: 2, height: 2}
+    rotatable: false
+    power_watts: 11
+    transport_units: 1
+    work: {placement: 3, bonding: 0, inspection: 4, test: 6, packaging: 0}
+    properties: {cores: 4, clock_ghz: 1.8, architecture_factor: 1, bandwidth_demand_gbps: 20}
+  - id: md-110
+    name_key: component.md-110
+    family: memory
+    footprint: {width: 1, height: 3}
+    rotatable: true
+    power_watts: 1.5
+    transport_units: 1
+    work: {placement: 1, bonding: 0, inspection: 1, test: 2, packaging: 0}
+    properties: {capacity_gb: 1, peak_bandwidth_gbps: 12.8}
+  - id: md-130
+    name_key: component.md-130
+    family: memory
+    footprint: {width: 1, height: 3}
+    rotatable: true
+    power_watts: 3
+    transport_units: 1
+    work: {placement: 1.5, bonding: 0, inspection: 2, test: 4, packaging: 0}
+    properties: {capacity_gb: 2, peak_bandwidth_gbps: 25.6}
+  - id: io-110
+    name_key: component.io-110
+    family: io
+    footprint: {width: 1, height: 2}
+    rotatable: true
+    power_watts: 2
+    transport_units: 1
+    work: {placement: 1, bonding: 0, inspection: 1.5, test: 1.5, packaging: 0}
+    properties: {display_pipelines: 1, external_bandwidth_gbps: 12, must_touch_edge: true}
+  - id: pm-110
+    name_key: component.pm-110
+    family: power
+    footprint: {width: 1, height: 1}
+    rotatable: false
+    power_watts: 0.8
+    transport_units: 1
+    work: {placement: 1, bonding: 0, inspection: 1, test: 1, packaging: 0}
+    properties: {delivery_capacity_watts: 20, efficiency: 0.92}
+  - id: th-110
+    name_key: component.th-110
+    family: thermal
+    footprint: {width: 2, height: 1}
+    rotatable: true
+    power_watts: 0
+    transport_units: 2
+    work: {placement: 1, bonding: 0, inspection: 0.5, test: 0, packaging: 1}
+    properties: {thermal_capacity_watts: 15, compute_adjacency_required: true}
+  - id: dl-110
+    name_key: component.dl-110
+    family: interconnect
+    footprint: {width: 1, height: 1}
+    rotatable: false
+    power_watts: 0.5
+    transport_units: 1
+    work: {placement: 0, bonding: 1, inspection: 0.5, test: 0, packaging: 0}
+    properties: {bandwidth_gbps: 16, material_units: 1}
+  - id: dl-130
+    name_key: component.dl-130
+    family: interconnect
+    footprint: {width: 1, height: 1}
+    rotatable: false
+    power_watts: 1.2
+    transport_units: 1
+    work: {placement: 0, bonding: 2, inspection: 1.5, test: 0, packaging: 0}
+    properties: {bandwidth_gbps: 32, material_units: 1}
+boards:
+  - id: sub-110
+    name_key: component.sub-110
+    family: substrate
+    board_size: {width: 6, height: 6}
+    max_components: 8
+    transport_units: 2
+    work: {placement: 0, bonding: 0, inspection: 0.5, test: 0, packaging: 0.5}
+items:
+  - {id: pkg-mat-100, name_key: item.pkg-mat-100, family: packaging, category: material, identity_scope: static-material}
+  - {id: wip-unconnected, name_key: item.wip-unconnected, family: packaging, category: wip, identity_scope: design-revision-template}
+  - {id: wip-bonded, name_key: item.wip-bonded, family: packaging, category: wip, identity_scope: design-revision-template}
+  - {id: wip-inspected, name_key: item.wip-inspected, family: packaging, category: wip, identity_scope: design-revision-template}
+  - {id: wip-validated, name_key: item.wip-validated, family: packaging, category: wip, identity_scope: design-revision-template}
+  - {id: product-display-100, name_key: item.product-display-100, family: packaging, category: product, identity_scope: design-revision-template}
+  - {id: reject-inspection, name_key: item.reject-inspection, family: packaging, category: reject, identity_scope: design-revision-template}
+  - {id: reject-test, name_key: item.reject-test, family: packaging, category: reject, identity_scope: design-revision-template}
+offers:
+  - {id: northstar-cp-110-standard, specification_id: cp-110, supplier: Northstar Compute, quality: standard, unit_price_usd: 16, defect_probability: 0.004, default: true}
+  - {id: northstar-cp-130-standard, specification_id: cp-130, supplier: Northstar Compute, quality: standard, unit_price_usd: 28, defect_probability: 0.008, default: true}
+  - {id: valuememory-md-110-value, specification_id: md-110, supplier: ValueMemory, quality: value, unit_price_usd: 9, defect_probability: 0.018, default: false}
+  - {id: primememory-md-110-premium, specification_id: md-110, supplier: PrimeMemory, quality: premium, unit_price_usd: 11, defect_probability: 0.003, default: true}
+  - {id: primememory-md-130-premium, specification_id: md-130, supplier: PrimeMemory, quality: premium, unit_price_usd: 20, defect_probability: 0.007, default: true}
+  - {id: signalworks-io-110-standard, specification_id: io-110, supplier: SignalWorks, quality: standard, unit_price_usd: 5, defect_probability: 0.004, default: true}
+  - {id: steadypower-pm-110-standard, specification_id: pm-110, supplier: SteadyPower, quality: standard, unit_price_usd: 4, defect_probability: 0.003, default: true}
+  - {id: thermaform-th-110-standard, specification_id: th-110, supplier: ThermaForm, quality: standard, unit_price_usd: 4, defect_probability: 0.002, default: true}
+  - {id: packagebase-sub-110-standard, specification_id: sub-110, supplier: PackageBase, quality: standard, unit_price_usd: 6, defect_probability: 0.006, default: true}
+  - {id: bondline-dl-110-standard, specification_id: dl-110, supplier: BondLine, quality: standard, unit_price_usd: 1, defect_probability: 0.002, default: true}
+  - {id: valuelink-dl-110-value, specification_id: dl-110, supplier: ValueLink, quality: value, unit_price_usd: 0.75, defect_probability: 0.01, default: false}
+  - {id: bondline-dl-130-standard, specification_id: dl-130, supplier: BondLine, quality: standard, unit_price_usd: 5, defect_probability: 0.004, default: true}
+  - {id: packright-pkg-100-standard, specification_id: pkg-mat-100, supplier: PackRight, quality: standard, unit_price_usd: 2, defect_probability: 0.001, default: true}
+machines:
+  - {id: rcv-100, name_key: machine.rcv-100, kind: receiving, footprint: {width: 1, height: 1}, rotatable: false, capital_cost_usd: 0, fixed: true, capabilities: [], ports: [{id: output-1, direction: output, side: edge, offset: 0, capacity: 8}]}
+  - {id: asm-100, name_key: machine.asm-100, kind: processing, footprint: {width: 3, height: 3}, rotatable: true, capital_cost_usd: 7000, fixed: false, capabilities: [assemble-package], ports: [{id: input-1, direction: input, side: west, offset: 0, capacity: 4}, {id: input-2, direction: input, side: west, offset: 1, capacity: 4}, {id: input-3, direction: input, side: west, offset: 2, capacity: 4}, {id: input-4, direction: input, side: north, offset: 0, capacity: 4}, {id: input-5, direction: input, side: north, offset: 2, capacity: 4}, {id: output-1, direction: output, side: east, offset: 1, capacity: 4}]}
+  - {id: bnd-100, name_key: machine.bnd-100, kind: processing, footprint: {width: 3, height: 3}, rotatable: true, capital_cost_usd: 6000, fixed: false, capabilities: [bond-connections], ports: [{id: input-1, direction: input, side: west, offset: 0, capacity: 4}, {id: input-2, direction: input, side: west, offset: 2, capacity: 12}, {id: output-1, direction: output, side: east, offset: 1, capacity: 4}]}
+  - {id: ins-100, name_key: machine.ins-100, kind: processing, footprint: {width: 3, height: 3}, rotatable: true, capital_cost_usd: 5000, fixed: false, capabilities: [inspect-package], ports: [{id: input-1, direction: input, side: west, offset: 1, capacity: 6}, {id: output-1, direction: output, side: east, offset: 1, capacity: 6}, {id: output-2, direction: output, side: south, offset: 1, capacity: 6}]}
+  - {id: tst-100, name_key: machine.tst-100, kind: processing, footprint: {width: 3, height: 3}, rotatable: true, capital_cost_usd: 4500, fixed: false, capabilities: [test-package], ports: [{id: input-1, direction: input, side: west, offset: 1, capacity: 6}, {id: output-1, direction: output, side: east, offset: 1, capacity: 6}, {id: output-2, direction: output, side: south, offset: 1, capacity: 6}]}
+  - {id: pkg-100, name_key: machine.pkg-100, kind: processing, footprint: {width: 3, height: 3}, rotatable: true, capital_cost_usd: 4000, fixed: false, capabilities: [package-product], ports: [{id: input-1, direction: input, side: west, offset: 0, capacity: 4}, {id: input-2, direction: input, side: west, offset: 1, capacity: 4}, {id: input-3, direction: input, side: west, offset: 2, capacity: 4}, {id: output-1, direction: output, side: east, offset: 1, capacity: 4}]}
+  - {id: shp-100, name_key: machine.shp-100, kind: shipping, footprint: {width: 1, height: 1}, rotatable: false, capital_cost_usd: 0, fixed: true, capabilities: [], ports: [{id: input-1, direction: input, side: edge, offset: 0, capacity: 1}]}
+  - {id: scr-100, name_key: machine.scr-100, kind: scrap, footprint: {width: 1, height: 1}, rotatable: false, capital_cost_usd: 0, fixed: true, capabilities: [], ports: [{id: input-1, direction: input, side: edge, offset: 0, capacity: 2147483647}]}
+  - {id: log-100, name_key: machine.log-100, kind: belt, footprint: {width: 1, height: 1}, rotatable: true, capital_cost_usd: 200, fixed: false, capabilities: [], ports: []}
+  - {id: log-110-split, name_key: machine.log-110-split, kind: splitter, footprint: {width: 1, height: 1}, rotatable: true, capital_cost_usd: 500, fixed: false, capabilities: [], ports: [{id: input-1, direction: input, side: west, offset: 0, capacity: 1}, {id: output-1, direction: output, side: north, offset: 0, capacity: 1}, {id: output-2, direction: output, side: east, offset: 0, capacity: 1}]}
+  - {id: log-110-merge, name_key: machine.log-110-merge, kind: merger, footprint: {width: 1, height: 1}, rotatable: true, capital_cost_usd: 500, fixed: false, capabilities: [], ports: [{id: input-1, direction: input, side: west, offset: 0, capacity: 1}, {id: input-2, direction: input, side: south, offset: 0, capacity: 1}, {id: output-1, direction: output, side: east, offset: 0, capacity: 1}]}
+recipe_templates:
+  - id: assembly-template
+    stage: assembly
+    capability: assemble-package
+    input_bindings:
+      - {port_id: input-1, source: design-compute-components}
+      - {port_id: input-2, source: design-memory-components}
+      - {port_id: input-3, source: design-io-components}
+      - {port_id: input-4, source: design-power-components}
+      - {port_id: input-5, source: substrate}
+    pass_output: {port_id: output-1, kind: wip-unconnected}
+    outcome_mode: deterministic
+    setup_seconds: 2
+    work_capacity_per_second: 2
+    fixed_work: 1
+    operating_cost_usd: 6
+  - id: bonding-template
+    stage: bonding
+    capability: bond-connections
+    input_bindings:
+      - {port_id: input-1, source: prior-wip}
+      - {port_id: input-2, source: connection-kits}
+    pass_output: {port_id: output-1, kind: wip-bonded}
+    outcome_mode: deterministic
+    setup_seconds: 1.5
+    work_capacity_per_second: 1.5
+    fixed_work: 0
+    operating_cost_usd: 5
+  - id: inspection-template
+    stage: inspection
+    capability: inspect-package
+    input_bindings:
+      - {port_id: input-1, source: prior-wip}
+    pass_output: {port_id: output-1, kind: wip-inspected}
+    reject_output: {port_id: output-2, kind: reject-inspection}
+    outcome_mode: exactly_one_seeded
+    setup_seconds: 2
+    work_capacity_per_second: 1.25
+    fixed_work: 0
+    operating_cost_usd: 7
+  - id: test-template
+    stage: test
+    capability: test-package
+    input_bindings:
+      - {port_id: input-1, source: prior-wip}
+    pass_output: {port_id: output-1, kind: wip-validated}
+    reject_output: {port_id: output-2, kind: reject-test}
+    outcome_mode: exactly_one_seeded
+    setup_seconds: 2
+    work_capacity_per_second: 1.5
+    fixed_work: 0
+    operating_cost_usd: 7
+  - id: packaging-template
+    stage: packaging
+    capability: package-product
+    input_bindings:
+      - {port_id: input-1, source: prior-wip}
+      - {port_id: input-2, source: selected-thermal-components}
+      - {port_id: input-3, source: packaging-material}
+    pass_output: {port_id: output-1, kind: product}
+    outcome_mode: deterministic
+    setup_seconds: 1
+    work_capacity_per_second: 0.75
+    fixed_work: 1
+    operating_cost_usd: 5
+outcome_algorithm:
+  id: keyed-sha256-u53
+  version: 1
+  key_fields: [scenario_seed, product_unit_id, stage, outcome_version]
+  canonical_key: UTF-8 JSON array in key_fields order using canonical decimal integers and lowercase stage IDs
+  draw: Unsigned big-endian first 53 SHA-256 digest bits divided by 2^53
+  decision: Reject exactly when draw is less than the stage reject probability; otherwise pass
+contract:
+  id: basic-display-1000
+  name_key: contract.basic-display-1000
+  product_id: product-display-100
+  quantity: 1000
+  unit_price_usd: 100
+  minimum_quality: value
+  requirements:
+    - {id: sustained-compute, operator: greater_than_or_equal, value: 28, unit: rating}
+    - {id: memory-capacity, operator: greater_than_or_equal, value: 1, unit: gb}
+    - {id: memory-bandwidth, operator: greater_than_or_equal, value: 8, unit: gbps}
+    - {id: display-pipelines, operator: greater_than_or_equal, value: 1, unit: count}
+    - {id: package-power, operator: less_than_or_equal, value: 16, unit: watts}
+balance:
+  expected_yield: 0.9333
+  material_cost_per_attempt_usd: 51
+  operating_cost_per_attempt_usd: 30
+  expected_cost_per_accepted_usd: 86.78
+  expected_margin_percent: 13.22
+  recommended_attempts: 1125
+  reference_factory_capital_usd: 41500
+  starting_cash_usd: 113707

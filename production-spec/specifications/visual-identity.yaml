@@ -1,0 +1,48 @@
+schema_version: 1
+id: visual-identity
+version: 1
+status: ready
+title: Production-direction greybox and visual semantics
+summary: Defines sufficient visual consistency, asset provenance, family semantics, captures, and performance-aware presentation without requiring final art.
+milestones: [playable-vertical-slice]
+sources:
+  - {path: docs/game-design.md, role: authority}
+  - {path: docs/code-factory/architecture.md, role: authority}
+parameters:
+  - {id: world-presentation, value: angled-isometric-3d}
+  - {id: management-presentation, value: 2d-ui}
+  - {id: audio-required, value: false}
+rules:
+  - id: art-direction
+    statement: The world is a stylized, readable industrial campus with a clean miniature or diorama feel, using representative materials, lighting, state effects, and production-direction greybox geometry.
+    level: normative
+    acceptance_notes: Captures communicate floor grid, ports, item flow, machine states, and campus hierarchy without final art.
+  - id: family-language
+    statement: Compute, memory, I/O, power, thermal, substrate, interconnect, and packaging each use one stable family glyph, silhouette motif, accessible color token, and always-visible text label.
+    level: normative
+    acceptance_notes: Cross-screen visual audit verifies stable semantics and grayscale readability.
+  - id: state-language
+    statement: Starved, working, blocked, rejected, invalid, selected, and alert states combine shape, motion or reduced-motion substitute, icon, and localized text; color is never the sole cue.
+    level: normative
+    acceptance_notes: Captures in normal, color-blind simulation, grayscale, and reduced motion remain distinguishable.
+  - id: discrete-items
+    statement: Belts render discrete family-readable items and preserve enough visible spacing and direction to diagnose movement and blockage.
+    level: normative
+    acceptance_notes: Bounded visual playtest identifies item family, travel direction, and first blocked location.
+  - id: no-concept-gate
+    statement: No separate visual concept approval is required before Milestone 2; the factory may choose reversible provisional tokens, icons, meshes, and materials that satisfy these contracts.
+    level: normative
+    acceptance_notes: Decision log records provisional assets and their replacement boundaries.
+  - id: asset-provenance
+    statement: Every nontrivial asset records creator or source, license, source URI or internal path, transformations, tool versions, and generated attribution when required.
+    level: normative
+    acceptance_notes: Unknown or disallowed provenance blocks integration.
+  - id: captures
+    statement: Checkpoint evidence includes representative screenshots and video of onboarding, design, procurement, belt construction, bottleneck, reject handling, fulfillment, and agent observer mode.
+    level: normative
+    acceptance_notes: Evidence index links captures to requirements and exact build revision.
+decisions:
+  - id: production-greybox
+    choice: Require coherent representative visuals but defer final art and audio.
+    rationale: The checkpoint judges complete gameplay and readability before expensive polish.
+    supersedes: []

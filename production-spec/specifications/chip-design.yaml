@@ -1,0 +1,73 @@
+schema_version: 1
+id: chip-design
+version: 1
+status: ready
+title: Chip design and published revisions
+summary: Defines drafts, revision identity, substrate placement, graph connections, qualification, BOM compilation, and design lifecycle.
+milestones: [technical-sandbox, playable-vertical-slice]
+sources:
+  - {path: docs/chip-parts.md, role: authority}
+  - {path: docs/component-catalog.md, role: authority}
+  - {path: content/catalog.js, role: provisional_values}
+parameters:
+  - {id: board-width, value: 6, unit: cells, provisional: true}
+  - {id: board-height, value: 6, unit: cells, provisional: true}
+  - {id: max-components, value: 8, unit: components, provisional: true}
+rules:
+  - id: lifecycle
+    statement: A design is an editable draft until published; publication creates an immutable revision, and every redesign creates a new immutable revision under the same stable design ID.
+    level: normative
+    acceptance_notes: Mutation commands reject published revisions and preserve all prior revision hashes.
+  - id: identities
+    statement: Contract-derived designs receive a stable contract-derived ID and default localized name; display names are editable and revisions are explicit.
+    level: normative
+    acceptance_notes: Standalone and contract-linked lists preserve identity across rename and revision.
+  - id: association
+    statement: Default flow creates a linked draft from a contract, while standalone design supports speculative designs and later contract association; internally valid designs may publish without a contract.
+    level: normative
+    acceptance_notes: Scenarios cover all three paths without changing qualification rules.
+  - id: archive-delete
+    statement: Archive and delete are manual and blocked while any contract, recipe, inventory, WIP, replay, or retained evidence references the design revision.
+    level: normative
+    acceptance_notes: Referential integrity tests enumerate every blocking reference.
+  - id: placement
+    statement: A design selects exactly one board record; that board defines the zero-based top-left design area and component limit but is not an occupying component. Placed component instances occupy their rotated integer footprints, cannot overlap or leave the selected board, and the SUB-110 board provisionally supplies a 6 by 6 area with at most eight placed components.
+    level: normative
+    acceptance_notes: Property tests cover bounds, overlap, rotation, and maximum count.
+  - id: families
+    statement: Component-family minimums and maximums are content data; onboarding requires compute, memory, power, thermal, at least one display I/O, one selected substrate board, interconnect routes, and packaging material. Multiple placed instances in one family are allowed only when they use the same exact model because each starter Assembler family port accepts one item type; later machine capabilities may add ports.
+    level: normative
+    acceptance_notes: Designer catalog shows required, alternative, and optional models and reports each family constraint.
+  - id: io-edge
+    statement: Every required display I/O component touches a package edge.
+    level: normative
+    acceptance_notes: All four edge orientations pass and fully interior placements fail with a plain-language reason.
+  - id: thermal-adjacency
+    statement: TH-110 is a draggable rotatable 2 by 1 part; every compute footprint must share an orthogonal edge with a spreader, and each spreader's 15 W capacity is shared among touching compute loads.
+    level: normative
+    acceptance_notes: Tests cover one-to-many and many-to-one adjacency and capacity allocation.
+  - id: connections
+    statement: The player selects Standard or Wide and drags compatible endpoints. Each endpoint anchor is the footprint cell nearest the other footprint by Manhattan distance, with topmost then leftmost tie-break. Breadth-first routing uses neighbor order east, south, west, north across in-bounds cells, may start/end on endpoint cells, cannot traverse another component, and may share or cross existing routes. Preview shows the resulting cell path, distance, capacity, power, material cost, bonding work, and inspection work before atomic creation.
+    level: normative
+    acceptance_notes: Equal endpoints and board state always select the same route and preview values.
+  - id: route-congestion
+    statement: For a route of distance d, distance efficiency is clamp from 0.4 to 1 of 1 minus 0.15 times max of zero and d minus 2. Effective route bandwidth is technology bandwidth times distance efficiency divided by the largest number of routes sharing any route cell. Bonding and inspection work are each multiplied by 1 plus 0.10 times the sum across its cells of max zero and route occupancy minus one.
+    level: normative
+    acceptance_notes: Crossing and shared-path fixtures report penalties and remain graph-connected.
+  - id: connectivity
+    statement: Every compute reaches memory and each required I/O through the connection graph, each required I/O reaches memory, and aggregate bandwidth is calculated over actual paths.
+    level: normative
+    acceptance_notes: Multi-component graph tests cover indirect paths, shared capacity, and disconnected endpoints.
+  - id: undo-redo
+    statement: Draft component, placement, rotation, connection, supplier-minimum, rename, and association edits support deterministic undo and redo.
+    level: normative
+    acceptance_notes: Round-trip sequences restore byte-identical draft state.
+  - id: publish-output
+    statement: Publication validates the selected board, instance positions, rotations, connection endpoints, and exact routes, then emits an immutable reusable design revision with exact BOM, functional product metrics, quality-neutral workload coefficients, minimum-quality constraints, and qualification results. It does not select suppliers or offers. Production allocation separately creates an immutable lot-bound manufacturing plan that instantiates quality-adjusted stage recipes and expected yield. Assembly consumes the exact nonthermal placed components plus one selected board; bonding consumes prior WIP plus one connection kit for each route; inspection and test each consume prior WIP and select exactly one pass or reject output; packaging consumes validated WIP, the exact selected thermal components, and packaging material.
+    level: normative
+    acceptance_notes: Compiled output is canonical and changes whenever a meaningful choice changes.
+decisions:
+  - id: graph-not-three-pairs
+    choice: Validate actual graph reachability and aggregate routed capacity instead of exactly three family-pair links.
+    rationale: Production supports multiple compute, memory, power, and thermal components.
+    supersedes: [browser exactly three required links, browser at most one express link]

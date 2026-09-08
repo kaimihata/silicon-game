@@ -1,0 +1,13 @@
+schema_version: 1
+id: scenarios
+version: 1
+status: ready
+kind: scenarios
+entries:
+  - {id: sandbox-accepted-chip, path: scenarios/sandbox-accepted-chip.yaml}
+  - {id: onboarding-complete, path: scenarios/onboarding-complete.yaml}
+  - {id: scanner-bottleneck, path: scenarios/scanner-bottleneck.yaml}
+  - {id: designer-accessibility, path: scenarios/designer-accessibility.yaml}
+  - {id: layout-accessibility, path: scenarios/layout-accessibility.yaml}
+  - {id: bounded-black-box, path: scenarios/bounded-black-box.yaml}
+  - {id: save-recovery, path: scenarios/save-recovery.yaml}

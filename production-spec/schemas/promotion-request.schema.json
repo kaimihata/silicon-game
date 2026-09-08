@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://chip-city.dev/production-spec/promotion-request.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_type",
+    "request_id",
+    "target_repository",
+    "source_branch",
+    "source_revision",
+    "target_branch",
+    "checkpoint_digest",
+    "packet_digest",
+    "packet_approval_digest",
+    "specification_revision",
+    "policy_revision",
+    "evidence_manifest_digest",
+    "requested_tag",
+    "factory_authority"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "artifact_type": {"const": "promotion_request"},
+    "request_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$"},
+    "target_repository": {"const": "kaimihata/silicon-game-v1"},
+    "source_branch": {"const": "develop"},
+    "source_revision": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "target_branch": {"const": "main"},
+    "checkpoint_digest": {"$ref": "#/$defs/digest"},
+    "packet_digest": {"$ref": "#/$defs/digest"},
+    "packet_approval_digest": {"$ref": "#/$defs/digest"},
+    "specification_revision": {"$ref": "#/$defs/digest"},
+    "policy_revision": {"$ref": "#/$defs/digest"},
+    "evidence_manifest_digest": {"$ref": "#/$defs/digest"},
+    "requested_tag": {"type": "string", "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "factory_authority": {"const": "request_only"}
+  },
+  "$defs": {
+    "digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+  }
+}

@@ -1,0 +1,48 @@
+schema_version: 1
+id: persistence
+version: 1
+status: ready
+title: Save, migration, recovery, and profile isolation
+summary: Defines canonical logical saves, atomic autosave, backup recovery, migrations, and separation of human and agent-test profiles.
+milestones: [technical-sandbox, playable-vertical-slice]
+sources:
+  - {path: docs/code-factory/player-protocol.md, role: authority}
+  - {path: docs/code-factory/verification.md, role: authority}
+parameters:
+  - {id: autosave-active-seconds, value: 60, unit: seconds}
+  - {id: human-backup-count, value: 1, unit: saves}
+  - {id: successful-agent-runs-retained, value: 10, unit: runs}
+rules:
+  - id: logical-format
+    statement: Logical save state is the canonical authoritative state defined by deterministic-simulation/state-hash, serialized as RFC 8785 JSON UTF-8 with stable identifiers and an explicit schema. It persists command_revision, simulation_tick, next event_sequence, accepted command-id results, immutable design and manufacturing-plan digests, lot-bound inventory provenance, product-unit IDs and attempt counters, contract reservations, and machine microtick progress. It excludes UI, wall-clock, network, localization, and derived cache state; load recomputes caches and verifies the stored SHA-256 before activation. Future physical binary encoding may wrap but not redefine it.
+    level: normative
+    acceptance_notes: Round-trip serialization is canonical and deterministic.
+  - id: migrations
+    statement: Every supported prior save version has an explicit deterministic migration chain or a clear unsupported error; silent reinterpretation is prohibited.
+    level: normative
+    acceptance_notes: Migration fixtures prove idempotence and expected final hashes.
+  - id: atomic-autosave
+    statement: Human state saves atomically after major decisions and every 60 seconds of active simulation time, retaining one last verified backup.
+    level: normative
+    acceptance_notes: Fault injection cannot leave a partially written primary or replace a verified backup with corrupt data.
+  - id: recovery
+    statement: Corrupt or unmigratable primary state is preserved for diagnosis, verified backup is attempted, and failure is reported without silently resetting progress.
+    level: normative
+    acceptance_notes: Recovery scenarios cover valid backup and dual failure.
+  - id: human-profile
+    statement: The first UI presents one human profile with New Game and Continue; New Game confirms replacement and preserves one backup.
+    level: normative
+    acceptance_notes: Black-box tests verify confirmation, backup, and Continue behavior.
+  - id: agent-isolation
+    statement: Agent-test profiles use a separate namespace and storage root; the semantic service cannot enumerate, read, overwrite, migrate, or delete human saves.
+    level: normative
+    acceptance_notes: Security tests attempt traversal and human-profile IDs through every agent endpoint.
+  - id: agent-retention
+    statement: Agents may reset or delete only their own profiles; retain the latest ten successful runs per scenario and all failed regressions unless manually pinned or deleted.
+    level: normative
+    acceptance_notes: Retention tests preserve failures and pins while pruning only excess unpinned successes.
+decisions:
+  - id: canonical-json-save
+    choice: Establish canonical JSON as the logical save contract.
+    rationale: Deterministic migrations, replay, inspection, and platform parity outweigh early binary optimization.
+    supersedes: []

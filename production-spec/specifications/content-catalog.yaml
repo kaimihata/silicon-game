@@ -1,0 +1,52 @@
+schema_version: 1
+id: content-catalog
+version: 1
+status: ready
+title: Content authoring and starter catalog
+summary: Defines pure-data authoring, identities, families, supplier offers, runtime compilation, and provisional balancing authority.
+milestones: [technical-sandbox, playable-vertical-slice]
+sources:
+  - {path: docs/component-catalog.md, role: authority}
+  - {path: content/catalog.js, role: provisional_values}
+  - {path: schemas/part.schema.json, role: context}
+parameters:
+  - {id: content-schema-version, value: 1}
+  - {id: balance-status, value: provisional}
+rules:
+  - id: yaml-source
+    statement: All runtime catalog entries are authored as safe external YAML, validate structurally and semantically, and compile to one canonical JSON document with a content digest.
+    level: normative
+    acceptance_notes: Reordered YAML mappings produce byte-identical JSON and digest.
+  - id: starter-models
+    statement: Catalog includes CP-110, CP-130, MD-110, MD-130, IO-110, PM-110, TH-110, SUB-110, DL-110, DL-130, static PKG-MAT-100, and design-revision identity templates for WIP states, rejects, and PRODUCT-DISPLAY-100.
+    level: normative
+    acceptance_notes: Completeness validation fails if any required starter ID is absent.
+  - id: alternatives
+    statement: CP and MD alternatives are visible in the designer; every model changes product metrics, manufacturing work, cost, yield exposure, or multiple dimensions.
+    level: normative
+    acceptance_notes: A catalog influence test proves no meaningful choice is behaviorally identical.
+  - id: default-offers
+    statement: The default memory offer is PrimeMemory Premium MD-110 and the onboarding alternative is ValueMemory Value MD-110; all other required BOM items have a compatible default offer.
+    level: normative
+    acceptance_notes: Default recommendation resolves one and only one allowed offer per BOM item.
+  - id: quality-values
+    statement: Current supplier prices and defect probabilities are promoted as provisional where available, with explicit inspection and test work multipliers added for each tier.
+    level: normative
+    acceptance_notes: Balance report identifies every promoted value and labels it provisional.
+  - id: localization
+    statement: Content stores localization keys for player-facing name, description, guidance, state, and failure copy; IDs are never the sole player label.
+    level: normative
+    acceptance_notes: Content validation requires keys and locale validation resolves them for English.
+  - id: visual-semantics
+    statement: Every family maps to a stable icon key, silhouette motif, accessible color token, and text label used in contracts, designer, procurement, docks, belts, recipes, alerts, and reports.
+    level: normative
+    acceptance_notes: UI snapshot tests verify icon, label, and token consistency without relying on color alone.
+  - id: generated-only
+    statement: Generated runtime JSON and revision-specific compiled recipes are never hand-edited. The catalog stores universal stage recipe templates rather than CP-110 or MD-110 recipe instances, and generated provenance records source paths, compiler version, schema version, and digest.
+    level: normative
+    acceptance_notes: CI regeneration detects drift and provenance lists every YAML input.
+decisions:
+  - id: provisional-promotion
+    choice: Use current starter catalog values as explicit provisional production values until tuning evidence changes them.
+    rationale: Independent implementations need concrete inputs rather than unspecified balance.
+    supersedes: [experimental browser-only values]

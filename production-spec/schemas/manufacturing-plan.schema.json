@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://chip-city.dev/production-spec/manufacturing-plan.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "id",
+    "version",
+    "status",
+    "reference_only",
+    "immutable",
+    "design_revision_id",
+    "source_offer_catalog_digest",
+    "attempt_capacity",
+    "allocation_order",
+    "lot_allocations",
+    "content_digest"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "id": {"$ref": "#/$defs/id"},
+    "version": {"type": "integer", "minimum": 1},
+    "status": {"enum": ["draft", "ready"]},
+    "reference_only": {"type": "boolean"},
+    "immutable": {"const": true},
+    "design_revision_id": {"$ref": "#/$defs/id"},
+    "source_offer_catalog_digest": {"$ref": "#/$defs/digest"},
+    "attempt_capacity": {"type": "integer", "minimum": 1},
+    "allocation_order": {
+      "const": "For each item_id in lexical order and product attempt_sequence in ascending order, consume allocations by allocation_index, then lot_id lexical order; never substitute another lot after plan creation."
+    },
+    "lot_allocations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "allocation_index",
+          "item_id",
+          "lot_id",
+          "offer_id",
+          "supplier",
+          "quality",
+          "allocated_units",
+          "unit_cost_microusd",
+          "defect_probability_ppm",
+          "offer_digest"
+        ],
+        "properties": {
+          "allocation_index": {"type": "integer", "minimum": 0},
+          "item_id": {"$ref": "#/$defs/id"},
+          "lot_id": {"$ref": "#/$defs/id"},
+          "offer_id": {"$ref": "#/$defs/id"},
+          "supplier": {"type": "string", "minLength": 1},
+          "quality": {"enum": ["value", "standard", "premium"]},
+          "allocated_units": {"type": "integer", "minimum": 1},
+          "unit_cost_microusd": {"type": "integer", "minimum": 0, "maximum": 9007199254740991},
+          "defect_probability_ppm": {"type": "integer", "minimum": 0, "maximum": 999999},
+          "offer_digest": {"$ref": "#/$defs/digest"}
+        }
+      }
+    },
+    "content_digest": {"$ref": "#/$defs/digest"}
+  },
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$", "maxLength": 180},
+    "digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+  }
+}

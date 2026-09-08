@@ -1,0 +1,275 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.silicon-code-factory.dev/game-spec-bundle-v1.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "spec_id", "state", "specification_revision", "files", "evidence_adapters"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "spec_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$",
+      "maxLength": 128
+    },
+    "state": {"const": "ready"},
+    "specification_revision": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "files": {
+      "type": "array",
+      "maxItems": 128,
+      "items": {"$ref": "#/$defs/file"}
+    },
+    "evidence_adapters": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {"$ref": "#/$defs/evidence_adapter"}
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$",
+      "maxLength": 128
+    },
+    "selector": {
+      "type": "array",
+      "maxItems": 100,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/identifier"}
+    },
+    "file": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "path", "role", "media_type", "sha256", "bytes", "requirement_ids", "milestone_ids"],
+      "properties": {
+        "id": {"$ref": "#/$defs/identifier"},
+        "path": {
+          "type": "string",
+          "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*\\\\)(?!.*//)[A-Za-z0-9._-]+(?:/[A-Za-z0-9._-]+)*$",
+          "maxLength": 512
+        },
+        "role": {
+          "enum": [
+            "rule",
+            "fixture",
+            "traceability",
+            "verification",
+            "check",
+            "runner",
+            "manufacturing_plan",
+            "target_bootstrap",
+            "protocol_wire",
+            "protocol_contract_fixture"
+          ]
+        },
+        "media_type": {
+          "enum": ["application/json", "text/markdown", "text/plain"]
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 65536
+        },
+        "requirement_ids": {"$ref": "#/$defs/selector"},
+        "milestone_ids": {"$ref": "#/$defs/selector"}
+      }
+    },
+    "factory_kind": {
+      "enum": [
+        "build_report",
+        "test_report",
+        "typecheck_report",
+        "static_analysis_report",
+        "performance_report",
+        "semantic_playtest_report",
+        "rendered_playtest_recording",
+        "screenshot",
+        "video",
+        "log_bundle",
+        "diff_summary",
+        "review_verdict",
+        "artifact_manifest"
+      ]
+    },
+    "producer": {
+      "enum": [
+        "windows_gpu_semantic",
+        "windows_gpu_rendered",
+        "macos_build",
+        "macos_smoke"
+      ]
+    },
+    "profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version", "media_type", "json_schema"],
+      "properties": {
+        "id": {"$ref": "#/$defs/identifier"},
+        "version": {
+          "type": "string",
+          "const": "1",
+          "minLength": 1,
+          "maxLength": 32,
+          "pattern": "^[0-9A-Za-z][0-9A-Za-z._+-]*$"
+        },
+        "media_type": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9!#$&^_.+-]*/[a-z0-9][a-z0-9!#$&^_.+-]*$"
+        },
+        "json_schema": {
+          "type": "object"
+        }
+      }
+    },
+    "delivery": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "max_bytes", "retention_days"],
+      "properties": {
+        "mode": {"enum": ["inline", "direct_blob"]},
+        "max_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5368709120
+        },
+        "retention_days": {"const": 30}
+      }
+    },
+    "evidence_adapter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "spec_evidence_id", "factory_kind", "profile", "authorized_producers", "delivery"],
+      "properties": {
+        "schema_version": {"const": 1},
+        "spec_evidence_id": {"$ref": "#/$defs/identifier"},
+        "factory_kind": {"$ref": "#/$defs/factory_kind"},
+        "profile": {"$ref": "#/$defs/profile"},
+        "authorized_producers": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/producer"}
+        },
+        "delivery": {"$ref": "#/$defs/delivery"}
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "authorized_producers": {
+                "type": "array",
+                "contains": {"const": "windows_gpu_semantic"}
+              }
+            },
+            "required": ["authorized_producers"]
+          },
+          "then": {
+            "properties": {
+              "factory_kind": {
+                "enum": ["semantic_playtest_report", "performance_report", "log_bundle"]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "authorized_producers": {
+                "type": "array",
+                "contains": {"const": "windows_gpu_rendered"}
+              }
+            },
+            "required": ["authorized_producers"]
+          },
+          "then": {
+            "properties": {
+              "factory_kind": {
+                "enum": [
+                  "test_report",
+                  "performance_report",
+                  "rendered_playtest_recording",
+                  "screenshot",
+                  "video",
+                  "log_bundle"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "authorized_producers": {
+                "type": "array",
+                "contains": {"const": "macos_build"}
+              }
+            },
+            "required": ["authorized_producers"]
+          },
+          "then": {
+            "properties": {
+              "factory_kind": {
+                "enum": [
+                  "build_report",
+                  "typecheck_report",
+                  "static_analysis_report",
+                  "artifact_manifest",
+                  "log_bundle"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "authorized_producers": {
+                "type": "array",
+                "contains": {"const": "macos_smoke"}
+              }
+            },
+            "required": ["authorized_producers"]
+          },
+          "then": {
+            "properties": {
+              "factory_kind": {
+                "enum": ["test_report", "log_bundle"]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "factory_kind": {
+                "enum": [
+                  "rendered_playtest_recording",
+                  "screenshot",
+                  "video",
+                  "log_bundle",
+                  "artifact_manifest"
+                ]
+              }
+            },
+            "required": ["factory_kind"]
+          },
+          "then": {
+            "properties": {
+              "delivery": {
+                "type": "object",
+                "properties": {"mode": {"const": "direct_blob"}}
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

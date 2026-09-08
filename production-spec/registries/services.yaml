@@ -1,0 +1,11 @@
+schema_version: 1
+id: services
+version: 1
+status: ready
+kind: services
+entries:
+  - {id: github, path: code-factory/registries/services.yaml, description: Repository pull request checks and protected branch control}
+  - {id: copilot-agent-tasks, path: code-factory/registries/services.yaml, description: Existing factory coding-agent dispatch provider}
+  - {id: factory-control-plane, path: code-factory/registries/services.yaml, description: Existing Silicon Code Factory deployment}
+  - {id: factory-evidence-store, path: code-factory/registries/services.yaml, description: Existing immutable evidence storage}
+  - {id: unity-editor-licensing, path: code-factory/registries/services.yaml, description: Existing or owner-provided Unity editor license only}

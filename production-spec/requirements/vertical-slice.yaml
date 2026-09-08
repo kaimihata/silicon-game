@@ -1,0 +1,653 @@
+schema_version: 1
+catalog_id: vertical-slice-requirements
+version: 1
+status: ready
+milestones:
+  - id: playable-vertical-slice
+    title: Playable onboarding vertical slice
+    owner: chip-city-owner
+    depends_on:
+      - technical-sandbox
+    checkpoint_required: true
+requirements:
+  - id: req.slice.contract-design
+    statement: A new player accepts the onboarding contract, creates its linked draft, publishes a qualifying immutable design, and may later reassign an eligible revision.
+    priority: must
+    milestone: playable-vertical-slice
+    source:
+      specification: contracts-procurement
+      rule: contract-states
+    acceptance:
+      - check_id: check.slice.contract-design
+        type: semantic_scenario
+        suite: semantic-playtest
+        scenario: onboarding-complete
+    lifecycle: milestone
+  - id: req.slice.designer
+    statement: The three-column designer supports all starter choices, placement, routing, congestion, validation, metrics, undo, redo, and publishing without prescribing a factory.
+    priority: must
+    milestone: playable-vertical-slice
+    source:
+      specification: chip-design
+      rule: connectivity
+    acceptance:
+      - check_id: check.slice.designer
+        type: black_box_scenario
+        suite: black-box-playtest
+        scenario: designer-accessibility
+    lifecycle: milestone
+  - id: req.slice.procurement
+    statement: Procurement shows expected BOM and yield, calculates buffered remaining demand, permits editing, and atomically buys explicit quantities while preserving lot metadata.
+    priority: must
+    milestone: playable-vertical-slice
+    source:
+      specification: contracts-procurement
+      rule: purchase-all
+    acceptance:
+      - check_id: check.slice.procurement
+        type: integration_test
+        suite: domain
+    lifecycle: milestone
+  - id: req.slice.quality
+    statement: Value, Standard, and Premium supplier offers alter manufacturing price, defect, inspection, and test effects but never functional performance.
+    priority: must
+    milestone: playable-vertical-slice
+    source:
+      specification: contracts-procurement
+      rule: quality-tiers
+    acceptance:
+      - check_id: check.slice.quality
+        type: automated_test
+        suite: domain
+    lifecycle: milestone
+  - id: req.slice.factory
+    statement: The 32 by 20 campus supports fixed docks, rotatable machines, repeated tools, atomic L belts, single-item splitters and mergers, and incomplete live factories.
+    priority: must
+    milestone: playable-vertical-slice
+    source:
+      specification: factory-logistics
+      rule: machine-placement
+    acceptance:
+      - check_id: check.slice.factory
+        type: semantic_scenario
+        suite: semantic-playtest
+        scenario: onboarding-complete
+    lifecycle: milestone
+  - id: req.slice.machine-flow
+    statement: Per-port typed buffers, input-driven processing, immutable WIP, blocking, recipe switching, physical rejects, collection, removal, and accounting lose no item.
+    priority: must
+    milestone: playable-vertical-slice
+    source:
+      specification: factory-logistics
+      rule: machine-buffers
+    acceptance:
+      - check_id: check.slice.machine-flow
+        type: property_test
+        suite: domain
+    lifecycle: milestone
+  - id: req.slice.scanner
+    statement: The initial Quality Scanner bottleneck is visible and can be relieved by a second scanner connected through a splitter and merger.
+    priority: must
+    milestone: playable-vertical-slice
+    source:
+      specification: factory-logistics
+      rule: scanner-bottleneck
+    acceptance:
+      - check_id: check.slice.scanner
+        type: semantic_scenario
+        suite: semantic-playtest
+        scenario: scanner-bottleneck
+    lifecycle: milestone
+  - id: req.slice.fulfillment
+    statement: Shipping recognizes revenue for exactly 1,000 eligible accepted units, fulfills even at negative cash, and blocks excess physical product.
+    priority: must
+    milestone: playable-vertical-slice
+    source:
+      specification: contracts-procurement
+      rule: shipping-revenue
+    acceptance:
+      - check_id: check.slice.fulfillment
+        type: semantic_scenario
+        suite: semantic-playtest
+        scenario: onboarding-complete
+    lifecycle: milestone
+  - id: req.slice.balance
+    statement: The default design has 10 to 15 percent expected contribution margin and formula-derived starting cash covering buffered materials, reference capital, and reserve.
+    priority: must
+    milestone: playable-vertical-slice
+    source:
+      specification: deterministic-simulation
+      rule: contribution-target
+    acceptance:
+      - check_id: check.slice.balance
+        type: automated_test
+        suite: balance
+    lifecycle: milestone
+  - id: req.slice.layout
+    statement: Campus-first header, centered management overlays, contextual inspector, and bottom construction dock remain coherent from 1280 by 720 through 4K.
+    priority: must
+    milestone: playable-vertical-slice
+    source:
+      specification: interaction-accessibility
+      rule: campus-home
+    acceptance:
+      - check_id: check.slice.layout
+        type: black_box_scenario
+        suite: black-box-playtest
+        scenario: layout-accessibility
+    lifecycle: milestone
+  - id: req.slice.accessibility
+    statement: Management is keyboard reachable with remapping, visible focus, scaling, reduced motion, localized labels, and color-independent cues.
+    priority: must
+    milestone: playable-vertical-slice
+    source:
+      specification: interaction-accessibility
+      rule: accessibility
+    acceptance:
+      - check_id: check.slice.accessibility
+        type: black_box_scenario
+        suite: accessibility
+        scenario: layout-accessibility
+    lifecycle: milestone
+  - id: req.slice.visuals
+    statement: Production-direction greybox clearly renders angled 3D factory state, discrete items, family semantics, ports, rejects, and blocking with documented asset provenance.
+    priority: must
+    milestone: playable-vertical-slice
+    source:
+      specification: visual-identity
+      rule: art-direction
+    acceptance:
+      - check_id: check.slice.visuals
+        type: asset_validation
+        suite: asset-provenance
+      - check_id: check.slice.visuals-black-box
+        type: black_box_scenario
+        suite: black-box-playtest
+        scenario: bounded-black-box
+    lifecycle: milestone
+  - id: req.slice.agent-security
+    statement: Opt-in loopback HTTP uses ephemeral authentication, isolates agent profiles from human saves, excludes oracle actions, paces commands, and displays connection state.
+    priority: must
+    milestone: playable-vertical-slice
+    source:
+      specification: player-protocol
+      rule: opt-in-security
+    acceptance:
+      - check_id: check.slice.agent-security
+        type: integration_test
+        suite: protocol
+      - check_id: check.slice.agent-security-isolation
+        type: black_box_scenario
+        suite: persistence
+        scenario: save-recovery
+    lifecycle: milestone
+  - id: req.slice.agent-runs
+    statement: Three fresh-profile semantic playthroughs on distinct seeds complete onboarding and emit replay, decisions, hashes, captures, and accounting.
+    priority: must
+    milestone: playable-vertical-slice
+    source:
+      specification: onboarding
+      rule: three-agent-runs
+    acceptance:
+      - check_id: check.slice.agent-runs
+        type: semantic_scenario
+        suite: semantic-playtest
+        scenario: onboarding-complete
+    lifecycle: milestone
+  - id: req.slice.black-box
+    statement: A bounded black-box run validates discoverability and visual feedback using only ordinary mouse and keyboard input, rendered frames, and accessibility semantics.
+    priority: must
+    milestone: playable-vertical-slice
+    source:
+      specification: onboarding
+      rule: black-box
+    acceptance:
+      - check_id: check.slice.black-box
+        type: black_box_scenario
+        suite: black-box-playtest
+        scenario: bounded-black-box
+    lifecycle: milestone
+  - id: req.slice.performance
+    statement: On the Windows reference floor gameplay sustains 60 FPS, cold main menu loads within 10 seconds, and process RAM remains below 4 GB.
+    priority: must
+    milestone: playable-vertical-slice
+    source:
+      specification: technical-architecture
+      rule: build-targets
+    acceptance:
+      - check_id: check.slice.performance
+        type: performance_measurement
+        suite: performance
+    lifecycle: milestone
+  - id: req.slice.platforms
+    statement: Unsigned Windows x86-64 and macOS Universal builds launch natively and include clear launch instructions and exact source revision.
+    priority: must
+    milestone: playable-vertical-slice
+    source:
+      specification: technical-architecture
+      rule: build-targets
+    acceptance:
+      - check_id: check.slice.platforms
+        type: integration_test
+        suite: build
+    lifecycle: milestone
+  - id: req.slice.persistence
+    statement: New Game, Continue, autosave, one backup, recovery, and agent-run retention behave as specified with no silent reset.
+    priority: must
+    milestone: playable-vertical-slice
+    source:
+      specification: persistence
+      rule: human-profile
+    acceptance:
+      - check_id: check.slice.persistence
+        type: black_box_scenario
+        suite: persistence
+        scenario: save-recovery
+    lifecycle: milestone
+  - id: req.slice.checkpoint
+    statement: The final candidate supplies all required build, coverage, trace, capture, performance, decision, risk, deferred-scope, and 30-day direct-to-Blob retention evidence for personal human playtest, with each artifact at most 5 GiB and only digest/metadata retained by the factory.
+    priority: must
+    milestone: playable-vertical-slice
+    source:
+      specification: onboarding
+      rule: checkpoint
+    acceptance:
+      - check_id: check.slice.checkpoint
+        type: integration_test
+        suite: checkpoint
+    lifecycle: milestone
+  - id: req.slice.game-context.new-production-foundation
+    statement: This specification targets a new Unity production-game foundation; browser-spike architecture is not carried forward.
+    priority: must
+    lifecycle: milestone
+    milestone: playable-vertical-slice
+    source:
+      specification: game-context
+      rule: new-production-foundation
+    acceptance:
+      - check_id: check.slice.game-context.new-production-foundation
+        type: schema
+        suite: specification
+  - id: req.slice.game-context.audience
+    statement: The primary audience is factory and management players with no semiconductor expertise; authentic terms always receive plain-language explanations.
+    priority: must
+    lifecycle: milestone
+    milestone: playable-vertical-slice
+    source:
+      specification: game-context
+      rule: audience
+    acceptance:
+      - check_id: check.slice.game-context.audience
+        type: schema
+        suite: specification
+  - id: req.slice.game-context.campus-scope
+    statement: Architecture represents one expandable campus; Milestone 2 implements purchased-component final assembly and previews future internal thermal production.
+    priority: must
+    lifecycle: milestone
+    milestone: playable-vertical-slice
+    source:
+      specification: game-context
+      rule: campus-scope
+    acceptance:
+      - check_id: check.slice.game-context.campus-scope
+        type: schema
+        suite: specification
+  - id: req.slice.game-context.excluded-scope
+    statement: Internal production, audio, multiplayer, cloud, gamepad, mixed belts, crossings, floor storage, lead times, resale, bankruptcy, deadlines, and broader campaign content are excluded from both milestones.
+    priority: must
+    lifecycle: milestone
+    milestone: playable-vertical-slice
+    source:
+      specification: game-context
+      rule: excluded-scope
+    acceptance:
+      - check_id: check.slice.game-context.excluded-scope
+        type: schema
+        suite: specification
+  - id: req.slice.game-context.no-automatic-loss
+    statement: Cash may become negative without bankruptcy or deadline failure; restart is explicit and contract fulfillment still explains profit or loss.
+    priority: must
+    lifecycle: milestone
+    milestone: playable-vertical-slice
+    source:
+      specification: game-context
+      rule: no-automatic-loss
+    acceptance:
+      - check_id: check.slice.game-context.no-automatic-loss
+        type: schema
+        suite: specification
+  - id: req.slice.game-context.english-localized
+    statement: The first build is English-only, but every player-facing string is addressed through a localization key rather than embedded rule text.
+    priority: must
+    lifecycle: milestone
+    milestone: playable-vertical-slice
+    source:
+      specification: game-context
+      rule: english-localized
+    acceptance:
+      - check_id: check.slice.game-context.english-localized
+        type: schema
+        suite: specification
+  - id: req.slice.contracts-procurement.assignment
+    statement: A contract assigns an eligible published revision and delivery priority to its Shipping route; assignment may change after production starts without changing delivered progress.
+    priority: must
+    lifecycle: milestone
+    milestone: playable-vertical-slice
+    source:
+      specification: contracts-procurement
+      rule: assignment
+    acceptance:
+      - check_id: check.slice.contracts-procurement.assignment
+        type: automated_test
+        suite: domain
+  - id: req.slice.contracts-procurement.minimum-quality
+    statement: Published designs may set a minimum tier for each BOM item; procurement may select any compatible offer at or above it, and onboarding accepts Value or higher.
+    priority: must
+    lifecycle: milestone
+    milestone: playable-vertical-slice
+    source:
+      specification: contracts-procurement
+      rule: minimum-quality
+    acceptance:
+      - check_id: check.slice.contracts-procurement.minimum-quality
+        type: automated_test
+        suite: domain
+  - id: req.slice.contracts-procurement.explicit-order
+    statement: Procurement orders explicit integer quantities, charges immediately, has no lead time, and allows additional orders while simulation runs.
+    priority: must
+    lifecycle: milestone
+    milestone: playable-vertical-slice
+    source:
+      specification: contracts-procurement
+      rule: explicit-order
+    acceptance:
+      - check_id: check.slice.contracts-procurement.explicit-order
+        type: automated_test
+        suite: domain
+  - id: req.slice.contracts-procurement.recommendation
+    statement: For each BOM item recommendation equals max of zero and ceil of expected attempts for remaining accepted quantity times 1.05 times item quantity minus compatible owned off-floor, buffered, WIP-reserved, and finished inventory.
+    priority: must
+    lifecycle: milestone
+    milestone: playable-vertical-slice
+    source:
+      specification: contracts-procurement
+      rule: recommendation
+    acceptance:
+      - check_id: check.slice.contracts-procurement.recommendation
+        type: automated_test
+        suite: domain
+  - id: req.slice.contracts-procurement.lot-metadata
+    statement: Purchased inventory remains off floor until fed by an assigned finite-rate receiving bay and preserves specification, model, supplier, quality tier, lot, unit cost, and source metadata.
+    priority: must
+    lifecycle: milestone
+    milestone: playable-vertical-slice
+    source:
+      specification: contracts-procurement
+      rule: lot-metadata
+    acceptance:
+      - check_id: check.slice.contracts-procurement.lot-metadata
+        type: automated_test
+        suite: domain
+  - id: req.slice.contracts-procurement.unused-inventory
+    statement: Unused compatible inputs remain in off-floor inventory indefinitely and cannot be resold in Milestone 2.
+    priority: must
+    lifecycle: milestone
+    milestone: playable-vertical-slice
+    source:
+      specification: contracts-procurement
+      rule: unused-inventory
+    acceptance:
+      - check_id: check.slice.contracts-procurement.unused-inventory
+        type: automated_test
+        suite: domain
+  - id: req.slice.contracts-procurement.loss-explanation
+    statement: Fulfillment occurs even with negative cash and the report separates revenue, purchases, operating cost, reject and scrap loss, reusable capital, and resulting contribution.
+    priority: must
+    lifecycle: milestone
+    milestone: playable-vertical-slice
+    source:
+      specification: contracts-procurement
+      rule: loss-explanation
+    acceptance:
+      - check_id: check.slice.contracts-procurement.loss-explanation
+        type: automated_test
+        suite: domain
+  - id: req.slice.interaction-accessibility.header
+    statement: Persistent top header shows cash, selected contract progress, global alerts, pause and speed, and a compact top-right management menu.
+    priority: must
+    lifecycle: milestone
+    milestone: playable-vertical-slice
+    source:
+      specification: interaction-accessibility
+      rule: header
+    acceptance:
+      - check_id: check.slice.interaction-accessibility.header
+        type: integration_test
+        suite: accessibility
+  - id: req.slice.interaction-accessibility.overlays
+    statement: Management screens open as large centered overlays leaving a small campus margin; Contracts is list/detail, Designer is catalog/board/inspector, and Procurement retains originating contract and design context.
+    priority: must
+    lifecycle: milestone
+    milestone: playable-vertical-slice
+    source:
+      specification: interaction-accessibility
+      rule: overlays
+    acceptance:
+      - check_id: check.slice.interaction-accessibility.overlays
+        type: integration_test
+        suite: accessibility
+  - id: req.slice.interaction-accessibility.contextual-inspector
+    statement: Selecting a machine, belt, dock, or item opens a right-side inspector over the live factory with actions, status, route, recipe, inventory, and causality appropriate to the selection.
+    priority: must
+    lifecycle: milestone
+    milestone: playable-vertical-slice
+    source:
+      specification: interaction-accessibility
+      rule: contextual-inspector
+    acceptance:
+      - check_id: check.slice.interaction-accessibility.contextual-inspector
+        type: integration_test
+        suite: accessibility
+  - id: req.slice.interaction-accessibility.construction-dock
+    statement: Bottom dock is construction only, with categories, search, pages of at most ten labeled icon slots, keys 1 through 0 to select, and Tab to cycle; hover and selection show price and details.
+    priority: must
+    lifecycle: milestone
+    milestone: playable-vertical-slice
+    source:
+      specification: interaction-accessibility
+      rule: construction-dock
+    acceptance:
+      - check_id: check.slice.interaction-accessibility.construction-dock
+        type: integration_test
+        suite: accessibility
+  - id: req.slice.interaction-accessibility.management-shortcuts
+    statement: Every management overlay has a remappable single-key shortcut and every meaningful management action is keyboard reachable.
+    priority: must
+    lifecycle: milestone
+    milestone: playable-vertical-slice
+    source:
+      specification: interaction-accessibility
+      rule: management-shortcuts
+    acceptance:
+      - check_id: check.slice.interaction-accessibility.management-shortcuts
+        type: integration_test
+        suite: accessibility
+  - id: req.slice.interaction-accessibility.world-pointer
+    statement: Exact world position may require mouse input initially, but all nonspatial choices and cancellation are keyboard reachable.
+    priority: must
+    lifecycle: milestone
+    milestone: playable-vertical-slice
+    source:
+      specification: interaction-accessibility
+      rule: world-pointer
+    acceptance:
+      - check_id: check.slice.interaction-accessibility.world-pointer
+        type: integration_test
+        suite: accessibility
+  - id: req.slice.interaction-accessibility.display-modes
+    statement: Windowed, borderless, and fullscreen modes support 1280 by 720 through 4K with UI scaling, safe text wrapping, and no clipped required controls.
+    priority: must
+    lifecycle: milestone
+    milestone: playable-vertical-slice
+    source:
+      specification: interaction-accessibility
+      rule: display-modes
+    acceptance:
+      - check_id: check.slice.interaction-accessibility.display-modes
+        type: integration_test
+        suite: accessibility
+  - id: req.slice.interaction-accessibility.guidance
+    statement: Guidance is active by default with optional hints; tutorial may be skipped or restarted without resetting campaign or production progress.
+    priority: must
+    lifecycle: milestone
+    milestone: playable-vertical-slice
+    source:
+      specification: interaction-accessibility
+      rule: guidance
+    acceptance:
+      - check_id: check.slice.interaction-accessibility.guidance
+        type: integration_test
+        suite: accessibility
+  - id: req.slice.onboarding.starts-paused
+    statement: New Game begins paused on the campus with guidance active, one available contract, no purchased materials, fixed docks visible, and sufficient formula-derived starting cash.
+    priority: must
+    lifecycle: milestone
+    milestone: playable-vertical-slice
+    source:
+      specification: onboarding
+      rule: starts-paused
+    acceptance:
+      - check_id: check.slice.onboarding.starts-paused
+        type: integration_test
+        suite: rendered-integration
+  - id: req.slice.onboarding.journey
+    statement: Guidance teaches contract acceptance, linked design draft, qualification and publication, procurement, machine and belt construction, recipe visibility, reject routing, production, bottleneck diagnosis, parallel scanner expansion, and delivery of 1,000 accepted chips.
+    priority: must
+    lifecycle: milestone
+    milestone: playable-vertical-slice
+    source:
+      specification: onboarding
+      rule: journey
+    acceptance:
+      - check_id: check.slice.onboarding.journey
+        type: integration_test
+        suite: rendered-integration
+  - id: req.slice.onboarding.alternatives
+    statement: Guidance permits valid layout and supplier alternatives and does not hard-gate adding the required parallel scanner through splitter and merger.
+    priority: must
+    lifecycle: milestone
+    milestone: playable-vertical-slice
+    source:
+      specification: onboarding
+      rule: alternatives
+    acceptance:
+      - check_id: check.slice.onboarding.alternatives
+        type: integration_test
+        suite: rendered-integration
+  - id: req.slice.onboarding.persistent-simulation
+    statement: Production continues at current speed while Contracts, Designer, Procurement, reports, and menu overlays are open; global controls and alerts remain available.
+    priority: must
+    lifecycle: milestone
+    milestone: playable-vertical-slice
+    source:
+      specification: onboarding
+      rule: persistent-simulation
+    acceptance:
+      - check_id: check.slice.onboarding.persistent-simulation
+        type: integration_test
+        suite: rendered-integration
+  - id: req.slice.onboarding.finish
+    statement: At the 1,000th eligible Shipping acceptance the contract becomes fulfilled, Shipping blocks extras, guidance explains contribution and loss if any, and future internal thermal production is previewed without unlocking it.
+    priority: must
+    lifecycle: milestone
+    milestone: playable-vertical-slice
+    source:
+      specification: onboarding
+      rule: finish
+    acceptance:
+      - check_id: check.slice.onboarding.finish
+        type: integration_test
+        suite: rendered-integration
+  - id: req.transition.onboarding.human-final
+    statement: After the single candidate checkpoint exists, the named human personally playtests it and may emit an approval event authorizing only that exact checkpoint digest. The factory may then emit only a promotion request for the bound verified develop commit; a human verifies the head, merges that exact revision to main, and creates one immutable tag. Stale digest, commit, evidence, ancestry, approval, or unexpected develop movement is rejected and invalidates authority pending revalidation.
+    priority: must
+    lifecycle: post_checkpoint_transition
+    source:
+      specification: onboarding
+      rule: human-final
+    acceptance:
+      - check_id: check.transition.onboarding.human-final
+        type: human_review
+        suite: checkpoint
+  - id: req.slice.visual-identity.family-language
+    statement: Compute, memory, I/O, power, thermal, substrate, interconnect, and packaging each use one stable family glyph, silhouette motif, accessible color token, and always-visible text label.
+    priority: must
+    lifecycle: milestone
+    milestone: playable-vertical-slice
+    source:
+      specification: visual-identity
+      rule: family-language
+    acceptance:
+      - check_id: check.slice.visual-identity.family-language
+        type: integration_test
+        suite: rendered-integration
+  - id: req.slice.visual-identity.state-language
+    statement: Starved, working, blocked, rejected, invalid, selected, and alert states combine shape, motion or reduced-motion substitute, icon, and localized text; color is never the sole cue.
+    priority: must
+    lifecycle: milestone
+    milestone: playable-vertical-slice
+    source:
+      specification: visual-identity
+      rule: state-language
+    acceptance:
+      - check_id: check.slice.visual-identity.state-language
+        type: integration_test
+        suite: rendered-integration
+  - id: req.slice.visual-identity.discrete-items
+    statement: Belts render discrete family-readable items and preserve enough visible spacing and direction to diagnose movement and blockage.
+    priority: must
+    lifecycle: milestone
+    milestone: playable-vertical-slice
+    source:
+      specification: visual-identity
+      rule: discrete-items
+    acceptance:
+      - check_id: check.slice.visual-identity.discrete-items
+        type: integration_test
+        suite: rendered-integration
+  - id: req.slice.visual-identity.no-concept-gate
+    statement: No separate visual concept approval is required before Milestone 2; the factory may choose reversible provisional tokens, icons, meshes, and materials that satisfy these contracts.
+    priority: must
+    lifecycle: milestone
+    milestone: playable-vertical-slice
+    source:
+      specification: visual-identity
+      rule: no-concept-gate
+    acceptance:
+      - check_id: check.slice.visual-identity.no-concept-gate
+        type: integration_test
+        suite: rendered-integration
+  - id: req.slice.visual-identity.asset-provenance
+    statement: Every nontrivial asset records creator or source, license, source URI or internal path, transformations, tool versions, and generated attribution when required.
+    priority: must
+    lifecycle: milestone
+    milestone: playable-vertical-slice
+    source:
+      specification: visual-identity
+      rule: asset-provenance
+    acceptance:
+      - check_id: check.slice.visual-identity.asset-provenance
+        type: asset_validation
+        suite: asset-provenance
+  - id: req.slice.visual-identity.captures
+    statement: Checkpoint evidence includes representative screenshots and video of onboarding, design, procurement, belt construction, bottleneck, reject handling, fulfillment, and agent observer mode.
+    priority: must
+    lifecycle: milestone
+    milestone: playable-vertical-slice
+    source:
+      specification: visual-identity
+      rule: captures
+    acceptance:
+      - check_id: check.slice.visual-identity.captures
+        type: integration_test
+        suite: rendered-integration

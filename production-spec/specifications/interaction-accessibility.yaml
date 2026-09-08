@@ -1,0 +1,62 @@
+schema_version: 1
+id: interaction-accessibility
+version: 1
+status: ready
+title: Campus-first interaction, layout, controls, and accessibility
+summary: Defines the approved screen hierarchy, construction controls, management overlays, resolution behavior, keyboard reachability, and guidance.
+milestones: [playable-vertical-slice]
+sources:
+  - {path: docs/first-user-interaction.md, role: context}
+  - {path: docs/code-factory/player-protocol.md, role: authority}
+parameters:
+  - {id: minimum-width, value: 1280, unit: pixels}
+  - {id: minimum-height, value: 720, unit: pixels}
+  - {id: maximum-reference-width, value: 3840, unit: pixels}
+  - {id: maximum-reference-height, value: 2160, unit: pixels}
+  - {id: dock-page-slots, value: 10, unit: slots}
+rules:
+  - id: campus-home
+    statement: The angled 3D campus is the spatial home; simulation remains visible and continues at selected speed behind management overlays.
+    level: normative
+    acceptance_notes: Navigation never replaces the canonical live simulation context.
+  - id: header
+    statement: Persistent top header shows cash, selected contract progress, global alerts, pause and speed, and a compact top-right management menu.
+    level: normative
+    acceptance_notes: Header remains available in campus and all overlays at supported resolutions.
+  - id: overlays
+    statement: Management screens open as large centered overlays leaving a small campus margin; Contracts is list/detail, Designer is catalog/board/inspector, and Procurement retains originating contract and design context.
+    level: normative
+    acceptance_notes: Black-box snapshots verify layout hierarchy and return context.
+  - id: contextual-inspector
+    statement: Selecting a machine, belt, dock, or item opens a right-side inspector over the live factory with actions, status, route, recipe, inventory, and causality appropriate to the selection.
+    level: normative
+    acceptance_notes: Each selectable type exposes keyboard focus, visible label, and current action availability.
+  - id: construction-dock
+    statement: Bottom dock is construction only, with categories, search, pages of at most ten labeled icon slots, keys 1 through 0 to select, and Tab to cycle; hover and selection show price and details.
+    level: normative
+    acceptance_notes: Keyboard and pointer tests reach every available construction item.
+  - id: management-shortcuts
+    statement: Every management overlay has a remappable single-key shortcut and every meaningful management action is keyboard reachable.
+    level: normative
+    acceptance_notes: A keyboard-only semantic accessibility traversal completes contract, design, procurement, and recipe configuration.
+  - id: world-pointer
+    statement: Exact world position may require mouse input initially, but all nonspatial choices and cancellation are keyboard reachable.
+    level: normative
+    acceptance_notes: Accessibility statement identifies this bounded pointer requirement without hiding other keyboard gaps.
+  - id: display-modes
+    statement: Windowed, borderless, and fullscreen modes support 1280 by 720 through 4K with UI scaling, safe text wrapping, and no clipped required controls.
+    level: normative
+    acceptance_notes: Automated layout captures cover minimum, 1080p, ultrawide, and 4K scales.
+  - id: accessibility
+    statement: Provide scalable UI and text, color-independent icon and text cues, reduced motion, remappable keyboard controls, visible focus, and persistent plain-language disabled reasons.
+    level: normative
+    acceptance_notes: Accessibility suite verifies settings apply immediately and persist.
+  - id: guidance
+    statement: Guidance is active by default with optional hints; tutorial may be skipped or restarted without resetting campaign or production progress.
+    level: normative
+    acceptance_notes: Fresh, skipped, and restarted guidance scenarios preserve identical game rules.
+decisions:
+  - id: campus-first-layout
+    choice: Adopt persistent campus, header, management overlays, bottom construction dock, and contextual right inspector.
+    rationale: This provisional layout keeps simulation causality visible while separating management tasks.
+    supersedes: [browser three-stage navigation]

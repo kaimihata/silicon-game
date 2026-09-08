@@ -1,0 +1,54 @@
+schema_version: 1
+id: bounded-black-box
+version: 1
+status: ready
+title: Ordinary-input production diagnosis
+milestone: playable-vertical-slice
+environment: windows-reference
+requirements:
+  - req.slice.black-box
+  - req.slice.visuals
+seeds:
+  - 7103
+initial_state:
+  fixture_id: bounded-black-box-initial-state
+  label: Rendered incomplete factory with one starved machine, one blocked output, one reject, and enough cash to repair the route.
+  inputs: [starter-catalog, default-qualifying-design, default-manufacturing-plan, complete-reference-factory]
+execution_contract:
+  setup_contract: fixture.setup.bounded-black-box
+  runner_contract: runner.black-box-playtest
+  command: "factory.verify.black-box-playtest --scenario bounded-black-box --fixture bounded-black-box-initial-state --seed {seed} --evidence-dir {evidence_dir}"
+  semantic_api: ordinary_input_only
+  verdict: pass only when setup state assertions pass, every declared scenario assertion evaluates true, budgets are not exceeded, every required evidence artifact validates and its digest is recorded, replay hash mismatch count is zero when replay evidence is required, and the runner exits zero; otherwise fail
+player_knowledge:
+  - Rendered frames
+  - Accessibility semantics
+  - Ordinary mouse and keyboard controls
+goals:
+  - assertion_id: assert.bounded-black-box.goal.01
+    metric: unresolved-visible-faults
+    operator: equal
+    value: 0
+invariants:
+  - assertion_id: assert.bounded-black-box.invariant.01
+    label: No semantic API
+  - assertion_id: assert.bounded-black-box.invariant.02
+    label: No oracle state
+  - assertion_id: assert.bounded-black-box.invariant.03
+    label: Every submitted action is ordinary input
+budgets:
+  simulation_minutes: 15
+  player_commands: 200
+required_behaviors:
+  - assertion_id: assert.bounded-black-box.required_behavior.01
+    label: Identify starved and blocked states
+  - assertion_id: assert.bounded-black-box.required_behavior.02
+    label: Trace one item family and destination
+  - assertion_id: assert.bounded-black-box.required_behavior.03
+    label: Repair the route
+  - assertion_id: assert.bounded-black-box.required_behavior.04
+    label: Confirm production resumes
+evidence:
+  - black-box-recording
+  - input-trace
+  - screenshots

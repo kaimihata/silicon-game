@@ -1,0 +1,883 @@
+schema_version: 1
+id: chip-city-verification-plan
+version: 1
+status: ready
+suites:
+  - id: specification
+    runner_contracts:
+      - runner.specification
+  - id: build
+    runner_contracts:
+      - runner.build
+  - id: domain
+    runner_contracts:
+      - runner.domain
+  - id: protocol
+    runner_contracts:
+      - runner.protocol
+  - id: persistence
+    runner_contracts:
+      - runner.persistence
+  - id: rendered-integration
+    runner_contracts:
+      - runner.rendered-integration
+  - id: semantic-playtest
+    runner_contracts:
+      - runner.semantic-playtest
+  - id: black-box-playtest
+    runner_contracts:
+      - runner.black-box-playtest
+  - id: accessibility
+    runner_contracts:
+      - runner.accessibility
+  - id: asset-provenance
+    runner_contracts:
+      - runner.asset-provenance
+  - id: balance
+    runner_contracts:
+      - runner.balance
+  - id: performance
+    runner_contracts:
+      - runner.performance
+  - id: checkpoint
+    runner_contracts:
+      - runner.checkpoint
+runner_contracts:
+  - id: runner.specification
+    command_id: factory.verify.specification
+    unavailable: fail_closed
+  - id: runner.build
+    command_id: factory.verify.build
+    unavailable: fail_closed
+  - id: runner.domain
+    command_id: factory.verify.domain
+    unavailable: fail_closed
+  - id: runner.protocol
+    command_id: factory.verify.protocol
+    unavailable: fail_closed
+  - id: runner.persistence
+    command_id: factory.verify.persistence
+    unavailable: fail_closed
+  - id: runner.rendered-integration
+    command_id: factory.verify.rendered-integration
+    unavailable: fail_closed
+  - id: runner.semantic-playtest
+    command_id: factory.verify.semantic-playtest
+    unavailable: fail_closed
+  - id: runner.black-box-playtest
+    command_id: factory.verify.black-box-playtest
+    unavailable: fail_closed
+  - id: runner.accessibility
+    command_id: factory.verify.accessibility
+    unavailable: fail_closed
+  - id: runner.asset-provenance
+    command_id: factory.verify.asset-provenance
+    unavailable: fail_closed
+  - id: runner.balance
+    command_id: factory.verify.balance
+    unavailable: fail_closed
+  - id: runner.performance
+    command_id: factory.verify.performance
+    unavailable: fail_closed
+  - id: runner.checkpoint
+    command_id: factory.verify.checkpoint
+    unavailable: fail_closed
+  - id: fixture.setup.bounded-black-box
+    command_id: factory.fixture.bounded-black-box
+    unavailable: fail_closed
+  - id: fixture.setup.designer-accessibility
+    command_id: factory.fixture.designer-accessibility
+    unavailable: fail_closed
+  - id: fixture.setup.layout-accessibility
+    command_id: factory.fixture.layout-accessibility
+    unavailable: fail_closed
+  - id: fixture.setup.onboarding-complete
+    command_id: factory.fixture.onboarding-complete
+    unavailable: fail_closed
+  - id: fixture.setup.sandbox-accepted-chip
+    command_id: factory.fixture.sandbox-accepted-chip
+    unavailable: fail_closed
+  - id: fixture.setup.save-recovery
+    command_id: factory.fixture.save-recovery
+    unavailable: fail_closed
+  - id: fixture.setup.scanner-bottleneck
+    command_id: factory.fixture.scanner-bottleneck
+    unavailable: fail_closed
+fixtures:
+  - id: bounded-black-box-initial-state
+    setup_contract: fixture.setup.bounded-black-box
+    state_assertions:
+      - {id: fixture.state.bounded-black-box, source: fixture.state-contract-id, operator: equal, value: bounded-black-box.initial.v1}
+  - id: designer-accessibility-initial-state
+    setup_contract: fixture.setup.designer-accessibility
+    state_assertions:
+      - {id: fixture.state.designer-accessibility, source: fixture.state-contract-id, operator: equal, value: designer-accessibility.initial.v1}
+  - id: layout-accessibility-initial-state
+    setup_contract: fixture.setup.layout-accessibility
+    state_assertions:
+      - {id: fixture.state.layout-accessibility, source: fixture.state-contract-id, operator: equal, value: layout-accessibility.initial.v1}
+  - id: onboarding-complete-initial-state
+    setup_contract: fixture.setup.onboarding-complete
+    state_assertions:
+      - {id: fixture.state.onboarding-complete, source: fixture.state-contract-id, operator: equal, value: onboarding-complete.initial.v1}
+  - id: sandbox-accepted-chip-initial-state
+    setup_contract: fixture.setup.sandbox-accepted-chip
+    state_assertions:
+      - {id: fixture.state.sandbox-accepted-chip, source: fixture.state-contract-id, operator: equal, value: sandbox-accepted-chip.initial.v1}
+  - id: save-recovery-initial-state
+    setup_contract: fixture.setup.save-recovery
+    state_assertions:
+      - {id: fixture.state.save-recovery, source: fixture.state-contract-id, operator: equal, value: save-recovery.initial.v1}
+  - id: scanner-bottleneck-initial-state
+    setup_contract: fixture.setup.scanner-bottleneck
+    state_assertions:
+      - {id: fixture.state.scanner-bottleneck, source: fixture.state-contract-id, operator: equal, value: scanner-bottleneck.initial.v1}
+scenario_assertions:
+  - id: assert.bounded-black-box.goal.01
+    scenario: bounded-black-box
+    kind: goal
+    metric: unresolved-visible-faults
+    operator: equal
+    value: 0
+    evaluator: independent-verifier
+    required_evidence:
+      - black-box-recording
+      - input-trace
+      - screenshots
+  - id: assert.bounded-black-box.invariant.01
+    scenario: bounded-black-box
+    kind: invariant
+    runner_contract: runner.black-box-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - black-box-recording
+      - input-trace
+      - screenshots
+  - id: assert.bounded-black-box.invariant.02
+    scenario: bounded-black-box
+    kind: invariant
+    runner_contract: runner.black-box-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - black-box-recording
+      - input-trace
+      - screenshots
+  - id: assert.bounded-black-box.invariant.03
+    scenario: bounded-black-box
+    kind: invariant
+    runner_contract: runner.black-box-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - black-box-recording
+      - input-trace
+      - screenshots
+  - id: assert.bounded-black-box.required_behavior.01
+    scenario: bounded-black-box
+    kind: required_behavior
+    runner_contract: runner.black-box-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - black-box-recording
+      - input-trace
+      - screenshots
+  - id: assert.bounded-black-box.required_behavior.02
+    scenario: bounded-black-box
+    kind: required_behavior
+    runner_contract: runner.black-box-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - black-box-recording
+      - input-trace
+      - screenshots
+  - id: assert.bounded-black-box.required_behavior.03
+    scenario: bounded-black-box
+    kind: required_behavior
+    runner_contract: runner.black-box-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - black-box-recording
+      - input-trace
+      - screenshots
+  - id: assert.bounded-black-box.required_behavior.04
+    scenario: bounded-black-box
+    kind: required_behavior
+    runner_contract: runner.black-box-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - black-box-recording
+      - input-trace
+      - screenshots
+  - id: assert.designer-accessibility.goal.01
+    scenario: designer-accessibility
+    kind: goal
+    metric: published-eligible-designs
+    operator: equal
+    value: 1
+    evaluator: independent-verifier
+    required_evidence:
+      - black-box-recording
+      - accessibility-snapshot
+      - screenshots
+  - id: assert.designer-accessibility.goal.02
+    scenario: designer-accessibility
+    kind: goal
+    metric: unexplained-validation-errors
+    operator: equal
+    value: 0
+    evaluator: independent-verifier
+    required_evidence:
+      - black-box-recording
+      - accessibility-snapshot
+      - screenshots
+  - id: assert.designer-accessibility.invariant.01
+    scenario: designer-accessibility
+    kind: invariant
+    runner_contract: runner.black-box-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - black-box-recording
+      - accessibility-snapshot
+      - screenshots
+  - id: assert.designer-accessibility.invariant.02
+    scenario: designer-accessibility
+    kind: invariant
+    runner_contract: runner.black-box-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - black-box-recording
+      - accessibility-snapshot
+      - screenshots
+  - id: assert.designer-accessibility.invariant.03
+    scenario: designer-accessibility
+    kind: invariant
+    runner_contract: runner.black-box-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - black-box-recording
+      - accessibility-snapshot
+      - screenshots
+  - id: assert.designer-accessibility.required_behavior.01
+    scenario: designer-accessibility
+    kind: required_behavior
+    runner_contract: runner.black-box-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - black-box-recording
+      - accessibility-snapshot
+      - screenshots
+  - id: assert.designer-accessibility.required_behavior.02
+    scenario: designer-accessibility
+    kind: required_behavior
+    runner_contract: runner.black-box-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - black-box-recording
+      - accessibility-snapshot
+      - screenshots
+  - id: assert.designer-accessibility.required_behavior.03
+    scenario: designer-accessibility
+    kind: required_behavior
+    runner_contract: runner.black-box-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - black-box-recording
+      - accessibility-snapshot
+      - screenshots
+  - id: assert.designer-accessibility.required_behavior.04
+    scenario: designer-accessibility
+    kind: required_behavior
+    runner_contract: runner.black-box-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - black-box-recording
+      - accessibility-snapshot
+      - screenshots
+  - id: assert.designer-accessibility.required_behavior.05
+    scenario: designer-accessibility
+    kind: required_behavior
+    runner_contract: runner.black-box-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - black-box-recording
+      - accessibility-snapshot
+      - screenshots
+  - id: assert.layout-accessibility.goal.01
+    scenario: layout-accessibility
+    kind: goal
+    metric: unreachable-management-actions
+    operator: equal
+    value: 0
+    evaluator: independent-verifier
+    required_evidence:
+      - black-box-recording
+      - accessibility-snapshot
+      - screenshots
+      - performance-report
+  - id: assert.layout-accessibility.goal.02
+    scenario: layout-accessibility
+    kind: goal
+    metric: clipped-required-controls
+    operator: equal
+    value: 0
+    evaluator: independent-verifier
+    required_evidence:
+      - black-box-recording
+      - accessibility-snapshot
+      - screenshots
+      - performance-report
+  - id: assert.layout-accessibility.invariant.01
+    scenario: layout-accessibility
+    kind: invariant
+    runner_contract: runner.black-box-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - black-box-recording
+      - accessibility-snapshot
+      - screenshots
+      - performance-report
+  - id: assert.layout-accessibility.invariant.02
+    scenario: layout-accessibility
+    kind: invariant
+    runner_contract: runner.black-box-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - black-box-recording
+      - accessibility-snapshot
+      - screenshots
+      - performance-report
+  - id: assert.layout-accessibility.invariant.03
+    scenario: layout-accessibility
+    kind: invariant
+    runner_contract: runner.black-box-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - black-box-recording
+      - accessibility-snapshot
+      - screenshots
+      - performance-report
+  - id: assert.layout-accessibility.required_behavior.01
+    scenario: layout-accessibility
+    kind: required_behavior
+    runner_contract: runner.black-box-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - black-box-recording
+      - accessibility-snapshot
+      - screenshots
+      - performance-report
+  - id: assert.layout-accessibility.required_behavior.02
+    scenario: layout-accessibility
+    kind: required_behavior
+    runner_contract: runner.black-box-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - black-box-recording
+      - accessibility-snapshot
+      - screenshots
+      - performance-report
+  - id: assert.layout-accessibility.required_behavior.03
+    scenario: layout-accessibility
+    kind: required_behavior
+    runner_contract: runner.black-box-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - black-box-recording
+      - accessibility-snapshot
+      - screenshots
+      - performance-report
+  - id: assert.layout-accessibility.required_behavior.04
+    scenario: layout-accessibility
+    kind: required_behavior
+    runner_contract: runner.black-box-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - black-box-recording
+      - accessibility-snapshot
+      - screenshots
+      - performance-report
+  - id: assert.layout-accessibility.required_behavior.05
+    scenario: layout-accessibility
+    kind: required_behavior
+    runner_contract: runner.black-box-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - black-box-recording
+      - accessibility-snapshot
+      - screenshots
+      - performance-report
+  - id: assert.onboarding-complete.goal.01
+    scenario: onboarding-complete
+    kind: goal
+    metric: accepted-deliveries
+    operator: equal
+    value: 1000
+    evaluator: independent-verifier
+    required_evidence:
+      - replay
+      - decision-trace
+      - semantic-report
+      - screenshots
+      - video
+      - accounting-report
+      - requirement-coverage
+  - id: assert.onboarding-complete.goal.02
+    scenario: onboarding-complete
+    kind: goal
+    metric: fulfilled-contracts
+    operator: equal
+    value: 1
+    evaluator: independent-verifier
+    required_evidence:
+      - replay
+      - decision-trace
+      - semantic-report
+      - screenshots
+      - video
+      - accounting-report
+      - requirement-coverage
+  - id: assert.onboarding-complete.goal.03
+    scenario: onboarding-complete
+    kind: goal
+    metric: replay-hash-mismatches
+    operator: equal
+    value: 0
+    evaluator: independent-verifier
+    required_evidence:
+      - replay
+      - decision-trace
+      - semantic-report
+      - screenshots
+      - video
+      - accounting-report
+      - requirement-coverage
+  - id: assert.onboarding-complete.invariant.01
+    scenario: onboarding-complete
+    kind: invariant
+    runner_contract: runner.semantic-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - replay
+      - decision-trace
+      - semantic-report
+      - screenshots
+      - video
+      - accounting-report
+      - requirement-coverage
+  - id: assert.onboarding-complete.invariant.02
+    scenario: onboarding-complete
+    kind: invariant
+    runner_contract: runner.semantic-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - replay
+      - decision-trace
+      - semantic-report
+      - screenshots
+      - video
+      - accounting-report
+      - requirement-coverage
+  - id: assert.onboarding-complete.invariant.03
+    scenario: onboarding-complete
+    kind: invariant
+    runner_contract: runner.semantic-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - replay
+      - decision-trace
+      - semantic-report
+      - screenshots
+      - video
+      - accounting-report
+      - requirement-coverage
+  - id: assert.onboarding-complete.invariant.04
+    scenario: onboarding-complete
+    kind: invariant
+    runner_contract: runner.semantic-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - replay
+      - decision-trace
+      - semantic-report
+      - screenshots
+      - video
+      - accounting-report
+      - requirement-coverage
+  - id: assert.onboarding-complete.invariant.05
+    scenario: onboarding-complete
+    kind: invariant
+    runner_contract: runner.semantic-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - replay
+      - decision-trace
+      - semantic-report
+      - screenshots
+      - video
+      - accounting-report
+      - requirement-coverage
+  - id: assert.onboarding-complete.required_behavior.01
+    scenario: onboarding-complete
+    kind: required_behavior
+    runner_contract: runner.semantic-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - replay
+      - decision-trace
+      - semantic-report
+      - screenshots
+      - video
+      - accounting-report
+      - requirement-coverage
+  - id: assert.onboarding-complete.required_behavior.02
+    scenario: onboarding-complete
+    kind: required_behavior
+    runner_contract: runner.semantic-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - replay
+      - decision-trace
+      - semantic-report
+      - screenshots
+      - video
+      - accounting-report
+      - requirement-coverage
+  - id: assert.onboarding-complete.required_behavior.03
+    scenario: onboarding-complete
+    kind: required_behavior
+    runner_contract: runner.semantic-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - replay
+      - decision-trace
+      - semantic-report
+      - screenshots
+      - video
+      - accounting-report
+      - requirement-coverage
+  - id: assert.onboarding-complete.required_behavior.04
+    scenario: onboarding-complete
+    kind: required_behavior
+    runner_contract: runner.semantic-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - replay
+      - decision-trace
+      - semantic-report
+      - screenshots
+      - video
+      - accounting-report
+      - requirement-coverage
+  - id: assert.onboarding-complete.required_behavior.05
+    scenario: onboarding-complete
+    kind: required_behavior
+    runner_contract: runner.semantic-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - replay
+      - decision-trace
+      - semantic-report
+      - screenshots
+      - video
+      - accounting-report
+      - requirement-coverage
+  - id: assert.onboarding-complete.required_behavior.06
+    scenario: onboarding-complete
+    kind: required_behavior
+    runner_contract: runner.semantic-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - replay
+      - decision-trace
+      - semantic-report
+      - screenshots
+      - video
+      - accounting-report
+      - requirement-coverage
+  - id: assert.onboarding-complete.required_behavior.07
+    scenario: onboarding-complete
+    kind: required_behavior
+    runner_contract: runner.semantic-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - replay
+      - decision-trace
+      - semantic-report
+      - screenshots
+      - video
+      - accounting-report
+      - requirement-coverage
+  - id: assert.sandbox-accepted-chip.goal.01
+    scenario: sandbox-accepted-chip
+    kind: goal
+    metric: accepted-deliveries
+    operator: greater_than_or_equal
+    value: 1
+    evaluator: independent-verifier
+    required_evidence:
+      - replay
+      - decision-trace
+      - domain-results
+      - content-provenance
+  - id: assert.sandbox-accepted-chip.goal.02
+    scenario: sandbox-accepted-chip
+    kind: goal
+    metric: replay-hash-mismatches
+    operator: equal
+    value: 0
+    evaluator: independent-verifier
+    required_evidence:
+      - replay
+      - decision-trace
+      - domain-results
+      - content-provenance
+  - id: assert.sandbox-accepted-chip.invariant.01
+    scenario: sandbox-accepted-chip
+    kind: invariant
+    runner_contract: runner.semantic-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - replay
+      - decision-trace
+      - domain-results
+      - content-provenance
+  - id: assert.sandbox-accepted-chip.invariant.02
+    scenario: sandbox-accepted-chip
+    kind: invariant
+    runner_contract: runner.semantic-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - replay
+      - decision-trace
+      - domain-results
+      - content-provenance
+  - id: assert.sandbox-accepted-chip.invariant.03
+    scenario: sandbox-accepted-chip
+    kind: invariant
+    runner_contract: runner.semantic-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - replay
+      - decision-trace
+      - domain-results
+      - content-provenance
+  - id: assert.sandbox-accepted-chip.invariant.04
+    scenario: sandbox-accepted-chip
+    kind: invariant
+    runner_contract: runner.semantic-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - replay
+      - decision-trace
+      - domain-results
+      - content-provenance
+  - id: assert.sandbox-accepted-chip.required_behavior.01
+    scenario: sandbox-accepted-chip
+    kind: required_behavior
+    runner_contract: runner.semantic-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - replay
+      - decision-trace
+      - domain-results
+      - content-provenance
+  - id: assert.sandbox-accepted-chip.required_behavior.02
+    scenario: sandbox-accepted-chip
+    kind: required_behavior
+    runner_contract: runner.semantic-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - replay
+      - decision-trace
+      - domain-results
+      - content-provenance
+  - id: assert.sandbox-accepted-chip.required_behavior.03
+    scenario: sandbox-accepted-chip
+    kind: required_behavior
+    runner_contract: runner.semantic-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - replay
+      - decision-trace
+      - domain-results
+      - content-provenance
+  - id: assert.sandbox-accepted-chip.required_behavior.04
+    scenario: sandbox-accepted-chip
+    kind: required_behavior
+    runner_contract: runner.semantic-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - replay
+      - decision-trace
+      - domain-results
+      - content-provenance
+  - id: assert.sandbox-accepted-chip.required_behavior.05
+    scenario: sandbox-accepted-chip
+    kind: required_behavior
+    runner_contract: runner.semantic-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - replay
+      - decision-trace
+      - domain-results
+      - content-provenance
+  - id: assert.save-recovery.goal.01
+    scenario: save-recovery
+    kind: goal
+    metric: recovered-human-saves
+    operator: equal
+    value: 1
+    evaluator: independent-verifier
+    required_evidence:
+      - persistence-results
+      - screenshots
+      - audit-log
+  - id: assert.save-recovery.goal.02
+    scenario: save-recovery
+    kind: goal
+    metric: human-save-agent-accesses
+    operator: equal
+    value: 0
+    evaluator: independent-verifier
+    required_evidence:
+      - persistence-results
+      - screenshots
+      - audit-log
+  - id: assert.save-recovery.invariant.01
+    scenario: save-recovery
+    kind: invariant
+    runner_contract: runner.semantic-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - persistence-results
+      - screenshots
+      - audit-log
+  - id: assert.save-recovery.invariant.02
+    scenario: save-recovery
+    kind: invariant
+    runner_contract: runner.semantic-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - persistence-results
+      - screenshots
+      - audit-log
+  - id: assert.save-recovery.invariant.03
+    scenario: save-recovery
+    kind: invariant
+    runner_contract: runner.semantic-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - persistence-results
+      - screenshots
+      - audit-log
+  - id: assert.save-recovery.required_behavior.01
+    scenario: save-recovery
+    kind: required_behavior
+    runner_contract: runner.semantic-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - persistence-results
+      - screenshots
+      - audit-log
+  - id: assert.save-recovery.required_behavior.02
+    scenario: save-recovery
+    kind: required_behavior
+    runner_contract: runner.semantic-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - persistence-results
+      - screenshots
+      - audit-log
+  - id: assert.save-recovery.required_behavior.03
+    scenario: save-recovery
+    kind: required_behavior
+    runner_contract: runner.semantic-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - persistence-results
+      - screenshots
+      - audit-log
+  - id: assert.save-recovery.required_behavior.04
+    scenario: save-recovery
+    kind: required_behavior
+    runner_contract: runner.semantic-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - persistence-results
+      - screenshots
+      - audit-log
+  - id: assert.scanner-bottleneck.goal.01
+    scenario: scanner-bottleneck
+    kind: goal
+    metric: scanner-count
+    operator: equal
+    value: 2
+    evaluator: independent-verifier
+    required_evidence:
+      - replay
+      - decision-trace
+      - domain-results
+  - id: assert.scanner-bottleneck.goal.02
+    scenario: scanner-bottleneck
+    kind: goal
+    metric: accepted-rate-improvement-percent
+    operator: greater_than
+    value: 0
+    evaluator: independent-verifier
+    required_evidence:
+      - replay
+      - decision-trace
+      - domain-results
+  - id: assert.scanner-bottleneck.invariant.01
+    scenario: scanner-bottleneck
+    kind: invariant
+    runner_contract: runner.semantic-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - replay
+      - decision-trace
+      - domain-results
+  - id: assert.scanner-bottleneck.invariant.02
+    scenario: scanner-bottleneck
+    kind: invariant
+    runner_contract: runner.semantic-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - replay
+      - decision-trace
+      - domain-results
+  - id: assert.scanner-bottleneck.invariant.03
+    scenario: scanner-bottleneck
+    kind: invariant
+    runner_contract: runner.semantic-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - replay
+      - decision-trace
+      - domain-results
+  - id: assert.scanner-bottleneck.required_behavior.01
+    scenario: scanner-bottleneck
+    kind: required_behavior
+    runner_contract: runner.semantic-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - replay
+      - decision-trace
+      - domain-results
+  - id: assert.scanner-bottleneck.required_behavior.02
+    scenario: scanner-bottleneck
+    kind: required_behavior
+    runner_contract: runner.semantic-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - replay
+      - decision-trace
+      - domain-results
+  - id: assert.scanner-bottleneck.required_behavior.03
+    scenario: scanner-bottleneck
+    kind: required_behavior
+    runner_contract: runner.semantic-playtest
+    evaluator: independent-verifier
+    required_evidence:
+      - replay
+      - decision-trace
+      - domain-results

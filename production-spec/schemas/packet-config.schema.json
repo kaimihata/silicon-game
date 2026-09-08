@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://chip-city.dev/production-spec/packet-config.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "status", "packet_id", "revision", "title", "target_repository", "base_ref", "owner", "approver", "requirement_catalogs", "policy", "outcome", "excluded", "principles"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "status": {"enum": ["draft", "ready"]},
+    "packet_id": {"$ref": "#/$defs/id"},
+    "revision": {"type": "integer", "minimum": 1},
+    "title": {"type": "string", "minLength": 1},
+    "target_repository": {"const": "kaimihata/silicon-game-v1"},
+    "base_ref": {"const": "develop"},
+    "owner": {"$ref": "#/$defs/id"},
+    "approver": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["github_user_id", "github_login"],
+      "properties": {
+        "github_user_id": {"type": "integer", "minimum": 1},
+        "github_login": {"type": "string", "pattern": "^[a-z0-9-]+$"}
+      }
+    },
+    "requirement_catalogs": {"type": "array", "minItems": 1, "items": {"type": "string", "pattern": "^requirements/.+\\.yaml$"}},
+    "policy": {"type": "string", "pattern": "^policy/.+\\.yaml$"},
+    "outcome": {"type": "string", "minLength": 1},
+    "excluded": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "principles": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}
+  },
+  "$defs": {"id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$", "maxLength": 128}}
+}

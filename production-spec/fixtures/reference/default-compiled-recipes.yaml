@@ -1,0 +1,71 @@
+schema_version: 1
+id: default-compiled-recipes
+version: 1
+status: ready
+reference_only: true
+derived_from: default-manufacturing-plan
+recipes:
+  - id: assembly-basic-display-controller-r1
+    stage: assembly
+    design_revision_id: basic-display-controller-r1
+    manufacturing_plan_id: default-manufacturing-plan
+    inputs:
+      - {item_id: cp-110, quantity: 1, port_id: input-1}
+      - {item_id: io-110, quantity: 1, port_id: input-3}
+      - {item_id: md-110, quantity: 1, port_id: input-2}
+      - {item_id: pm-110, quantity: 1, port_id: input-4}
+      - {item_id: sub-110, quantity: 1, port_id: input-5}
+    pass_output: {item_id: wip-unconnected-basic-display-controller-r1, quantity: 1, port_id: output-1}
+    outcome_mode: deterministic
+    workload: 6
+    cycle_seconds: 5
+    operating_cost_usd: 6
+  - id: bonding-basic-display-controller-r1
+    stage: bonding
+    design_revision_id: basic-display-controller-r1
+    manufacturing_plan_id: default-manufacturing-plan
+    inputs:
+      - {item_id: wip-unconnected-basic-display-controller-r1, quantity: 1, port_id: input-1}
+      - {item_id: dl-110, quantity: 3, port_id: input-2}
+    pass_output: {item_id: wip-bonded-basic-display-controller-r1, quantity: 1, port_id: output-1}
+    outcome_mode: deterministic
+    workload: 3
+    cycle_seconds: 3.5
+    operating_cost_usd: 5
+  - id: inspection-basic-display-controller-r1
+    stage: inspection
+    design_revision_id: basic-display-controller-r1
+    manufacturing_plan_id: default-manufacturing-plan
+    inputs:
+      - {item_id: wip-bonded-basic-display-controller-r1, quantity: 1, port_id: input-1}
+    pass_output: {item_id: wip-inspected-basic-display-controller-r1, quantity: 1, port_id: output-1}
+    reject_output: {item_id: reject-inspection-basic-display-controller-r1, quantity: 1, port_id: output-2}
+    outcome_mode: exactly_one_seeded
+    workload: 7.9
+    cycle_seconds: 8.32
+    operating_cost_usd: 7
+  - id: test-basic-display-controller-r1
+    stage: test
+    design_revision_id: basic-display-controller-r1
+    manufacturing_plan_id: default-manufacturing-plan
+    inputs:
+      - {item_id: wip-inspected-basic-display-controller-r1, quantity: 1, port_id: input-1}
+    pass_output: {item_id: wip-validated-basic-display-controller-r1, quantity: 1, port_id: output-1}
+    reject_output: {item_id: reject-test-basic-display-controller-r1, quantity: 1, port_id: output-2}
+    outcome_mode: exactly_one_seeded
+    workload: 7.3
+    cycle_seconds: 6.866667
+    operating_cost_usd: 7
+  - id: packaging-basic-display-controller-r1
+    stage: packaging
+    design_revision_id: basic-display-controller-r1
+    manufacturing_plan_id: default-manufacturing-plan
+    inputs:
+      - {item_id: wip-validated-basic-display-controller-r1, quantity: 1, port_id: input-1}
+      - {item_id: th-110, quantity: 1, port_id: input-2}
+      - {item_id: pkg-mat-100, quantity: 1, port_id: input-3}
+    pass_output: {item_id: product-display-100-basic-display-controller-r1, quantity: 1, port_id: output-1}
+    outcome_mode: deterministic
+    workload: 2.5
+    cycle_seconds: 4.333333
+    operating_cost_usd: 5

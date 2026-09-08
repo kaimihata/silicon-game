@@ -1,0 +1,9 @@
+schema_version: 1
+id: macos-compatibility
+version: 1
+status: ready
+platform: macos-universal
+runner: github-hosted
+hardware: [GitHub-hosted supported macOS runner, Native Apple Silicon execution for launch smoke]
+software: [Unity 6000.3.23f1, macOS Universal player build, runner image revision captured in evidence]
+purpose: [First-epoch macOS Universal build, first-epoch native launch smoke, compile and package compatibility, save and content smoke tests]
