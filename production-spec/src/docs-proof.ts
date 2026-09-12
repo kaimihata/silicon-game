@@ -66,6 +66,7 @@ const AUTHORED_PATHS = [
 
 type FileRecord = {
   path: string;
+  media_type: "application/json";
   bytes: number;
   sha256: string;
 };
@@ -361,7 +362,12 @@ async function writeCanonicalAtRoot(
   if (!destination.startsWith(prefix)) throw new Error(`Docs proof output escapes root: ${path}`);
   await mkdir(dirname(destination), { recursive: true });
   await writeFile(destination, bytes);
-  return { path, bytes: bytes.byteLength, sha256: sha256(bytes) };
+  return {
+    path,
+    media_type: "application/json",
+    bytes: bytes.byteLength,
+    sha256: sha256(bytes),
+  };
 }
 
 async function writeDocsProof(

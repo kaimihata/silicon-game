@@ -58,9 +58,10 @@
     "file": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["path", "bytes", "sha256"],
+      "required": ["path", "media_type", "bytes", "sha256"],
       "properties": {
         "path": {"type": "string", "pattern": "^(proof-bundle\\.json|(proof|schemas)/[a-z0-9][a-z0-9./-]*\\.json)$"},
+        "media_type": {"const": "application/json"},
         "bytes": {"type": "integer", "minimum": 2, "maximum": 1048576},
         "sha256": {"$ref": "#/$defs/digest"}
       }
