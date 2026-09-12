@@ -320,26 +320,6 @@ describe("docs-live-proof-v1", () => {
     await rebindPayload(same, "proof/verification.json", (verification) => {
       verification.evidence_obligations[0].evaluator.role_id = "trusted_system_collector";
     });
-
-    test("rejects any authority escalation even with rebound outer digests", async () => {
-      const contractRoot = await copyBase("contract-authority");
-      await rebindPayload(contractRoot, "proof/contract.json", (contract) => {
-        contract.authority.execution_authority = true;
-      });
-      await expect(expected(contractRoot)).rejects.toThrow(/invalid|authority flags/);
-
-      const bundleRoot = await copyBase("bundle-authority");
-      const bundle = await readJson(bundleRoot, "proof-bundle.json");
-      bundle.execution_authority = true;
-      const bundleBytes = await writeCanonical(bundleRoot, "proof-bundle.json", bundle);
-      const provenance = await readJson(bundleRoot, "proof-provenance.json");
-      const record = provenance.files.find((file: any) => file.path === "proof-bundle.json");
-      record.bytes = bundleBytes.byteLength;
-      record.sha256 = digest(bundleBytes);
-      provenance.bundle.digest = digest(bundleBytes);
-      await writeCanonical(bundleRoot, "proof-provenance.json", provenance);
-      await expect(expected(bundleRoot)).rejects.toThrow(/invalid|authority flags/);
-    });
     await expect(expected(same)).rejects.toThrow(/not independent/);
 
     const mutable = await copyBase("mutable-evidence");
@@ -347,6 +327,26 @@ describe("docs-live-proof-v1", () => {
       verification.evidence_obligations[0].immutable_identity_fields.pop();
     });
     await expect(expected(mutable)).rejects.toThrow(/not exact|mutable|invalid/);
+  });
+
+  test("rejects any authority escalation even with rebound outer digests", async () => {
+    const contractRoot = await copyBase("contract-authority");
+    await rebindPayload(contractRoot, "proof/contract.json", (contract) => {
+      contract.authority.execution_authority = true;
+    });
+    await expect(expected(contractRoot)).rejects.toThrow(/invalid|authority flags/);
+
+    const bundleRoot = await copyBase("bundle-authority");
+    const bundle = await readJson(bundleRoot, "proof-bundle.json");
+    bundle.execution_authority = true;
+    const bundleBytes = await writeCanonical(bundleRoot, "proof-bundle.json", bundle);
+    const provenance = await readJson(bundleRoot, "proof-provenance.json");
+    const record = provenance.files.find((file: any) => file.path === "proof-bundle.json");
+    record.bytes = bundleBytes.byteLength;
+    record.sha256 = digest(bundleBytes);
+    provenance.bundle.digest = digest(bundleBytes);
+    await writeCanonical(bundleRoot, "proof-provenance.json", provenance);
+    await expect(expected(bundleRoot)).rejects.toThrow(/invalid|authority flags/);
   });
 
   test("rejects wrong source and stale target bindings", async () => {
