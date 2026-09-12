@@ -294,6 +294,23 @@ function assertExactVerification(verification: any): void {
     hosted.required_result?.app_id !== 15368 ||
     hosted.required_result?.app_slug !== "github-actions" ||
     hosted.required_result?.conclusion !== "success" ||
+    hosted.required_result?.validator_command !==
+      "python3 scripts/static_candidate_validator.py --trusted-sha \"$TRUSTED_CONTROLLER_SHA\" --candidate-sha \"$CANDIDATE_SHA\"" ||
+    JSON.stringify(hosted.required_result?.runtime_fact_fields) !== JSON.stringify([
+      "run_attempt",
+      "job",
+      "candidate_sha",
+      "pr_ref",
+      "base_ref",
+      "workflow_sha",
+      "trusted_controller_sha",
+      "fetch_head_sha",
+      "workflow_sha_matches_trusted_controller",
+      "trusted_controller_distinct_from_candidate",
+      "fetch_head_matches_candidate",
+      "validator_command",
+      "validated_without_candidate_execution",
+    ]) ||
     JSON.stringify(hosted.immutable_identity_fields) !== JSON.stringify([
       "workflow_id",
       "workflow_repository",

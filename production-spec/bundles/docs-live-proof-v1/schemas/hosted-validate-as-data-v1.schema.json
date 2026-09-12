@@ -38,13 +38,22 @@
     "raw_facts": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["workflow_job_name", "workflow_conclusion", "workflow_sha_source", "base_sha", "head_sha"],
+      "required": ["run_attempt", "job", "candidate_sha", "pr_ref", "base_ref", "workflow_sha", "trusted_controller_sha", "fetch_head_sha", "workflow_sha_source", "workflow_sha_matches_trusted_controller", "trusted_controller_distinct_from_candidate", "fetch_head_matches_candidate", "validator_command", "validated_without_candidate_execution"],
       "properties": {
-        "workflow_job_name": {"const": "validate-as-data"},
-        "workflow_conclusion": {"const": "success"},
+        "run_attempt": {"type": "integer", "minimum": 1},
+        "job": {"const": "validate-as-data"},
+        "candidate_sha": {"$ref": "#/$defs/sha"},
+        "pr_ref": {"type": "string", "pattern": "^refs/pull/[1-9][0-9]*/head$"},
+        "base_ref": {"const": "develop"},
+        "workflow_sha": {"$ref": "#/$defs/sha"},
+        "trusted_controller_sha": {"$ref": "#/$defs/sha"},
+        "fetch_head_sha": {"$ref": "#/$defs/sha"},
         "workflow_sha_source": {"const": "authenticated_trusted_log_attestation"},
-        "base_sha": {"$ref": "#/$defs/sha"},
-        "head_sha": {"$ref": "#/$defs/sha"}
+        "workflow_sha_matches_trusted_controller": {"const": true},
+        "trusted_controller_distinct_from_candidate": {"const": true},
+        "fetch_head_matches_candidate": {"const": true},
+        "validator_command": {"const": "python3 scripts/static_candidate_validator.py --trusted-sha \"$TRUSTED_CONTROLLER_SHA\" --candidate-sha \"$CANDIDATE_SHA\""},
+        "validated_without_candidate_execution": {"const": true}
       }
     },
     "semantic_verdict": {"$ref": "#/$defs/verdict"},

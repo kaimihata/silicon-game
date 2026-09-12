@@ -289,8 +289,17 @@ describe("docs-live-proof-v1", () => {
     expect(hostedSchema.properties.workflow_blob_sha.const)
       .toBe("0f66a20943fb86f3cd1bd821aa490fa9716ef0af");
     expect(hostedSchema.required).toContain("trusted_log_attestation_digest");
-    expect(hostedSchema.properties.raw_facts.properties.workflow_sha_source.const)
+    const rawFacts = hostedSchema.properties.raw_facts;
+    expect(rawFacts.properties.workflow_sha_source.const)
       .toBe("authenticated_trusted_log_attestation");
+    expect(rawFacts.properties.pr_ref.pattern).toBe("^refs/pull/[1-9][0-9]*/head$");
+    expect(rawFacts.properties.base_ref.const).toBe("develop");
+    expect(rawFacts.properties.workflow_sha_matches_trusted_controller.const).toBe(true);
+    expect(rawFacts.properties.trusted_controller_distinct_from_candidate.const).toBe(true);
+    expect(rawFacts.properties.fetch_head_matches_candidate.const).toBe(true);
+    expect(rawFacts.properties.validator_command.const)
+      .toBe("python3 scripts/static_candidate_validator.py --trusted-sha \"$TRUSTED_CONTROLLER_SHA\" --candidate-sha \"$CANDIDATE_SHA\"");
+    expect(rawFacts.properties.validated_without_candidate_execution.const).toBe(true);
     expect(hostedSchema.properties.check_name.const).toBe("validate-as-data");
     expect(hostedSchema.properties.event.const).toBe("pull_request_target");
     expect(hostedSchema.properties.app_id.const).toBe(15368);
