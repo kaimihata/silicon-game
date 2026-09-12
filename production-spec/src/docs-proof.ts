@@ -284,7 +284,16 @@ function assertExactVerification(verification: any): void {
     hosted.artifact_type !== "hosted_validate_as_data_v1" ||
     hosted.report_schema_path !== "schemas/hosted-validate-as-data-v1.schema.json" ||
     hosted.required_result?.job !== "validate-as-data" ||
-    hosted.required_result?.conclusion !== "success"
+    hosted.required_result?.conclusion !== "success" ||
+    JSON.stringify(hosted.immutable_identity_fields) !== JSON.stringify([
+      "workflow_repository",
+      "workflow_path",
+      "workflow_blob_sha",
+      "run_id",
+      "run_attempt",
+      "check_suite_id",
+      "check_run_id",
+    ])
   ) {
     throw new Error("Hosted validate-as-data obligation is not exact");
   }
@@ -297,7 +306,17 @@ function assertExactVerification(verification: any): void {
     tree.required_blob?.blob_object_id !== ALLOWED_BLOB_OBJECT_ID ||
     tree.required_blob?.bytes_sha256 !== ALLOWED_CONTENT_DIGEST ||
     tree.required_blob?.encoding !== "UTF-8" ||
-    tree.required_blob?.final_newline !== true
+    tree.required_blob?.final_newline !== true ||
+    JSON.stringify(tree.immutable_identity_fields) !== JSON.stringify([
+      "path",
+      "change_kind",
+      "mode",
+      "blob_object_id",
+      "bytes",
+      "bytes_sha256",
+      "encoding",
+      "final_newline",
+    ])
   ) {
     throw new Error("Candidate Git-tree blob-content obligation is not exact");
   }
