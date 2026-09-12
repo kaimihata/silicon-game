@@ -3,6 +3,11 @@ import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { parseSafeYaml } from "./safe-yaml.js";
 import { cleanGeneratedOutput } from "./clean.js";
+import {
+  exportDocsProof,
+  validateAuthoredDocsProof,
+  validateDocsProofBundleDirectory,
+} from "./docs-proof.js";
 import { compileContent, exportBundle } from "./export.js";
 import { generatePacket, packetYaml, validatePacket } from "./packet.js";
 import { validateBundle } from "./validate.js";
@@ -43,6 +48,44 @@ async function main(): Promise<void> {
     console.log(`Exported source-bundle-valid ready import from clean checked-out HEAD to ${out}; planner bundle ${result.plannerBundleDigest}; separate digest-bound human packet approval remains mandatory`);
     return;
   }
+  if (command === "export-docs-proof-v1") {
+    const out = option("--out");
+    const sourceSha = option("--source-sha");
+    const sourceRef = option("--source-ref");
+    const targetBaseSha = option("--target-base-sha");
+    if (!out || !sourceSha || !sourceRef || !targetBaseSha) {
+      throw new Error("export-docs-proof-v1 requires --out <directory> --source-sha <40-hex> --source-ref <refs/heads/reviewed-ref> --target-base-sha <40-hex>");
+    }
+    const result = await exportDocsProof(
+      resolve(out),
+      sourceSha,
+      sourceRef,
+      targetBaseSha,
+    );
+    console.log(`Exported canonical ${result.proofBundleDigest} from exact source ${sourceRef}@${sourceSha} for target base ${targetBaseSha}; human bundle review remains required and no execution, merge, dispatch, or deploy authority was granted`);
+    return;
+  }
+  if (command === "validate-docs-proof-v1") {
+    const bundle = option("--bundle");
+    if (!bundle) {
+      await validateAuthoredDocsProof();
+      console.log("Valid authored docs-live-proof-v1 contract; human review required; no execution authority");
+      return;
+    }
+    const sourceSha = option("--source-sha");
+    const sourceRef = option("--source-ref");
+    const targetBaseSha = option("--target-base-sha");
+    if (!sourceSha || !sourceRef || !targetBaseSha) {
+      throw new Error("validate-docs-proof-v1 --bundle requires --source-sha <40-hex> --source-ref <refs/heads/reviewed-ref> --target-base-sha <40-hex>");
+    }
+    const result = await validateDocsProofBundleDirectory(resolve(bundle), {
+      sourceSha,
+      sourceRef,
+      targetBaseSha,
+    });
+    console.log(`Valid canonical docs-live-proof-v1 ${result.proofBundleDigest}; human review required; no execution authority`);
+    return;
+  }
   if (command === "generate-packet") {
     const out = option("--out");
     const baseSha = option("--base-sha");
@@ -65,7 +108,7 @@ async function main(): Promise<void> {
     await cleanGeneratedOutput(option("--out"));
     return;
   }
-  throw new Error("Usage: validate | compile --out DIR | export --out DIR --source-sha SHA --source-ref REF | generate-packet --out FILE --base-sha SHA | validate-packet --file FILE");
+  throw new Error("Usage: validate | compile --out DIR | export --out DIR --source-sha SHA --source-ref REF | export-docs-proof-v1 --out DIR --source-sha SHA --source-ref REF --target-base-sha SHA | validate-docs-proof-v1 [--bundle DIR --source-sha SHA --source-ref REF --target-base-sha SHA] | generate-packet --out FILE --base-sha SHA | validate-packet --file FILE");
 }
 
 main().catch((error) => {

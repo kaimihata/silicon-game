@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://chip-city.dev/docs-live-proof/docs-live-proof-provenance-v1.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "provenance_id", "protocol_id", "bundle", "contract", "verification", "source", "target", "files", "canonicalization", "digest_algorithm", "execution_authority", "human_review_required"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "provenance_id": {"const": "docs-live-proof-provenance-v1"},
+    "protocol_id": {"const": "docs-live-proof-v1"},
+    "bundle": {"$ref": "#/$defs/artifact"},
+    "contract": {"$ref": "#/$defs/artifact"},
+    "verification": {"$ref": "#/$defs/artifact"},
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "ref", "sha"],
+      "properties": {
+        "repository": {"const": "kaimihata/silicon-game"},
+        "ref": {"type": "string", "pattern": "^refs/heads/.+"},
+        "sha": {"$ref": "#/$defs/sha"}
+      }
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "ref", "base_sha"],
+      "properties": {
+        "repository": {"const": "kaimihata/silicon-game-v1"},
+        "ref": {"const": "refs/heads/develop"},
+        "base_sha": {"$ref": "#/$defs/sha"}
+      }
+    },
+    "files": {
+      "type": "array",
+      "minItems": 11,
+      "maxItems": 11,
+      "items": {"$ref": "#/$defs/file"}
+    },
+    "canonicalization": {"const": "RFC 8785"},
+    "digest_algorithm": {"const": "sha256"},
+    "execution_authority": {"const": false},
+    "human_review_required": {"const": true}
+  },
+  "$defs": {
+    "sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "path", "digest"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "path": {"type": "string", "minLength": 1},
+        "digest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "file": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "bytes", "sha256"],
+      "properties": {
+        "path": {"type": "string", "pattern": "^(proof-bundle\\.json|(proof|schemas)/[a-z0-9][a-z0-9./-]*\\.json)$"},
+        "bytes": {"type": "integer", "minimum": 2, "maximum": 1048576},
+        "sha256": {"$ref": "#/$defs/digest"}
+      }
+    }
+  }
+}

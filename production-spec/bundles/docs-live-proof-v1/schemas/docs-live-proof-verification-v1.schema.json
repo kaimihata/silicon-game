@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://chip-city.dev/docs-live-proof/docs-live-proof-verification-v1.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "verification_id", "exact_head_required", "independence", "evidence_obligations"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "verification_id": {"const": "docs-live-proof-verification-v1"},
+    "exact_head_required": {"const": true},
+    "independence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["producer_and_evaluator_must_differ"],
+      "properties": {"producer_and_evaluator_must_differ": {"const": true}}
+    },
+    "evidence_obligations": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {"$ref": "#/$defs/obligation"}
+    }
+  },
+  "$defs": {
+    "identity_requirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["role_id", "identity_required"],
+      "properties": {
+        "role_id": {"type": "string", "minLength": 1},
+        "identity_required": {"const": true}
+      }
+    },
+    "obligation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["obligation_id", "artifact_type", "report_schema_path", "binding_fields", "immutable_identity_fields", "producer", "evaluator", "freshness", "evidence_digest_required"],
+      "properties": {
+        "obligation_id": {"enum": ["hosted_validate_as_data", "candidate_git_tree_blob_content"]},
+        "artifact_type": {"enum": ["hosted_validate_as_data_v1", "candidate_git_tree_blob_content_v1"]},
+        "report_schema_path": {"enum": ["schemas/hosted-validate-as-data-v1.schema.json", "schemas/candidate-git-tree-blob-content-v1.schema.json"]},
+        "binding_fields": {"type": "array", "minItems": 3, "items": {"type": "string", "minLength": 1}},
+        "immutable_identity_fields": {"type": "array", "minItems": 4, "items": {"type": "string", "minLength": 1}},
+        "producer": {"$ref": "#/$defs/identity_requirement"},
+        "evaluator": {"$ref": "#/$defs/identity_requirement"},
+        "freshness": {"type": "string", "minLength": 1},
+        "evidence_digest_required": {"const": true},
+        "required_result": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["job", "conclusion"],
+          "properties": {"job": {"const": "validate-as-data"}, "conclusion": {"const": "success"}}
+        },
+        "required_blob": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path", "change_kind", "mode", "blob_object_id", "bytes_sha256", "encoding", "final_newline"],
+          "properties": {
+            "path": {"const": "docs/live-proof.md"},
+            "change_kind": {"const": "add"},
+            "mode": {"const": "100644"},
+            "blob_object_id": {"const": "74a349837fcb7e1f8d6fb8cdb015089c66edadce"},
+            "bytes_sha256": {"const": "sha256:1c3cc393ba4b6269bfda95738934ec933990133120dfec373c9e0e1c17959e13"},
+            "encoding": {"const": "UTF-8"},
+            "final_newline": {"const": true}
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://chip-city.dev/docs-live-proof/hosted-validate-as-data-v1.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "profile_id", "protocol_id", "proof_bundle_digest", "proof_contract_revision", "proof_verification_revision", "target_repository", "target_base_ref", "target_base_sha", "candidate_head_sha", "workflow_repository", "workflow_path", "workflow_blob_sha", "run_id", "run_attempt", "check_suite_id", "check_run_id", "job", "conclusion", "event", "producer", "evaluator", "produced_observation", "evaluated_observation", "raw_facts", "semantic_verdict", "evidence_digest"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "profile_id": {"const": "docs-live-proof-hosted-validate-as-data-v1"},
+    "protocol_id": {"const": "docs-live-proof-v1"},
+    "proof_bundle_digest": {"$ref": "#/$defs/digest"},
+    "proof_contract_revision": {"$ref": "#/$defs/digest"},
+    "proof_verification_revision": {"$ref": "#/$defs/digest"},
+    "target_repository": {"const": "kaimihata/silicon-game-v1"},
+    "target_base_ref": {"const": "refs/heads/develop"},
+    "target_base_sha": {"$ref": "#/$defs/sha"},
+    "candidate_head_sha": {"$ref": "#/$defs/sha"},
+    "workflow_repository": {"const": "kaimihata/silicon-game-v1"},
+    "workflow_path": {"type": "string", "pattern": "^\\.github/workflows/.+\\.ya?ml$"},
+    "workflow_blob_sha": {"$ref": "#/$defs/sha"},
+    "run_id": {"type": "integer", "minimum": 1},
+    "run_attempt": {"type": "integer", "minimum": 1},
+    "check_suite_id": {"type": "integer", "minimum": 1},
+    "check_run_id": {"type": "integer", "minimum": 1},
+    "job": {"const": "validate-as-data"},
+    "conclusion": {"const": "success"},
+    "event": {"const": "pull_request"},
+    "producer": {"$ref": "#/$defs/identity"},
+    "evaluator": {"$ref": "#/$defs/identity"},
+    "produced_observation": {"$ref": "#/$defs/observation"},
+    "evaluated_observation": {"$ref": "#/$defs/observation"},
+    "raw_facts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["workflow_job_name", "workflow_conclusion", "base_sha", "head_sha"],
+      "properties": {
+        "workflow_job_name": {"const": "validate-as-data"},
+        "workflow_conclusion": {"const": "success"},
+        "base_sha": {"$ref": "#/$defs/sha"},
+        "head_sha": {"$ref": "#/$defs/sha"}
+      }
+    },
+    "semantic_verdict": {"$ref": "#/$defs/verdict"},
+    "evidence_digest": {"$ref": "#/$defs/digest"}
+  },
+  "$defs": {
+    "sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "revision"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "revision": {"type": "string", "minLength": 1}
+      }
+    },
+    "observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["base_ref_sha", "head_sha", "observed_at"],
+      "properties": {
+        "base_ref_sha": {"$ref": "#/$defs/sha"},
+        "head_sha": {"$ref": "#/$defs/sha"},
+        "observed_at": {"type": "string", "format": "date-time"}
+      }
+    },
+    "verdict": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "bindings_match", "immutable_identity_complete", "fresh", "producer_evaluator_independent"],
+      "properties": {
+        "status": {"const": "passed"},
+        "bindings_match": {"const": true},
+        "immutable_identity_complete": {"const": true},
+        "fresh": {"const": true},
+        "producer_evaluator_independent": {"const": true}
+      }
+    }
+  }
+}
