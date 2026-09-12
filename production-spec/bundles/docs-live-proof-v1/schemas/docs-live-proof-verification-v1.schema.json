@@ -48,7 +48,7 @@
         "required_result": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["workflow_id", "workflow_name", "workflow_path", "workflow_blob_sha", "workflow_sha_source", "job", "check_name", "event", "app_id", "app_slug", "conclusion", "runtime_fact_fields", "log_format_revision", "trusted_step_names", "fetch_head_assertion", "validator_argv"],
+          "required": ["workflow_id", "workflow_name", "workflow_path", "workflow_blob_sha", "workflow_sha_source", "job", "check_name", "event", "app_id", "app_slug", "conclusion", "runtime_fact_fields", "log_format_revision", "trusted_step_names", "fetch_head_assertion", "validator_argv", "digest_semantics"],
           "properties": {
             "workflow_id": {"const": 349570522},
             "workflow_name": {"const": "Data-only runner contract validation"},
@@ -65,7 +65,14 @@
             "log_format_revision": {"const": "docs-live-proof-trusted-job-log-v1"},
             "trusted_step_names": {"const": ["Verify trusted validation workflow provenance", "Check out immutable trusted validator", "Fetch untrusted candidate as Git objects only", "Validate candidate without executing its files", "Remove fetched candidate objects and credentials"]},
             "fetch_head_assertion": {"const": "test \"$(git rev-parse FETCH_HEAD)\" = \"$CANDIDATE_SHA\""},
-            "validator_argv": {"const": ["python3", "scripts/static_candidate_validator.py", "--trusted-sha", "$TRUSTED_CONTROLLER_SHA", "--candidate-sha", "$CANDIDATE_SHA"]}
+            "validator_argv": {"const": ["python3", "scripts/static_candidate_validator.py", "--trusted-sha", "$TRUSTED_CONTROLLER_SHA", "--candidate-sha", "$CANDIDATE_SHA"]},
+            "digest_semantics": {
+              "const": {
+                "raw_log_digest": "sha256 of authenticated raw trusted job-log bytes",
+                "trusted_log_attestation_digest": "sha256 of exact RFC 8785 raw_facts bytes",
+                "evidence_digest": "sha256 of exact RFC 8785 report bytes with only evidence_digest omitted"
+              }
+            }
           }
         },
         "required_blob": {

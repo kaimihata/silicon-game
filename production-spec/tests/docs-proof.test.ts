@@ -16,9 +16,13 @@ import { canonicalJson } from "../src/canonical.js";
 import {
   DOCS_PROOF_OUTPUT_PATHS,
   DOCS_PROOF_PAYLOAD_PATHS,
+  digestAuthenticatedTrustedJobLog,
+  digestDocsProofEvidenceReport,
+  digestTrustedLogAttestation,
   exportDocsProofFromRepository,
   validateAuthoredDocsProof,
   validateDocsProofBundleDirectory,
+  validateHostedValidateAsDataReport,
 } from "../src/docs-proof.js";
 import { ROOT } from "../src/io.js";
 import { createGitExportFixture, type GitExportFixture } from "./git-export-fixture.js";
@@ -143,6 +147,129 @@ describe("docs-live-proof-v1", () => {
       contractRevision: expect.stringMatching(/^sha256:[0-9a-f]{64}$/),
       verificationRevision: expect.stringMatching(/^sha256:[0-9a-f]{64}$/),
     });
+  });
+
+  test("computes hosted evidence digests from three exact non-circular preimages", async () => {
+      const authenticatedLog = Buffer.from("authenticated trusted job log\n", "utf8");
+      const rawFacts = {
+        workflow_job_name: "validate-as-data",
+        workflow_conclusion: "success",
+        base_sha: TARGET_BASE,
+        head_sha: "a".repeat(40),
+        job_id: 101,
+        run_attempt: 1,
+        workflow_id: 349570522,
+        workflow_name: "Data-only runner contract validation",
+        check_name: "validate-as-data",
+        event: "pull_request_target",
+        app_id: 15368,
+        app_slug: "github-actions",
+        log_format_revision: "docs-live-proof-trusted-job-log-v1",
+        log_sha256: digest(authenticatedLog),
+        trusted_step_names: [
+          "Verify trusted validation workflow provenance",
+          "Check out immutable trusted validator",
+          "Fetch untrusted candidate as Git objects only",
+          "Validate candidate without executing its files",
+          "Remove fetched candidate objects and credentials",
+        ],
+        candidate_sha: "a".repeat(40),
+        pr_ref: "refs/pull/1/head",
+        workflow_sha: TARGET_BASE,
+        trusted_controller_sha: TARGET_BASE,
+        base_ref: "develop",
+        fetch_head_assertion: "test \"$(git rev-parse FETCH_HEAD)\" = \"$CANDIDATE_SHA\"",
+        validator_argv: [
+          "python3",
+          "scripts/static_candidate_validator.py",
+          "--trusted-sha",
+          "$TRUSTED_CONTROLLER_SHA",
+          "--candidate-sha",
+          "$CANDIDATE_SHA",
+        ],
+      };
+      const report: Record<string, any> = {
+        schema_version: 1,
+        profile_id: "docs-live-proof-hosted-validate-as-data-v1",
+        protocol_id: "docs-live-proof-v1",
+        proof_bundle_digest: `sha256:${"1".repeat(64)}`,
+        proof_contract_revision: `sha256:${"2".repeat(64)}`,
+        proof_verification_revision: `sha256:${"3".repeat(64)}`,
+        target_repository: "kaimihata/silicon-game-v1",
+        target_base_ref: "refs/heads/develop",
+        target_base_sha: TARGET_BASE,
+        candidate_head_sha: "a".repeat(40),
+        workflow_id: 349570522,
+        workflow_repository: "kaimihata/silicon-game-v1",
+        workflow_name: "Data-only runner contract validation",
+        workflow_path: ".github/workflows/runner-contract-validation.yml",
+        workflow_blob_sha: "0f66a20943fb86f3cd1bd821aa490fa9716ef0af",
+        trusted_log_attestation_digest: digestTrustedLogAttestation(rawFacts),
+        run_id: 201,
+        run_attempt: 1,
+        check_suite_id: 301,
+        check_run_id: 401,
+        job: "validate-as-data",
+        check_name: "validate-as-data",
+        conclusion: "success",
+        event: "pull_request_target",
+        app_id: 15368,
+        app_slug: "github-actions",
+        producer: { id: "collector", revision: "collector-v1" },
+        evaluator: { id: "evaluator", revision: "evaluator-v1" },
+        produced_observation: {
+          base_ref_sha: TARGET_BASE,
+          head_sha: "a".repeat(40),
+          observed_at: "2026-09-12T12:00:00Z",
+        },
+        evaluated_observation: {
+          base_ref_sha: TARGET_BASE,
+          head_sha: "a".repeat(40),
+          observed_at: "2026-09-12T12:01:00Z",
+        },
+        raw_facts: rawFacts,
+        semantic_verdict: {
+          status: "passed",
+          bindings_match: true,
+          immutable_identity_complete: true,
+          fresh: true,
+          producer_evaluator_independent: true,
+        },
+      };
+      report.evidence_digest = digestDocsProofEvidenceReport(report);
+
+      expect(digestAuthenticatedTrustedJobLog(authenticatedLog)).toBe(digest(authenticatedLog));
+      expect(report.trusted_log_attestation_digest).toBe(
+        digest(Buffer.from(canonicalJson(rawFacts))),
+      );
+      const evidencePreimage = structuredClone(report);
+      delete evidencePreimage.evidence_digest;
+      expect(report.evidence_digest).toBe(
+        digest(Buffer.from(canonicalJson(evidencePreimage))),
+      );
+      expect(canonicalJson(rawFacts)).not.toContain("trusted_log_attestation_digest");
+      expect(canonicalJson(evidencePreimage)).toContain("trusted_log_attestation_digest");
+      await expect(
+        validateHostedValidateAsDataReport(report, authenticatedLog),
+      ).resolves.toBeUndefined();
+
+      const wrongLog = structuredClone(report);
+      wrongLog.raw_facts.log_sha256 = `sha256:${"0".repeat(64)}`;
+      await expect(
+        validateHostedValidateAsDataReport(wrongLog, authenticatedLog),
+      ).rejects.toThrow("log_sha256");
+
+      const wrongAttestation = structuredClone(report);
+      wrongAttestation.trusted_log_attestation_digest = `sha256:${"0".repeat(64)}`;
+      await expect(
+        validateHostedValidateAsDataReport(wrongAttestation, authenticatedLog),
+      ).rejects.toThrow("trusted_log_attestation_digest");
+
+      const wrongEvidence = structuredClone(report);
+      wrongEvidence.evidence_digest = `sha256:${"0".repeat(64)}`;
+      await expect(
+        validateHostedValidateAsDataReport(wrongEvidence, authenticatedLog),
+      ).rejects.toThrow("evidence_digest");
   });
 
   test("binds the exact source, target, one-path contract, and no authority", async () => {
@@ -305,6 +432,10 @@ describe("docs-live-proof-v1", () => {
       "--candidate-sha",
       "$CANDIDATE_SHA",
     ]);
+    expect(hostedSchema.properties.trusted_log_attestation_digest.description)
+      .toContain("canonical raw_facts");
+    expect(hostedSchema.properties.evidence_digest.description)
+      .toContain("only the evidence_digest member omitted");
     expect(hostedSchema.properties.check_name.const).toBe("validate-as-data");
     expect(hostedSchema.properties.event.const).toBe("pull_request_target");
     expect(hostedSchema.properties.app_id.const).toBe(15368);

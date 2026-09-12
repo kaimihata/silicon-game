@@ -24,9 +24,20 @@ candidate head plus exactly both machine-evidence digests. That review is not pa
 approval and cannot merge, dispatch, deploy, or promote. Packet approval and later
 promotion remain separate authority events outside this proof bundle.
 
-Each machine report's `evidence_digest` is SHA-256 over the exact RFC 8785 canonical
-report object with the `evidence_digest` member omitted. The factory's separately
-content-addressed storage digest covers the complete stored report bytes. A conforming
-evaluator must recompute both, require distinct producer and evaluator identities,
-and re-observe the bound target base and candidate head before accepting either
-report as current.
+For the hosted report, `raw_facts.log_sha256` is SHA-256 over the authenticated raw
+trusted job-log bytes before that transient log is discarded.
+`trusted_log_attestation_digest` is SHA-256 over the exact RFC 8785 canonical
+`raw_facts` object bytes with no trailing newline. Each machine report's
+`evidence_digest` is SHA-256 over the exact RFC 8785 canonical report object with only
+the `evidence_digest` member omitted, also with no trailing newline. The factory's
+separate content-addressed storage digest covers the complete stored report bytes. A
+conforming evaluator must recompute the canonical attestation and evidence digests,
+require distinct producer and evaluator identities, and re-observe the bound target
+base and candidate head before accepting either report as current.
+
+The TypeScript API `validateHostedValidateAsDataReport(report, authenticatedLogBytes)`
+validates the closed report schema and all three digest computations. The
+`trusted_log_attestation_digest` preimage is only `raw_facts`; it does not include the
+top-level attestation or evidence digest. The `evidence_digest` preimage omits only
+itself and therefore includes `trusted_log_attestation_digest`, avoiding circular
+self-inclusion.

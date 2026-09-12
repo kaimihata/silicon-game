@@ -83,8 +83,22 @@ export type DocsProofExportResult = {
   verificationRevision: string;
 };
 
-function sha256(bytes: Buffer | string): string {
+function sha256(bytes: Uint8Array | string): string {
   return `sha256:${createHash("sha256").update(bytes).digest("hex")}`;
+}
+
+export function digestAuthenticatedTrustedJobLog(bytes: Uint8Array): string {
+  return sha256(bytes);
+}
+
+export function digestTrustedLogAttestation(rawFacts: unknown): string {
+  return sha256(canonicalJson(rawFacts));
+}
+
+export function digestDocsProofEvidenceReport(report: Record<string, unknown>): string {
+  const preimage = structuredClone(report);
+  delete preimage.evidence_digest;
+  return sha256(canonicalJson(preimage));
 }
 
 function assertSha(value: string, option: string): void {
@@ -165,6 +179,32 @@ function validateWithSchema(
       .map((error) => `${error.instancePath || "/"} ${error.message ?? "schema error"}`)
       .join("; ");
     throw new Error(`${label} is invalid: ${details}`);
+  }
+}
+
+export async function validateHostedValidateAsDataReport(
+  report: Record<string, unknown>,
+  authenticatedRawJobLogBytes: Uint8Array,
+  repositoryRoot = ROOT,
+): Promise<void> {
+  const schema = await readJson(
+    join(
+      repositoryRoot,
+      SOURCE_DIRECTORY,
+      SCHEMA_DIRECTORY,
+      "hosted-validate-as-data-v1.schema.json",
+    ),
+  );
+  validateWithSchema(schema, report, "Hosted validate-as-data evidence");
+  const rawFacts = report.raw_facts as Record<string, unknown>;
+  if (rawFacts.log_sha256 !== digestAuthenticatedTrustedJobLog(authenticatedRawJobLogBytes)) {
+    throw new Error("Hosted validate-as-data raw_facts.log_sha256 does not match authenticated raw job-log bytes");
+  }
+  if (report.trusted_log_attestation_digest !== digestTrustedLogAttestation(rawFacts)) {
+    throw new Error("Hosted validate-as-data trusted_log_attestation_digest does not match canonical raw_facts");
+  }
+  if (report.evidence_digest !== digestDocsProofEvidenceReport(report)) {
+    throw new Error("Hosted validate-as-data evidence_digest does not match canonical report preimage");
   }
 }
 
@@ -330,6 +370,12 @@ function assertExactVerification(verification: any): void {
       "$CANDIDATE_SHA",
     ]) ||
     hosted.required_result?.trusted_step_names?.length !== 5 ||
+    hosted.required_result?.digest_semantics?.raw_log_digest !==
+      "sha256 of authenticated raw trusted job-log bytes" ||
+    hosted.required_result?.digest_semantics?.trusted_log_attestation_digest !==
+      "sha256 of exact RFC 8785 raw_facts bytes" ||
+    hosted.required_result?.digest_semantics?.evidence_digest !==
+      "sha256 of exact RFC 8785 report bytes with only evidence_digest omitted" ||
     JSON.stringify(hosted.immutable_identity_fields) !== JSON.stringify([
       "workflow_id",
       "workflow_repository",

@@ -20,7 +20,10 @@
     "workflow_name": {"const": "Data-only runner contract validation"},
     "workflow_path": {"const": ".github/workflows/runner-contract-validation.yml"},
     "workflow_blob_sha": {"const": "0f66a20943fb86f3cd1bd821aa490fa9716ef0af"},
-    "trusted_log_attestation_digest": {"$ref": "#/$defs/digest"},
+    "trusted_log_attestation_digest": {
+      "$ref": "#/$defs/digest",
+      "description": "SHA-256 of the exact RFC 8785 canonical raw_facts object bytes, with no trailing newline."
+    },
     "run_id": {"type": "integer", "minimum": 1},
     "run_attempt": {"type": "integer", "minimum": 1},
     "check_suite_id": {"type": "integer", "minimum": 1},
@@ -53,7 +56,10 @@
         "app_id": {"const": 15368},
         "app_slug": {"const": "github-actions"},
         "log_format_revision": {"const": "docs-live-proof-trusted-job-log-v1"},
-        "log_sha256": {"$ref": "#/$defs/digest"},
+        "log_sha256": {
+          "$ref": "#/$defs/digest",
+          "description": "SHA-256 of the authenticated raw trusted job-log bytes before the transient log is discarded."
+        },
         "trusted_step_names": {"const": ["Verify trusted validation workflow provenance", "Check out immutable trusted validator", "Fetch untrusted candidate as Git objects only", "Validate candidate without executing its files", "Remove fetched candidate objects and credentials"]},
         "candidate_sha": {"$ref": "#/$defs/sha"},
         "pr_ref": {"type": "string", "pattern": "^refs/pull/[1-9][0-9]*/head$"},
@@ -65,7 +71,10 @@
       }
     },
     "semantic_verdict": {"$ref": "#/$defs/verdict"},
-    "evidence_digest": {"$ref": "#/$defs/digest"}
+    "evidence_digest": {
+      "$ref": "#/$defs/digest",
+      "description": "SHA-256 of the exact RFC 8785 canonical report object bytes with only the evidence_digest member omitted, with no trailing newline."
+    }
   },
   "$defs": {
     "sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
