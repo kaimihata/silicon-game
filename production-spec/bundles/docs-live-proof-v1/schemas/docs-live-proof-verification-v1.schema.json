@@ -48,12 +48,13 @@
         "required_result": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["workflow_id", "workflow_name", "workflow_path", "workflow_blob_sha", "job", "check_name", "event", "app_id", "app_slug", "conclusion"],
+          "required": ["workflow_id", "workflow_name", "workflow_path", "workflow_blob_sha", "workflow_sha_source", "job", "check_name", "event", "app_id", "app_slug", "conclusion"],
           "properties": {
             "workflow_id": {"const": 349570522},
             "workflow_name": {"const": "Data-only runner contract validation"},
             "workflow_path": {"const": ".github/workflows/runner-contract-validation.yml"},
             "workflow_blob_sha": {"const": "0f66a20943fb86f3cd1bd821aa490fa9716ef0af"},
+            "workflow_sha_source": {"const": "authenticated_trusted_log_attestation"},
             "job": {"const": "validate-as-data"},
             "check_name": {"const": "validate-as-data"},
             "event": {"const": "pull_request_target"},

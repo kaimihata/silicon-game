@@ -288,6 +288,9 @@ describe("docs-live-proof-v1", () => {
       .toBe(".github/workflows/runner-contract-validation.yml");
     expect(hostedSchema.properties.workflow_blob_sha.const)
       .toBe("0f66a20943fb86f3cd1bd821aa490fa9716ef0af");
+    expect(hostedSchema.required).toContain("trusted_log_attestation_digest");
+    expect(hostedSchema.properties.raw_facts.properties.workflow_sha_source.const)
+      .toBe("authenticated_trusted_log_attestation");
     expect(hostedSchema.properties.check_name.const).toBe("validate-as-data");
     expect(hostedSchema.properties.event.const).toBe("pull_request_target");
     expect(hostedSchema.properties.app_id.const).toBe(15368);

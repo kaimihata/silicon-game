@@ -3,7 +3,7 @@
   "$id": "https://chip-city.dev/docs-live-proof/hosted-validate-as-data-v1.schema.json",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "profile_id", "protocol_id", "proof_bundle_digest", "proof_contract_revision", "proof_verification_revision", "target_repository", "target_base_ref", "target_base_sha", "candidate_head_sha", "workflow_id", "workflow_repository", "workflow_name", "workflow_path", "workflow_blob_sha", "run_id", "run_attempt", "check_suite_id", "check_run_id", "job", "check_name", "conclusion", "event", "app_id", "app_slug", "producer", "evaluator", "produced_observation", "evaluated_observation", "raw_facts", "semantic_verdict", "evidence_digest"],
+  "required": ["schema_version", "profile_id", "protocol_id", "proof_bundle_digest", "proof_contract_revision", "proof_verification_revision", "target_repository", "target_base_ref", "target_base_sha", "candidate_head_sha", "workflow_id", "workflow_repository", "workflow_name", "workflow_path", "workflow_blob_sha", "trusted_log_attestation_digest", "run_id", "run_attempt", "check_suite_id", "check_run_id", "job", "check_name", "conclusion", "event", "app_id", "app_slug", "producer", "evaluator", "produced_observation", "evaluated_observation", "raw_facts", "semantic_verdict", "evidence_digest"],
   "properties": {
     "schema_version": {"const": 1},
     "profile_id": {"const": "docs-live-proof-hosted-validate-as-data-v1"},
@@ -20,6 +20,7 @@
     "workflow_name": {"const": "Data-only runner contract validation"},
     "workflow_path": {"const": ".github/workflows/runner-contract-validation.yml"},
     "workflow_blob_sha": {"const": "0f66a20943fb86f3cd1bd821aa490fa9716ef0af"},
+    "trusted_log_attestation_digest": {"$ref": "#/$defs/digest"},
     "run_id": {"type": "integer", "minimum": 1},
     "run_attempt": {"type": "integer", "minimum": 1},
     "check_suite_id": {"type": "integer", "minimum": 1},
@@ -37,10 +38,11 @@
     "raw_facts": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["workflow_job_name", "workflow_conclusion", "base_sha", "head_sha"],
+      "required": ["workflow_job_name", "workflow_conclusion", "workflow_sha_source", "base_sha", "head_sha"],
       "properties": {
         "workflow_job_name": {"const": "validate-as-data"},
         "workflow_conclusion": {"const": "success"},
+        "workflow_sha_source": {"const": "authenticated_trusted_log_attestation"},
         "base_sha": {"$ref": "#/$defs/sha"},
         "head_sha": {"$ref": "#/$defs/sha"}
       }
