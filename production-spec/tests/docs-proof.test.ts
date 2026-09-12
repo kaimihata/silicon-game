@@ -283,7 +283,15 @@ describe("docs-live-proof-v1", () => {
     expect(hostedSchema.required).toContain("candidate_head_sha");
     expect(treeSchema.required).toContain("candidate_head_sha");
     expect(hostedSchema.properties.job.const).toBe("validate-as-data");
-    expect(hostedSchema.properties.event.const).toBe("pull_request");
+    expect(hostedSchema.properties.workflow_id.const).toBe(349570522);
+    expect(hostedSchema.properties.workflow_path.const)
+      .toBe(".github/workflows/runner-contract-validation.yml");
+    expect(hostedSchema.properties.workflow_blob_sha.const)
+      .toBe("0f66a20943fb86f3cd1bd821aa490fa9716ef0af");
+    expect(hostedSchema.properties.check_name.const).toBe("validate-as-data");
+    expect(hostedSchema.properties.event.const).toBe("pull_request_target");
+    expect(hostedSchema.properties.app_id.const).toBe(15368);
+    expect(hostedSchema.properties.app_slug.const).toBe("github-actions");
     expect(treeSchema.properties.path.const).toBe("docs/live-proof.md");
   });
 

@@ -283,16 +283,30 @@ function assertExactVerification(verification: any): void {
   if (
     hosted.artifact_type !== "hosted_validate_as_data_v1" ||
     hosted.report_schema_path !== "schemas/hosted-validate-as-data-v1.schema.json" ||
+    hosted.required_result?.workflow_id !== 349570522 ||
+    hosted.required_result?.workflow_name !== "Data-only runner contract validation" ||
+    hosted.required_result?.workflow_path !== ".github/workflows/runner-contract-validation.yml" ||
+    hosted.required_result?.workflow_blob_sha !== "0f66a20943fb86f3cd1bd821aa490fa9716ef0af" ||
     hosted.required_result?.job !== "validate-as-data" ||
+    hosted.required_result?.check_name !== "validate-as-data" ||
+    hosted.required_result?.event !== "pull_request_target" ||
+    hosted.required_result?.app_id !== 15368 ||
+    hosted.required_result?.app_slug !== "github-actions" ||
     hosted.required_result?.conclusion !== "success" ||
     JSON.stringify(hosted.immutable_identity_fields) !== JSON.stringify([
+      "workflow_id",
       "workflow_repository",
+      "workflow_name",
       "workflow_path",
       "workflow_blob_sha",
       "run_id",
       "run_attempt",
       "check_suite_id",
       "check_run_id",
+      "check_name",
+      "app_id",
+      "app_slug",
+      "event",
     ])
   ) {
     throw new Error("Hosted validate-as-data obligation is not exact");

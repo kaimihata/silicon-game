@@ -48,8 +48,19 @@
         "required_result": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["job", "conclusion"],
-          "properties": {"job": {"const": "validate-as-data"}, "conclusion": {"const": "success"}}
+          "required": ["workflow_id", "workflow_name", "workflow_path", "workflow_blob_sha", "job", "check_name", "event", "app_id", "app_slug", "conclusion"],
+          "properties": {
+            "workflow_id": {"const": 349570522},
+            "workflow_name": {"const": "Data-only runner contract validation"},
+            "workflow_path": {"const": ".github/workflows/runner-contract-validation.yml"},
+            "workflow_blob_sha": {"const": "0f66a20943fb86f3cd1bd821aa490fa9716ef0af"},
+            "job": {"const": "validate-as-data"},
+            "check_name": {"const": "validate-as-data"},
+            "event": {"const": "pull_request_target"},
+            "app_id": {"const": 15368},
+            "app_slug": {"const": "github-actions"},
+            "conclusion": {"const": "success"}
+          }
         },
         "required_blob": {
           "type": "object",
