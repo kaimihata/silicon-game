@@ -287,30 +287,49 @@ function assertExactVerification(verification: any): void {
     hosted.required_result?.workflow_name !== "Data-only runner contract validation" ||
     hosted.required_result?.workflow_path !== ".github/workflows/runner-contract-validation.yml" ||
     hosted.required_result?.workflow_blob_sha !== "0f66a20943fb86f3cd1bd821aa490fa9716ef0af" ||
-    hosted.required_result?.workflow_sha_source !== "authenticated_trusted_log_attestation" ||
+    hosted.required_result?.workflow_sha_source !== "authenticated_trusted_job_log" ||
     hosted.required_result?.job !== "validate-as-data" ||
     hosted.required_result?.check_name !== "validate-as-data" ||
     hosted.required_result?.event !== "pull_request_target" ||
     hosted.required_result?.app_id !== 15368 ||
     hosted.required_result?.app_slug !== "github-actions" ||
     hosted.required_result?.conclusion !== "success" ||
-    hosted.required_result?.validator_command !==
-      "python3 scripts/static_candidate_validator.py --trusted-sha \"$TRUSTED_CONTROLLER_SHA\" --candidate-sha \"$CANDIDATE_SHA\"" ||
     JSON.stringify(hosted.required_result?.runtime_fact_fields) !== JSON.stringify([
+      "workflow_job_name",
+      "workflow_conclusion",
+      "base_sha",
+      "head_sha",
+      "job_id",
       "run_attempt",
-      "job",
+      "workflow_id",
+      "workflow_name",
+      "check_name",
+      "event",
+      "app_id",
+      "app_slug",
+      "log_format_revision",
+      "log_sha256",
+      "trusted_step_names",
       "candidate_sha",
       "pr_ref",
-      "base_ref",
       "workflow_sha",
       "trusted_controller_sha",
-      "fetch_head_sha",
-      "workflow_sha_matches_trusted_controller",
-      "trusted_controller_distinct_from_candidate",
-      "fetch_head_matches_candidate",
-      "validator_command",
-      "validated_without_candidate_execution",
+      "base_ref",
+      "fetch_head_assertion",
+      "validator_argv",
     ]) ||
+    hosted.required_result?.log_format_revision !== "docs-live-proof-trusted-job-log-v1" ||
+    hosted.required_result?.fetch_head_assertion !==
+      "test \"$(git rev-parse FETCH_HEAD)\" = \"$CANDIDATE_SHA\"" ||
+    JSON.stringify(hosted.required_result?.validator_argv) !== JSON.stringify([
+      "python3",
+      "scripts/static_candidate_validator.py",
+      "--trusted-sha",
+      "$TRUSTED_CONTROLLER_SHA",
+      "--candidate-sha",
+      "$CANDIDATE_SHA",
+    ]) ||
+    hosted.required_result?.trusted_step_names?.length !== 5 ||
     JSON.stringify(hosted.immutable_identity_fields) !== JSON.stringify([
       "workflow_id",
       "workflow_repository",

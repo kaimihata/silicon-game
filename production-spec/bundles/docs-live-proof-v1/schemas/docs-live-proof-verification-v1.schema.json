@@ -48,21 +48,24 @@
         "required_result": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["workflow_id", "workflow_name", "workflow_path", "workflow_blob_sha", "workflow_sha_source", "job", "check_name", "event", "app_id", "app_slug", "conclusion", "runtime_fact_fields", "validator_command"],
+          "required": ["workflow_id", "workflow_name", "workflow_path", "workflow_blob_sha", "workflow_sha_source", "job", "check_name", "event", "app_id", "app_slug", "conclusion", "runtime_fact_fields", "log_format_revision", "trusted_step_names", "fetch_head_assertion", "validator_argv"],
           "properties": {
             "workflow_id": {"const": 349570522},
             "workflow_name": {"const": "Data-only runner contract validation"},
             "workflow_path": {"const": ".github/workflows/runner-contract-validation.yml"},
             "workflow_blob_sha": {"const": "0f66a20943fb86f3cd1bd821aa490fa9716ef0af"},
-            "workflow_sha_source": {"const": "authenticated_trusted_log_attestation"},
+            "workflow_sha_source": {"const": "authenticated_trusted_job_log"},
             "job": {"const": "validate-as-data"},
             "check_name": {"const": "validate-as-data"},
             "event": {"const": "pull_request_target"},
             "app_id": {"const": 15368},
             "app_slug": {"const": "github-actions"},
             "conclusion": {"const": "success"},
-            "runtime_fact_fields": {"const": ["run_attempt", "job", "candidate_sha", "pr_ref", "base_ref", "workflow_sha", "trusted_controller_sha", "fetch_head_sha", "workflow_sha_matches_trusted_controller", "trusted_controller_distinct_from_candidate", "fetch_head_matches_candidate", "validator_command", "validated_without_candidate_execution"]},
-            "validator_command": {"const": "python3 scripts/static_candidate_validator.py --trusted-sha \"$TRUSTED_CONTROLLER_SHA\" --candidate-sha \"$CANDIDATE_SHA\""}
+            "runtime_fact_fields": {"const": ["workflow_job_name", "workflow_conclusion", "base_sha", "head_sha", "job_id", "run_attempt", "workflow_id", "workflow_name", "check_name", "event", "app_id", "app_slug", "log_format_revision", "log_sha256", "trusted_step_names", "candidate_sha", "pr_ref", "workflow_sha", "trusted_controller_sha", "base_ref", "fetch_head_assertion", "validator_argv"]},
+            "log_format_revision": {"const": "docs-live-proof-trusted-job-log-v1"},
+            "trusted_step_names": {"const": ["Verify trusted validation workflow provenance", "Check out immutable trusted validator", "Fetch untrusted candidate as Git objects only", "Validate candidate without executing its files", "Remove fetched candidate objects and credentials"]},
+            "fetch_head_assertion": {"const": "test \"$(git rev-parse FETCH_HEAD)\" = \"$CANDIDATE_SHA\""},
+            "validator_argv": {"const": ["python3", "scripts/static_candidate_validator.py", "--trusted-sha", "$TRUSTED_CONTROLLER_SHA", "--candidate-sha", "$CANDIDATE_SHA"]}
           }
         },
         "required_blob": {
