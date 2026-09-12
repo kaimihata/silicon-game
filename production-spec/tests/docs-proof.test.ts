@@ -229,7 +229,7 @@ describe("docs-live-proof-v1", () => {
     };
     const bundleReview = {
       ...common,
-      artifact_type: "docs_live_proof_review_disposition_v1",
+      artifact_type: "docs_live_proof_bundle_review_disposition_v1",
     };
     expect(validateBundleReview(bundleReview), JSON.stringify(validateBundleReview.errors)).toBe(true);
     expect(validateBundleReview({ ...bundleReview, candidate_head_sha: "5".repeat(40) })).toBe(false);
@@ -319,6 +319,26 @@ describe("docs-live-proof-v1", () => {
     const same = await copyBase("same-evaluator");
     await rebindPayload(same, "proof/verification.json", (verification) => {
       verification.evidence_obligations[0].evaluator.role_id = "trusted_system_collector";
+    });
+
+    test("rejects any authority escalation even with rebound outer digests", async () => {
+      const contractRoot = await copyBase("contract-authority");
+      await rebindPayload(contractRoot, "proof/contract.json", (contract) => {
+        contract.authority.execution_authority = true;
+      });
+      await expect(expected(contractRoot)).rejects.toThrow(/invalid|authority flags/);
+
+      const bundleRoot = await copyBase("bundle-authority");
+      const bundle = await readJson(bundleRoot, "proof-bundle.json");
+      bundle.execution_authority = true;
+      const bundleBytes = await writeCanonical(bundleRoot, "proof-bundle.json", bundle);
+      const provenance = await readJson(bundleRoot, "proof-provenance.json");
+      const record = provenance.files.find((file: any) => file.path === "proof-bundle.json");
+      record.bytes = bundleBytes.byteLength;
+      record.sha256 = digest(bundleBytes);
+      provenance.bundle.digest = digest(bundleBytes);
+      await writeCanonical(bundleRoot, "proof-provenance.json", provenance);
+      await expect(expected(bundleRoot)).rejects.toThrow(/invalid|authority flags/);
     });
     await expect(expected(same)).rejects.toThrow(/not independent/);
 

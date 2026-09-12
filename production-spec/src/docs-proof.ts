@@ -592,10 +592,7 @@ export async function validateDocsProofBundleDirectory(
   ) {
     throw new Error("Docs proof provenance revision digest drift");
   }
-  if (
-    provenance.source?.repository !== "kaimihata/silicon-game" &&
-    !provenance.source?.repository?.includes("/")
-  ) {
+  if (provenance.source?.repository !== "kaimihata/silicon-game") {
     throw new Error("Docs proof source repository is invalid");
   }
   if (

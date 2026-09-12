@@ -6,7 +6,7 @@
   "required": ["schema_version", "artifact_type", "proof_bundle_digest", "contract_revision", "verification_revision", "source", "target", "reviewer", "reviewed_at", "disposition", "execution_authority", "merge_authority", "dispatch_authority", "deploy_authority"],
   "properties": {
     "schema_version": {"const": 1},
-    "artifact_type": {"const": "docs_live_proof_review_disposition_v1"},
+    "artifact_type": {"const": "docs_live_proof_bundle_review_disposition_v1"},
     "proof_bundle_digest": {"$ref": "#/$defs/digest"},
     "contract_revision": {"$ref": "#/$defs/digest"},
     "verification_revision": {"$ref": "#/$defs/digest"},
