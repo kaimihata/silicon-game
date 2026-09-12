@@ -35,6 +35,7 @@
       "type": "array",
       "minItems": 2,
       "maxItems": 2,
+      "uniqueItems": true,
       "items": {
         "type": "object",
         "additionalProperties": false,
@@ -43,7 +44,27 @@
           "obligation_id": {"enum": ["hosted_validate_as_data", "candidate_git_tree_blob_content"]},
           "evidence_digest": {"$ref": "#/$defs/digest"}
         }
-      }
+      },
+      "allOf": [
+        {
+          "contains": {
+            "type": "object",
+            "required": ["obligation_id"],
+            "properties": {"obligation_id": {"const": "hosted_validate_as_data"}}
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "required": ["obligation_id"],
+            "properties": {"obligation_id": {"const": "candidate_git_tree_blob_content"}}
+          },
+          "minContains": 1,
+          "maxContains": 1
+        }
+      ]
     },
     "reviewer": {
       "type": "object",

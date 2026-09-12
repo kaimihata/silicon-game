@@ -23,3 +23,10 @@ review validates against
 candidate head plus exactly both machine-evidence digests. That review is not packet
 approval and cannot merge, dispatch, deploy, or promote. Packet approval and later
 promotion remain separate authority events outside this proof bundle.
+
+Each machine report's `evidence_digest` is SHA-256 over the exact RFC 8785 canonical
+report object with the `evidence_digest` member omitted. The factory's separately
+content-addressed storage digest covers the complete stored report bytes. A conforming
+evaluator must recompute both, require distinct producer and evaluator identities,
+and re-observe the bound target base and candidate head before accepting either
+report as current.

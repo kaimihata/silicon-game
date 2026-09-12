@@ -261,6 +261,16 @@ describe("docs-live-proof-v1", () => {
       ...candidateReview,
       evidence_bindings: candidateReview.evidence_bindings.slice(0, 1),
     })).toBe(false);
+    expect(validateCandidateReview({
+      ...candidateReview,
+      evidence_bindings: [
+        candidateReview.evidence_bindings[0],
+        {
+          ...candidateReview.evidence_bindings[0],
+          evidence_digest: `sha256:${"8".repeat(64)}`,
+        },
+      ],
+    })).toBe(false);
     expect(validateCandidateReview({ ...candidateReview, execution_authority: true })).toBe(false);
   });
 
