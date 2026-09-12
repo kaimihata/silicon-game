@@ -1,0 +1,126 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://chip-city.dev/docs-live-proof/docs-live-proof-contract-v1.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "contract_id", "status", "source", "target", "planning_binding", "change_policy", "authority"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "contract_id": {"const": "docs-live-proof-contract-v1"},
+    "status": {"const": "ready_for_human_review"},
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "proof_policy"],
+      "properties": {
+        "repository": {"const": "kaimihata/silicon-game"},
+        "proof_policy": {"const": "clean_complete_non_shallow_single_authoritative_remote_exact_advertised_head_immutable_git_objects"}
+      }
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "ref", "base_sha"],
+      "properties": {
+        "repository": {"const": "kaimihata/silicon-game-v1"},
+        "ref": {"const": "refs/heads/develop"},
+        "base_sha": {"$ref": "#/$defs/sha"}
+      }
+    },
+    "planning_binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "acceptance", "requirement_id", "check_id", "suite_id", "milestone_id", "policy_id"],
+      "properties": {
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "id"],
+          "properties": {
+            "type": {"const": "specification"},
+            "id": {"const": "docs-live-proof-contract-v1"}
+          }
+        },
+        "acceptance": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["check_id", "type"],
+          "properties": {
+            "check_id": {"const": "docs-live-proof-contract-v1"},
+            "type": {"const": "docs_proof"}
+          }
+        },
+        "requirement_id": {"const": "req.docs-live-proof-v1"},
+        "check_id": {"const": "docs-live-proof-contract-v1"},
+        "suite_id": {"const": "suite.docs-live-proof-v1"},
+        "milestone_id": {"const": "milestone.docs-live-proof-v1"},
+        "policy_id": {"const": "policy.docs-live-proof-v1"}
+      }
+    },
+    "change_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["max_changed_paths", "allowed_changes", "forbidden_change_kinds", "forbid_symlinks", "forbid_submodules", "forbid_executable_modes", "denied_scopes"],
+      "properties": {
+        "max_changed_paths": {"const": 1},
+        "allowed_changes": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "prefixItems": [{"$ref": "#/$defs/allowed_change"}],
+          "items": false
+        },
+        "forbidden_change_kinds": {
+          "const": ["modify", "delete", "rename", "copy"]
+        },
+        "forbid_symlinks": {"const": true},
+        "forbid_submodules": {"const": true},
+        "forbid_executable_modes": {"const": true},
+        "denied_scopes": {
+          "type": "array",
+          "minItems": 7,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["category", "examples"],
+            "properties": {
+              "category": {"enum": ["workflow", "runner-lock", "source-spec", "dependency", "generated", "Unity", "runtime"]},
+              "examples": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}
+            }
+          }
+        }
+      }
+    },
+    "authority": {"$ref": "#/$defs/authority"}
+  },
+  "$defs": {
+    "sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "allowed_change": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "change_kind", "mode", "blob_object_id", "content_sha256", "encoding", "final_newline"],
+      "properties": {
+        "path": {"const": "docs/live-proof.md"},
+        "change_kind": {"const": "add"},
+        "mode": {"const": "100644"},
+        "blob_object_id": {"const": "74a349837fcb7e1f8d6fb8cdb015089c66edadce"},
+        "content_sha256": {"const": "sha256:1c3cc393ba4b6269bfda95738934ec933990133120dfec373c9e0e1c17959e13"},
+        "encoding": {"const": "UTF-8"},
+        "final_newline": {"const": true}
+      }
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["execution_authority", "merge_authority", "dispatch_authority", "deploy_authority", "human_review_required"],
+      "properties": {
+        "execution_authority": {"const": false},
+        "merge_authority": {"const": false},
+        "dispatch_authority": {"const": false},
+        "deploy_authority": {"const": false},
+        "human_review_required": {"const": true}
+      }
+    }
+  }
+}

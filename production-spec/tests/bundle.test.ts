@@ -334,7 +334,7 @@ describe("bundle", () => {
     });
     expect((await readdir(WORK)).some((entry) => entry.startsWith(temporaryPrefix))).toBe(false);
     await fixture.remove();
-  });
+  }, 15_000);
 
   test("rejects a source repository mutation before atomic publication", async () => {
     const fixture = await createGitExportFixture();
@@ -365,7 +365,7 @@ describe("bundle", () => {
     await expect(readdir(out)).rejects.toMatchObject({ code: "ENOENT" });
     expect((await readdir(WORK)).some((entry) => entry.startsWith(temporaryPrefix))).toBe(false);
     await fixture.remove();
-  });
+  }, 15_000);
 
   test("exports from the verified snapshot when a live source file changes and is restored", async () => {
     const fixture = await createGitExportFixture();

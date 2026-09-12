@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://chip-city.dev/docs-live-proof/docs-live-proof-candidate-evidence-disposition-v1.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "artifact_type", "proof_bundle_digest", "contract_revision", "verification_revision", "source", "target", "candidate_head_sha", "evidence_bindings", "reviewer", "reviewed_at", "disposition", "execution_authority", "merge_authority", "dispatch_authority", "deploy_authority"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "artifact_type": {"const": "docs_live_proof_candidate_evidence_disposition_v1"},
+    "proof_bundle_digest": {"$ref": "#/$defs/digest"},
+    "contract_revision": {"$ref": "#/$defs/digest"},
+    "verification_revision": {"$ref": "#/$defs/digest"},
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "ref", "sha"],
+      "properties": {
+        "repository": {"const": "kaimihata/silicon-game"},
+        "ref": {"type": "string", "pattern": "^refs/heads/.+"},
+        "sha": {"$ref": "#/$defs/sha"}
+      }
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "ref", "base_sha"],
+      "properties": {
+        "repository": {"const": "kaimihata/silicon-game-v1"},
+        "ref": {"const": "refs/heads/develop"},
+        "base_sha": {"$ref": "#/$defs/sha"}
+      }
+    },
+    "candidate_head_sha": {"$ref": "#/$defs/sha"},
+    "evidence_bindings": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["obligation_id", "evidence_digest"],
+        "properties": {
+          "obligation_id": {"enum": ["hosted_validate_as_data", "candidate_git_tree_blob_content"]},
+          "evidence_digest": {"$ref": "#/$defs/digest"}
+        }
+      },
+      "allOf": [
+        {
+          "contains": {
+            "type": "object",
+            "required": ["obligation_id"],
+            "properties": {"obligation_id": {"const": "hosted_validate_as_data"}}
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "required": ["obligation_id"],
+            "properties": {"obligation_id": {"const": "candidate_git_tree_blob_content"}}
+          },
+          "minContains": 1,
+          "maxContains": 1
+        }
+      ]
+    },
+    "reviewer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "immutable_user_id", "login"],
+      "properties": {
+        "provider": {"const": "github"},
+        "immutable_user_id": {"type": "integer", "minimum": 1},
+        "login": {"type": "string", "minLength": 1}
+      }
+    },
+    "reviewed_at": {"type": "string", "format": "date-time"},
+    "disposition": {"enum": ["accepted", "changes_requested", "rejected"]},
+    "notes": {"type": "string"},
+    "execution_authority": {"const": false},
+    "merge_authority": {"const": false},
+    "dispatch_authority": {"const": false},
+    "deploy_authority": {"const": false}
+  },
+  "$defs": {
+    "sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+  }
+}

@@ -59,9 +59,10 @@ export type ExportResult = {
   specificationRevision: string;
 };
 
-type VerifiedRepositorySource = {
+export type VerifiedRepositorySource = {
   repositoryRoot: string;
   sourceRepository: string;
+  sourceRef: string;
   sourceSha: string;
 };
 
@@ -276,6 +277,7 @@ export async function verifyRepositorySource(
   return Object.freeze({
     repositoryRoot,
     sourceRepository: policy.sourceRepository,
+    sourceRef,
     sourceSha,
   });
 }
@@ -628,11 +630,16 @@ async function writeBundle(
   };
 }
 
-async function publishVerifiedBundle(
+export async function publishVerifiedProductionSpecExport<T>(
   out: string,
   verifiedSource: VerifiedRepositorySource,
   reverify: () => Promise<VerifiedRepositorySource>,
-): Promise<ExportResult> {
+  writeExport: (
+    temporary: string,
+    verifiedSource: VerifiedRepositorySource,
+    snapshotSpecification: string,
+  ) => Promise<T>,
+): Promise<T> {
   const destination = resolve(out);
   await assertAbsentOrEmptyDirectory(destination);
   await mkdir(dirname(destination), { recursive: true });
@@ -646,7 +653,7 @@ async function publishVerifiedBundle(
       snapshotSpecification,
       gitEnvironment,
     );
-    const result = await writeBundle(
+    const result = await writeExport(
       temporary,
       verifiedSource,
       snapshotSpecification,
@@ -678,6 +685,19 @@ async function publishVerifiedBundle(
     }
     throw error;
   }
+}
+
+async function publishVerifiedBundle(
+  out: string,
+  verifiedSource: VerifiedRepositorySource,
+  reverify: () => Promise<VerifiedRepositorySource>,
+): Promise<ExportResult> {
+  return publishVerifiedProductionSpecExport(
+    out,
+    verifiedSource,
+    reverify,
+    writeBundle,
+  );
 }
 
 export async function exportBundleFromRepository(

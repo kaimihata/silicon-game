@@ -40,6 +40,9 @@ npm test
 npm run validate
 npm run compile -- --out generated/compile-check
 npm run export -- --out generated/target-import --source-sha <silicon-game-40-hex-sha> --source-ref <refs/heads/reviewed-ref>
+npm run export:docs-proof-v1 -- --out generated/docs-live-proof-v1 --source-sha <silicon-game-40-hex-sha> --source-ref <refs/heads/reviewed-ref> --target-base-sha <silicon-game-v1-40-hex-sha>
+npm run validate:docs-proof-v1
+npm run validate:docs-proof-v1 -- --bundle generated/docs-live-proof-v1 --source-sha <silicon-game-40-hex-sha> --source-ref <refs/heads/reviewed-ref> --target-base-sha <silicon-game-v1-40-hex-sha>
 npm run generate:packet -- --out generated/chip-city-foundation-01.yaml --base-sha <target-40-hex-base-sha>
 npm run validate:packet -- --file generated/chip-city-foundation-01.yaml
 npm run clean -- --out generated
@@ -48,6 +51,16 @@ npm run clean -- --out generated
 For normal CLI use, `export` requires an explicit source SHA equal to checked-out `HEAD` and an explicit reviewed `refs/heads/*` source ref. It requires a complete non-shallow clone, one canonical `kaimihata/silicon-game` origin URL, a clean repository, and exact proof from the live authoritative remote that the named ref advertises that SHA. Unavailable, ambiguous, fork, pull-request pseudo-ref, stale, or unadvertised proof fails closed. There is no verification bypass. Export rechecks the same proof immediately before publication, writes into a temporary sibling, validates the complete closed regular-file set and all declared digests, rejects symlinks or extras, and atomically publishes only to an absent or empty destination. It writes source repository/SHA plus authored bundle, specification, policy, and per-file digests, the bootstrap contract, canonical `README.specification-import.md`, the exact MIT license, and canonical `<export-root>/bundle.json` for the factory planner. The planner bundle has its own exact-byte digest and records the same `specification_revision` as generated Direction Packet v1 `source.specification_revision`; it does not contain the external bundle-review disposition. See [`handoff/factory-bundle-export.md`](handoff/factory-bundle-export.md) for the deterministic consolidation and limits. Exportability follows from `ready`; export itself grants no execution authority. `generate:packet` requires an explicit freshly observed target base SHA and first requires successful full source-bundle validation. The observed target snapshot is not embedded as permanent packet authority, and there is intentionally no finalized packet in source.
 
 `clean` can remove only `generated/` or one of its relative descendants. It rejects absolute paths, parent traversal, repository or specification roots, outside paths, and any existing symlink in the deletion path.
+
+The parallel [`bundles/docs-live-proof-v1/`](bundles/docs-live-proof-v1/) contract is
+not part of `bundle.yaml`, the game requirement catalogs, accepted game artifacts, or
+`GameSpecBundleV1`. Its separate exporter permits only one added regular
+`docs/live-proof.md` blob with the contracted mode and content digest. It binds an
+explicit target base SHA, requires two independent post-dispatch exact-head evidence
+reports, and exports only canonical closed-set JSON. Bundle review and optional later
+candidate-evidence review are separate human records; no disposition instance is
+generated, and neither review grants execution, merge, dispatch, deploy, or promotion
+authority.
 
 ## Validation guarantees
 

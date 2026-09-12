@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://chip-city.dev/docs-live-proof/docs-live-proof-bundle-v1.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "protocol_id", "state", "canonicalization", "digest_algorithm", "contract_revision", "verification_revision", "execution_authority", "human_review_required", "files"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "protocol_id": {"const": "docs-live-proof-v1"},
+    "state": {"const": "ready"},
+    "canonicalization": {"const": "RFC 8785"},
+    "digest_algorithm": {"const": "sha256"},
+    "contract_revision": {"$ref": "#/$defs/digest"},
+    "verification_revision": {"$ref": "#/$defs/digest"},
+    "execution_authority": {"const": false},
+    "human_review_required": {"const": true},
+    "files": {
+      "type": "array",
+      "minItems": 10,
+      "maxItems": 10,
+      "items": {"$ref": "#/$defs/file"}
+    }
+  },
+  "$defs": {
+    "digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "file": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "media_type", "bytes", "sha256"],
+      "properties": {
+        "path": {"type": "string", "pattern": "^(proof|schemas)/[a-z0-9][a-z0-9./-]*\\.json$"},
+        "media_type": {"const": "application/json"},
+        "bytes": {"type": "integer", "minimum": 2, "maximum": 1048576},
+        "sha256": {"$ref": "#/$defs/digest"}
+      }
+    }
+  }
+}
